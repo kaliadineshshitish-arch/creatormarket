@@ -742,7 +742,7 @@ const CONFIG = {
 
   // Cashfree stays ready — flip this to true once your Cashfree account + secrets are set.
   CASHFREE_ENABLED: true,
-  CASHFREE_MODE: 'sandbox',               // change to 'production' when using live Cashfree keys
+  CASHFREE_MODE: 'production',            // LIVE Cashfree keys are in use on the server
   CASHFREE_SPLIT_ENABLED: false,          // true once Easy Split is activated on your Cashfree account
   COMMISSION_PERCENT: 10,                 // platform commission taken from each creator sale
 
@@ -822,7 +822,7 @@ async function signUpUser() {
   const password = document.getElementById('authPassword').value;
   if (!email || password.length < 6) { setAuthMsg('Enter a valid email and a password of at least 6 characters.', 'error'); return; }
   const { data, error } = await supabaseClient.auth.signUp({ email, password });
-  if (error) { setAuthMsg('Signup failed: ' + error.message, 'error'); toast('Signup failed: ' + error.message); return; }
+  if (error) { const m = 'Could not create the account. Please check your details — or log in if you already have one.'; setAuthMsg(m, 'error'); toast(m); return; }
   if (data?.session) { currentUser = data.user; updateAuthButton(); closeModal('authModal'); setAuthMsg('✅ Account created and logged in.', 'ok'); toast('✅ Account created and logged in.'); }
   else setAuthMsg('✅ Account created. Please confirm via the email we sent, then log in.', 'ok');
 }
