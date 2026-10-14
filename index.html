@@ -794,25 +794,34 @@ function updateAuthButton() {
   if (em) em.textContent = currentUser ? (currentUser.email || 'Creator') : '';
 }
 function openAuthModal() { refreshCurrentUser().then(() => openModal('authModal')); }
+function setAuthMsg(msg, kind) {
+  const el = document.getElementById('authStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = kind === 'error' ? '#ff8585' : kind === 'ok' ? '#34d399' : 'var(--muted)';
+  try { el.scrollIntoView({ block: 'center' }); } catch (e) {}
+}
 async function signInUser() {
-  if (!isSupabaseConnected) { toast('Supabase is not configured.'); return; }
+  setAuthMsg('Logging in…', '');
+  if (!isSupabaseConnected) { setAuthMsg('Supabase is not connected — internet check karo / page refresh karo.', 'error'); return; }
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
-  if (!email || !password) { toast('Enter email and password.'); return; }
+  if (!email || !password) { setAuthMsg('Enter email and password.', 'error'); return; }
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error) { toast('Login failed: ' + error.message); return; }
+  if (error) { setAuthMsg('Login failed: ' + error.message, 'error'); toast('Login failed: ' + error.message); return; }
   currentUser = data.user; updateAuthButton(); closeModal('authModal');
-  await loadProductsFromSupabase(); toast('✅ Login successful.');
+  await loadProductsFromSupabase(); setAuthMsg('✅ Logged in.', 'ok'); toast('✅ Login successful.');
 }
 async function signUpUser() {
-  if (!isSupabaseConnected) { toast('Supabase is not configured.'); return; }
+  setAuthMsg('Creating account…', '');
+  if (!isSupabaseConnected) { setAuthMsg('Supabase is not connected — internet check karo / page refresh karo.', 'error'); return; }
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
-  if (!email || password.length < 6) { toast('Enter a valid email and a password of at least 6 characters.'); return; }
+  if (!email || password.length < 6) { setAuthMsg('Enter a valid email and a password of at least 6 characters.', 'error'); return; }
   const { data, error } = await supabaseClient.auth.signUp({ email, password });
-  if (error) { toast('Signup failed: ' + error.message); return; }
-  if (data?.session) { currentUser = data.user; updateAuthButton(); closeModal('authModal'); toast('✅ Account created and logged in.'); }
-  else toast('✅ Account created. Check your email to confirm, then log in.');
+  if (error) { setAuthMsg('Signup failed: ' + error.message, 'error'); toast('Signup failed: ' + error.message); return; }
+  if (data?.session) { currentUser = data.user; updateAuthButton(); closeModal('authModal'); setAuthMsg('✅ Account created and logged in.', 'ok'); toast('✅ Account created and logged in.'); }
+  else setAuthMsg('✅ Account created. Please confirm via the email we sent, then log in.', 'ok');
 }
 async function signOutUser() { if (supabaseClient) await supabaseClient.auth.signOut(); currentUser = null; updateAuthButton(); closeModal('authModal'); toast('Logged out.'); }
 function requireLogin() { if (currentUser) return true; toast('🔐 Please log in / sign up first.'); openAuthModal(); return false; }
