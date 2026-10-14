@@ -40,10 +40,10 @@ jobs:
             [YOUTUBE_API_KEY]="${{ secrets.YOUTUBE_API_KEY }}"
             [OWNER_EMAIL]="${{ secrets.OWNER_EMAIL }}"
           )
-          ARGS=("CASHFREE_ENV=sandbox")
+          ARGS=("CASHFREE_ENV=production")
           for k in "${!S[@]}"; do
             if [ -n "${S[$k]}" ]; then ARGS+=("$k=${S[$k]}"); fi
           done
-          echo "Setting ${#ARGS[@]} secret(s) in Supabase ..."
+          echo "Setting ${#ARGS[@]} secret(s) in Supabase (live mode) ..."
           supabase secrets set "${ARGS[@]}" --project-ref "$PROJECT_REF"
           echo "Secrets set."
