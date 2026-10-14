@@ -1,0 +1,15 @@
+name: Supabase Security Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: eqwmsjsqrhgyfpyssfop
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run checks
+        run: python3 scripts/supabase-check.py
