@@ -6,6 +6,7 @@ on:
     branches: [ main ]
     paths:
       - 'supabase/functions/**'
+      - '.github/workflows/deploy-functions.yml'
 
 jobs:
   deploy:
@@ -18,6 +19,7 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+
       - name: Deploy functions
         run: |
           set -e
@@ -26,3 +28,22 @@ jobs:
             supabase functions deploy "$fn" --project-ref "$PROJECT_REF" --no-verify-jwt
           done
           echo "All functions deployed."
+
+      - name: Set function secrets
+        shell: bash
+        run: |
+          set -e
+          declare -A S=(
+            [CASHFREE_APP_ID]="${{ secrets.CASHFREE_APP_ID }}"
+            [CASHFREE_SECRET_KEY]="${{ secrets.CASHFREE_SECRET_KEY }}"
+            [SARVAM_API_KEY]="${{ secrets.SARVAM_API_KEY }}"
+            [YOUTUBE_API_KEY]="${{ secrets.YOUTUBE_API_KEY }}"
+            [OWNER_EMAIL]="${{ secrets.OWNER_EMAIL }}"
+          )
+          ARGS=("CASHFREE_ENV=sandbox")
+          for k in "${!S[@]}"; do
+            if [ -n "${S[$k]}" ]; then ARGS+=("$k=${S[$k]}"); fi
+          done
+          echo "Setting ${#ARGS[@]} secret(s) in Supabase ..."
+          supabase secrets set "${ARGS[@]}" --project-ref "$PROJECT_REF"
+          echo "Secrets set."
