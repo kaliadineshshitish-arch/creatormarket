@@ -1127,8 +1127,8 @@ async function confirmPromotion() {
     payload: { type: 'promotion', product_id: productId, promo_days: selectedPromoDays },
     onPaid: async (method) => {
       await recordOrder({ kind: 'promotion', product_id: productId, promo_days: selectedPromoDays, amount: selectedPromoCost, title: `Promotion — ${selectedPromoDays} day(s)`, method });
-      if (method === 'cashfree') { activatePromotion(productId, selectedPromoDays); toast(`🎉 Promotion active for ${selectedPromoDays} day(s).`); }
-      else toast('Promotion will activate once your UPI payment is confirmed.');
+      activatePromotion(productId, selectedPromoDays);
+      toast(`🎉 Promotion active for ${selectedPromoDays} day(s).`);
     }
   });
 }
@@ -1196,17 +1196,17 @@ function upiLink(amount, note) {
 }
 
 async function recordOrder(o) {
-  const status = o.method === 'cashfree' ? 'Paid' : 'Awaiting confirmation';
   const orders = JSON.parse(localStorage.getItem('cmOrders') || '[]');
-  orders.unshift({ id: (o.method === 'cashfree' ? 'cf-' : 'upi-') + Date.now(), product_id: o.product_id || null, title: o.title, status, date: new Date().toLocaleString(), link: o.link || '' });
+  orders.unshift({ id: (o.method === 'cashfree' ? 'cf-' : 'upi-') + Date.now(), product_id: o.product_id || null, title: o.title, status: 'Paid', date: new Date().toLocaleString(), link: o.link || '' });
   localStorage.setItem('cmOrders', JSON.stringify(orders));
-  // UPI has no gateway verification, so record a pending order for manual confirmation.
+  // UPI is self-declared (no gateway verification): the order is stored as paid,
+  // with a marker so the owner can still reconcile it against their bank/UPI app.
   if (o.method === 'upi' && isSupabaseConnected && supabaseClient && currentUser) {
     try {
       await supabaseClient.from('orders').insert([{
         buyer_id: currentUser.id, kind: o.kind, product_id: o.product_id || null,
         plan: o.plan || null, promo_days: o.promo_days || null, amount: Number(o.amount) || 0,
-        status: 'pending', payment_id: 'UPI — awaiting confirmation'
+        status: 'paid', payment_id: 'UPI — self-declared'
       }]);
     } catch (e) { console.warn('UPI order record failed:', e); }
   }
@@ -1253,7 +1253,7 @@ function showUpiView(amount) {
     </div>
     <a class="btn btn-primary btn-block" style="margin-top:12px" href="${link}">Open UPI app to pay ${money(amount)}</a>
     <button class="btn btn-block" style="margin-top:8px" onclick="upiPaid()">✅ I have paid — submit order</button>
-    <div class="notice" style="margin-top:10px">UPI payments go straight to the owner's account (no gateway), so the order is marked “awaiting confirmation” until it is verified.</div>`;
+    <div class="notice" style="margin-top:10px">UPI payments go straight to the owner's account (no gateway). After you pay, tap the button below to submit your order.</div>`;
   const box = document.getElementById('qrBox');
   box.innerHTML = '';
   try {
@@ -1382,7 +1382,7 @@ async function startCheckout(productId) {
     payload: { type: 'product', product_id: p.id },
     onPaid: async (method) => {
       await recordOrder({ kind: 'product', product_id: p.id, amount: Number(p.price), title: p.title, link: p.link || p.product_url || '', method });
-      toast(method === 'cashfree' ? '✅ Payment successful. Product added to your library.' : 'Order submitted — the product unlocks once your UPI payment is confirmed.');
+      toast('✅ Payment successful. Product added to your library.');
       openLibraryModal();
     }
   });
@@ -1397,13 +1397,9 @@ async function startPlan(plan) {
     payload: { type: 'plan', plan },
     onPaid: async (method) => {
       await recordOrder({ kind: 'plan', plan, amount, title: (plan === 'pro' ? 'Pro' : 'Creator') + ' pass', method });
-      if (method === 'cashfree') {
-        localStorage.setItem('cmPlan', JSON.stringify({ plan, until: Date.now() + 30 * 24 * 60 * 60 * 1000 }));
-        applyPlanUI();
-        toast('✅ Pass active for 30 days.');
-      } else {
-        toast('Pass will activate once your UPI payment is confirmed.');
-      }
+      localStorage.setItem('cmPlan', JSON.stringify({ plan, until: Date.now() + 30 * 24 * 60 * 60 * 1000 }));
+      applyPlanUI();
+      toast('✅ Pass active for 30 days.');
     }
   });
 }
