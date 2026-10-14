@@ -575,7 +575,7 @@ footer.site .flinks a:hover{color:var(--text)}
     <span class="brand-name">Creator<span>Market</span></span>
   </div>
   <div class="flinks">
-    <a href="#marketplace">Marketplace</a><a href="#tools">Creator Tools</a><a href="#plans">Plans</a><a href="#faq">FAQ</a>
+    <a href="#marketplace">Marketplace</a><a href="#tools">Creator Tools</a><a href="#plans">Plans</a><a href="#faq">FAQ</a><a href="mailto:creatormarket.support@gmail.com">Support</a>
   </div>
   <p>© 2026 CreatorMarket. Marketplace &amp; Creator Tools for creators worldwide.</p>
   <p style="margin-top:.5rem;font-size:.75rem">Payments by UPI (direct) &amp; Cashfree • Auth &amp; data by Supabase • Frontend is fully static.</p>
@@ -688,6 +688,7 @@ footer.site .flinks a:hover{color:var(--text)}
       <li>Authenticated users are required for selling and buying.</li>
       <li>Cashfree order status is confirmed on the server before marking an order paid.</li>
     </ul>
+    <p style="margin-top:1rem;color:var(--muted);font-size:.9rem">Need help? Email us at <a href="mailto:creatormarket.support@gmail.com">creatormarket.support@gmail.com</a> — we usually reply within 24 hours.</p>
     <button class="btn btn-primary" style="margin-top:1rem" onclick="requestSupport()">Contact Support</button>
   </div>
 </div>
@@ -1164,7 +1165,7 @@ async function openLibraryModal() {
   openModal('libraryModal');
 }
 function openSupportModal() { openModal('supportModal'); }
-function requestSupport() { toast('Add your support email or endpoint before going live.'); }
+function requestSupport() { window.location.href = 'mailto:creatormarket.support@gmail.com?subject=CreatorMarket%20Support%20Request'; }
 
 /* ============================================================
    PAYMENTS — Cashfree via Supabase Edge Functions
