@@ -211,6 +211,8 @@ input.field:focus,textarea.field:focus,select.field:focus{border-color:var(--bra
   justify-content:center;align-items:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s ease;
 }
 .modal-overlay.active{opacity:1;pointer-events:auto}
+#authModal{z-index:1200}
+#payModal{z-index:1200}
 .modal{
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:540px;
   max-height:90vh;overflow-y:auto;padding:1.6rem;position:relative;transform:scale(.96);transition:transform .2s ease;
@@ -824,7 +826,7 @@ async function signUpUser() {
   else setAuthMsg('✅ Account created. Please confirm via the email we sent, then log in.', 'ok');
 }
 async function signOutUser() { if (supabaseClient) await supabaseClient.auth.signOut(); currentUser = null; updateAuthButton(); closeModal('authModal'); toast('Logged out.'); }
-function requireLogin() { if (currentUser) return true; toast('🔐 Please log in / sign up first.'); openAuthModal(); return false; }
+function requireLogin() { if (currentUser) return true; openAuthModal(); setTimeout(() => setAuthMsg('Please log in or create an account to continue.', 'error'), 120); return false; }
 
 /* ---------------- Edge function caller ---------------- */
 async function callFunction(name, body) {
