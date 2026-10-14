@@ -1,25 +1,25 @@
-// ai-tools — content-pack and prompt-creator (OpenAI). Replaces the old Netlify functions.
+// ai-tools — content-pack and prompt-creator (Sarvam). Replaces the old Netlify functions.
 import { json, handleOptions } from '../_shared/cors.ts';
 
 function env(k: string) { return String(Deno.env.get(k) || '').trim(); }
-const MODEL = () => env('OPENAI_MODEL') || 'gpt-4o-mini';
+const MODEL = () => env('SARVAM_MODEL') || 'sarvam-105b';
 
 const PLATFORM_NAMES: Record<string, string> = {
   youtube: 'YouTube', instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', general: 'any AI tool',
 };
 
 async function chat(system: string, user: string, temperature: number): Promise<string> {
-  const key = env('OPENAI_API_KEY');
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const key = env('SARVAM_API_KEY');
+  const res = await fetch('https://api.sarvam.ai/v1/chat/completions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+    headers: { 'Content-Type': 'application/json', 'api-subscription-key': key },
     body: JSON.stringify({
       model: MODEL(), temperature, max_tokens: 900,
       messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
     }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error?.message || 'OpenAI request failed.');
+  if (!res.ok) throw new Error(data?.error?.message || 'Sarvam request failed.');
   return data?.choices?.[0]?.message?.content || '';
 }
 
@@ -28,8 +28,8 @@ Deno.serve(async (req) => {
   if (pre) return pre;
   if (req.method !== 'POST') return json({ message: 'Method not allowed' }, 405);
 
-  const key = env('OPENAI_API_KEY');
-  if (!key) return json({ message: 'AI is not configured yet. Add OPENAI_API_KEY in your Supabase function secrets.' }, 503);
+  const key = env('SARVAM_API_KEY');
+  if (!key) return json({ message: 'AI is not configured yet. Add SARVAM_API_KEY in your Supabase function secrets.' }, 503);
 
   try {
     const body = await req.json().catch(() => ({}));
