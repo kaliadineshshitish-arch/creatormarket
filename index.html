@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CreatorMarket — Marketplace & Creator Tools</title>
+<meta name="description" content="CreatorMarket is one workspace for creators: buy and sell digital products, analyze videos, and generate platform-ready content — with secure Cashfree checkout.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#0a0b12">
+<meta property="og:title" content="CreatorMarket — Marketplace & Creator Tools">
+<meta property="og:description" content="Buy and sell creator digital products, analyze videos and generate platform-ready content in one place.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='.5' stop-color='%23a855f7'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='60' height='60' rx='18' fill='url(%23g)'/%3E%3Cpath d='M16 46 L24 20 L32 38 L40 20 L48 46' fill='none' stroke='%230a0b12' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#0a0b12; --bg2:#0e1018; --card:#12141f; --card-hover:#171a28; --panel:#0d0f19;
+  --border:#232838; --border-glow:#6366f155; --line:#1c2130;
+  --text:#f4f6ff; --muted:#98a2b8; --faint:#6c7891;
+  --brand1:#6366f1; --brand2:#a855f7; --brand3:#22d3ee;
+  --grad:linear-gradient(120deg,#6366f1,#a855f7 52%,#22d3ee);
+  --grad-soft:linear-gradient(120deg,#6366f133,#a855f733 52%,#22d3ee33);
+  --good:#10b981; --good-soft:#10b9811f; --warn:#f59e0b; --warn-soft:#f59e0b1f;
+  --radius:14px; --radius-lg:20px; --shadow:0 18px 50px -18px rgba(0,0,0,.7);
+  --transition:all .2s ease-in-out;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:radial-gradient(900px 520px at 50% -12%,#1a2350 0%,#0c0e19 46%,var(--bg) 78%);
+  color:var(--text);min-height:100vh;line-height:1.5;
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+h1,h2,h3,.brand-name{font-family:Sora,Inter,sans-serif;letter-spacing:-.02em}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px;width:100%}
+
+/* ---------- Header ---------- */
+header.site{
+  position:sticky;top:0;z-index:100;background:rgba(10,11,18,.82);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--text)}
+.brand .mark{width:40px;height:40px;flex:0 0 40px;border-radius:12px;display:block}
+.brand-name{font-size:20px;font-weight:800}
+.brand-name span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.navlinks{display:flex;gap:22px;align-items:center}
+.navlinks a{color:#a9b6cc;text-decoration:none;font-size:14px;font-weight:500;transition:var(--transition)}
+.navlinks a:hover{color:var(--text)}
+.navright{display:flex;gap:9px;align-items:center}
+
+/* ---------- Buttons ---------- */
+.btn{
+  background:var(--card);border:1px solid var(--border);color:var(--text);padding:.6rem 1rem;
+  border-radius:12px;font-size:.875rem;font-weight:600;cursor:pointer;transition:var(--transition);
+  display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;font-family:inherit;white-space:nowrap;
+}
+.btn:hover{border-color:var(--brand1);background:var(--card-hover);transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--grad);border:0;color:#080a12;font-weight:800;box-shadow:0 10px 26px -10px #6366f1aa}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-ghost{background:transparent}
+.btn-sm{padding:.5rem .8rem;font-size:.8rem}
+.btn-block{width:100%;justify-content:center}
+
+/* ---------- Hero ---------- */
+.hero{padding:64px 0 40px;text-align:center}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--border);
+  border-radius:999px;background:var(--card);color:#c9d6f0;font-size:12px;font-weight:700;letter-spacing:.03em;
+}
+.hero h1{font-size:clamp(2.1rem,5.2vw,3.6rem);font-weight:800;line-height:1.04;margin:20px auto 16px;max-width:820px}
+.hero h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);font-size:clamp(1rem,2vw,1.15rem);max-width:620px;margin:0 auto 1.6rem}
+.cta{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.trust{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:20px;color:var(--faint);font-size:12.5px}
+.trust span{display:inline-flex;align-items:center;gap:6px}
+
+/* ---------- Feature strip ---------- */
+.feature-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:34px 0 10px}
+.feature-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.feature-box b{display:block;font-size:13.5px;margin-bottom:3px}
+.feature-box span{font-size:11.5px;color:var(--muted)}
+
+/* ---------- Sections ---------- */
+.section{padding:60px 0 0}
+.section-title{font-size:1.4rem;font-weight:800;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.section-head{text-align:center;margin-bottom:30px}
+.section-head h2{font-size:clamp(1.6rem,3.6vw,2.3rem);font-weight:800;margin-bottom:10px}
+.section-head p{color:var(--muted);max-width:680px;margin:0 auto;line-height:1.6}
+
+/* ---------- Marketplace ---------- */
+.search-bar{max-width:520px;margin:0 auto;position:relative}
+.search-bar input{
+  width:100%;background:var(--card);border:1px solid var(--border);padding:.8rem 1rem .8rem 2.8rem;
+  border-radius:var(--radius);color:var(--text);font-size:.95rem;outline:none;transition:var(--transition);font-family:inherit;
+}
+.search-bar input:focus{border-color:var(--brand1);box-shadow:0 0 0 3px var(--border-glow)}
+.search-icon{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none}
+.categories{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.5rem;margin:26px 0 1.4rem;scrollbar-width:none}
+.categories::-webkit-scrollbar{display:none}
+.cat-pill{
+  background:var(--card);border:1px solid var(--border);color:var(--muted);padding:.5rem 1rem;border-radius:50px;
+  font-size:.85rem;white-space:nowrap;cursor:pointer;transition:var(--transition);font-family:inherit;
+}
+.cat-pill:hover,.cat-pill.active{background:var(--card-hover);color:var(--text);border-color:var(--brand1)}
+.market-tools{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.market-tools select,.market-tools button{
+  background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:11px;padding:.55rem .8rem;
+  font-family:inherit;font-size:.85rem;cursor:pointer;transition:var(--transition);
+}
+.market-tools button:hover{border-color:var(--brand1)}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:1.15rem;margin-bottom:2rem}
+.product-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;
+  flex-direction:column;transition:var(--transition);position:relative;cursor:pointer;
+}
+.product-card:hover{transform:translateY(-4px);border-color:var(--border-glow);box-shadow:var(--shadow)}
+.card-header{padding:1.1rem 1.15rem .6rem;display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
+.card-category{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.card-badge{
+  background:var(--warn-soft);border:1px solid #f59e0b55;color:#fbbf24;font-size:.68rem;font-weight:700;
+  padding:.2rem .55rem;border-radius:50px;text-transform:uppercase;letter-spacing:.05em;
+}
+.card-badge.live{background:var(--good-soft);border-color:#10b98155;color:#34d399}
+.card-body{padding:0 1.15rem 1.15rem;flex:1;display:flex;flex-direction:column}
+.card-title{font-size:1.02rem;font-weight:700;margin-bottom:.4rem;line-height:1.35;font-family:Sora,Inter,sans-serif}
+.card-desc{font-size:.85rem;color:var(--muted);margin-bottom:1rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.creator-line{color:var(--faint);font-size:12px;margin-top:6px}
+.creator-line button{background:none;border:0;color:var(--brand3);cursor:pointer;font:inherit;padding:0}
+.rating{color:#fbbf24;font-size:12.5px;white-space:nowrap}
+.card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:.75rem;border-top:1px solid var(--border)}
+.price{font-weight:800;font-size:1.05rem}
+.price.free{color:var(--good)}
+.product-actions{display:flex;gap:7px;align-items:center}
+.icon-btn{border:1px solid var(--border);background:var(--bg2);color:var(--text);border-radius:9px;padding:.4rem .55rem;cursor:pointer;transition:var(--transition)}
+.icon-btn:hover{border-color:var(--brand1)}
+.icon-btn.active{color:#fbbf24;border-color:#8a651e;background:#5d431522}
+.empty-state{text-align:center;padding:2.6rem 1rem;color:var(--muted);grid-column:1/-1}
+
+/* ---------- Creator tools ---------- */
+.tool{border:1px solid var(--border);border-radius:var(--radius-lg);background:linear-gradient(150deg,#101425,#0b0e18);padding:24px;box-shadow:var(--shadow);margin-bottom:22px}
+.toolhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.toolhead h3{margin:0;font-size:1.25rem}
+.pill{font-size:11px;font-weight:800;padding:6px 11px;border-radius:999px;background:var(--good-soft);color:#34d399;border:1px solid #10b98155}
+.inputrow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.inputrow input{flex:1;min-width:200px}
+input.field,textarea.field,select.field{
+  width:100%;border:1px solid var(--border);background:var(--bg2);color:var(--text);border-radius:12px;
+  padding:.8rem;outline:none;font-family:inherit;font-size:.9rem;transition:var(--transition);
+}
+input.field:focus,textarea.field:focus,select.field:focus{border-color:var(--brand3);box-shadow:0 0 0 3px #22d3ee22}
+.status{display:none;margin-top:12px;padding:12px;border-radius:12px;background:var(--bg2);border:1px solid var(--border);color:var(--muted);font-size:13px;line-height:1.5}
+.status.show{display:block}
+.result{display:none;margin-top:14px;border:1px solid var(--border);border-radius:16px;background:var(--bg2);padding:16px}
+.result.show{display:block}
+.resultgrid{display:grid;grid-template-columns:200px 1fr;gap:18px}
+.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:#101828}
+.meta h4{margin:0 0 6px;font-size:1.1rem}
+.meta p{margin:5px 0;color:var(--muted);font-size:.88rem}
+.stats{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.stat{padding:6px 10px;border-radius:9px;background:var(--card);border:1px solid var(--border);color:#c3cfe3;font-size:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.platforms{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px}
+.platform{padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card)}
+.platform b{font-size:15px}
+.platform small{display:block;color:var(--muted);line-height:1.5;margin-top:6px;font-size:12px}
+.studio{margin-top:18px;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;background:var(--panel)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1px solid var(--border);background:var(--bg2);color:var(--muted);border-radius:10px;padding:.6rem .85rem;font-weight:700;cursor:pointer;font-family:inherit;font-size:.85rem;transition:var(--transition)}
+.tab.active{background:var(--grad-soft);color:#eaf3ff;border-color:#6366f188}
+.studio textarea.field{min-height:120px;resize:vertical;margin-top:10px}
+.studioGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.out{min-height:210px;border:1px solid var(--border);border-radius:13px;background:var(--bg2);padding:15px;color:#c7d6e5;white-space:pre-wrap;line-height:1.55;font-size:13px;overflow-wrap:anywhere}
+.promptForm{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.promptForm label{display:block;color:#a9b6cc;font-size:12px;font-weight:700}
+.promptForm label .field{margin-top:7px}
+.limitbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;border:1px solid var(--border);border-radius:13px;background:var(--bg2);color:var(--muted);font-size:12px}
+.limitbar strong{color:var(--text)}
+.progress{height:7px;background:#1b2233;border-radius:999px;overflow:hidden;flex:1;min-width:120px}
+.progress i{display:block;height:100%;width:100%;background:var(--grad);border-radius:999px;transition:width .25s}
+.note{font-size:12px;color:var(--faint);line-height:1.55;margin-top:12px}
+
+/* ---------- Plans ---------- */
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1000px;margin:0 auto}
+.price-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;background:var(--card);display:flex;flex-direction:column}
+.price-card.featured{border-color:#6366f188;background:linear-gradient(150deg,#141a33,#14122a);box-shadow:var(--shadow)}
+.planbadge{display:inline-block;font-size:11px;font-weight:800;padding:6px 10px;border-radius:999px;background:var(--grad-soft);color:#dcd6ff;border:1px solid #6366f155;align-self:flex-start}
+.price-card h3{margin:14px 0 6px;font-size:1.3rem}
+.amount{font-size:2.3rem;font-weight:900;margin:6px 0 4px;font-family:Sora,Inter,sans-serif}
+.amount small{font-size:.85rem;color:var(--muted);font-weight:600}
+.price-card ul{padding-left:18px;color:#a7b4c9;line-height:1.95;font-size:.9rem;margin:12px 0;flex:1}
+.price-card .note{margin-top:12px}
+
+/* ---------- FAQ ---------- */
+.faq{display:grid;gap:10px;max-width:860px;margin:0 auto}
+.faq details{border:1px solid var(--border);border-radius:14px;padding:15px 17px;background:var(--card)}
+.faq summary{cursor:pointer;font-weight:700;font-size:.95rem}
+.faq p{color:var(--muted);line-height:1.6;margin-top:10px;font-size:.9rem}
+
+/* ---------- Modals ---------- */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(4,5,10,.82);backdrop-filter:blur(6px);z-index:1000;display:flex;
+  justify-content:center;align-items:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s ease;
+}
+.modal-overlay.active{opacity:1;pointer-events:auto}
+.modal{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:540px;
+  max-height:90vh;overflow-y:auto;padding:1.6rem;position:relative;transform:scale(.96);transition:transform .2s ease;
+}
+.modal-overlay.active .modal{transform:scale(1)}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.35rem;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--text)}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.35rem;color:var(--muted)}
+.form-control{width:100%;background:var(--bg2);border:1px solid var(--border);padding:.7rem .85rem;border-radius:12px;color:var(--text);font-size:.9rem;outline:none;font-family:inherit}
+.form-control:focus{border-color:var(--brand1)}
+textarea.form-control{resize:vertical;min-height:90px}
+.profile-card{display:flex;gap:12px;align-items:center;border:1px solid var(--border);background:var(--bg2);padding:12px;border-radius:14px;margin-top:12px}
+.avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:grid;place-items:center;background:var(--grad);color:#0a0b12;font-weight:900}
+.review{border-top:1px solid var(--border);padding:12px 0}
+.review:first-child{border-top:0}
+.review-head{display:flex;justify-content:space-between;gap:8px}
+.rating-stars button{border:0;background:none;color:#454c60;font-size:20px;padding:0 2px;cursor:pointer}
+.rating-stars button.on{color:#fbbf24}
+.notice{padding:.85rem;border:1px solid var(--border);border-radius:12px;background:var(--bg2);color:var(--muted);font-size:.85rem;line-height:1.55}
+.notice.success{border-color:#10b98155;background:var(--good-soft)}
+.notice.warn{border-color:#f59e0b55;background:var(--warn-soft)}
+.dashboard-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}
+.dashboard-stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.dashboard-stat strong{display:block;font-size:1.2rem}
+.dashboard-stat span{font-size:.72rem;color:var(--muted)}
+.dashboard-item{padding:12px 0;border-bottom:1px solid var(--border)}
+.dashboard-item:last-child{border-bottom:0}
+.dashboard-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.promo-options{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem}
+.promo-card-option{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.85rem .5rem;text-align:center;cursor:pointer;transition:var(--transition)}
+.promo-card-option.selected{border-color:var(--brand1);background:var(--border-glow)}
+.promo-card-option .days{font-size:.75rem;color:var(--muted)}
+.promo-card-option .cost{font-weight:800;font-size:1rem;margin-top:.2rem}
+.mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.tag{display:inline-block;font-size:10px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);margin:2px}
+
+/* ---------- Footer ---------- */
+footer.site{border-top:1px solid var(--border);padding:44px 20px 30px;text-align:center;color:var(--faint);font-size:.85rem;margin-top:60px}
+footer.site .fbrand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px}
+footer.site .fbrand img{width:34px;height:34px;border-radius:10px}
+footer.site .flinks{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+footer.site .flinks a{color:var(--muted);text-decoration:none}
+footer.site .flinks a:hover{color:var(--text)}
+
+/* ---------- Splash ---------- */
+.splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(600px 420px at 50% 40%,#16204a 0%,#090c16 52%,#05060c 100%);transition:opacity .45s ease,visibility .45s ease}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-inner{text-align:center;animation:splashIn .5s ease-out both}
+.splash-inner svg{width:82px;height:82px;margin-bottom:16px;filter:drop-shadow(0 16px 40px #6366f166)}
+.splash-name{font-size:32px;font-weight:800;font-family:Sora,Inter,sans-serif}
+.splash-name span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.splash-tag{margin-top:8px;color:#a9bad0;font-size:13px;font-weight:600}
+.splash-line{width:120px;height:3px;border-radius:99px;background:var(--grad);margin:20px auto 0;animation:splashLine 1.6s ease-in-out both}
+@keyframes splashIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes splashLine{from{transform:scaleX(.15);opacity:.35}to{transform:scaleX(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.splash-inner,.splash-line{animation:none}.splash{transition:none}}
+
+/* ---------- Toast ---------- */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);z-index:2000;background:#161c2e;border:1px solid #2c3550;border-radius:13px;padding:12px 18px;color:#e9f2ff;max-width:92%;font-size:13px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .25s ease}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.userpill{display:none;align-items:center;gap:8px;color:#cfe1f4;font-size:12.5px}
+.userpill.show{display:inline-flex}
+.userdot{width:9px;height:9px;border-radius:50%;background:var(--good)}
+
+/* ---------- Responsive ---------- */
+@media(max-width:900px){
+  .navlinks{display:none}
+  .feature-strip{grid-template-columns:repeat(2,1fr)}
+  .platforms{grid-template-columns:repeat(2,1fr)}
+  .pricing{grid-template-columns:1fr;max-width:520px}
+  .resultgrid{grid-template-columns:1fr}
+  .studioGrid{grid-template-columns:1fr}
+  .promptForm{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .wrap{padding:0 14px}
+  .hero{padding:40px 0 26px}
+  .hero h1{letter-spacing:-1px}
+  .cta .btn{width:100%;justify-content:center}
+  .feature-strip{grid-template-columns:1fr 1fr}
+  .products-grid{grid-template-columns:1fr}
+  .dashboard-stats{grid-template-columns:1fr 1fr}
+  .dashboard-stats .dashboard-stat:last-child{grid-column:1/-1}
+  .mini-grid{grid-template-columns:1fr}
+  .promo-options{grid-template-columns:1fr}
+  .nav{height:64px}
+  .brand-name{font-size:17px}
+}
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div class="splash" id="splash" aria-label="CreatorMarket loading">
+  <div class="splash-inner">
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset=".5" stop-color="#a855f7"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#sg)"/>
+      <path d="M16 46 L24 20 L32 38 L40 20 L48 46" fill="none" stroke="#0a0b12" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="49" cy="18" r="4.5" fill="#0a0b12"/>
+    </svg>
+    <div class="splash-name">Creator<span>Market</span></div>
+    <div class="splash-tag">Marketplace &amp; Creator Tools</div>
+    <div class="splash-line" aria-hidden="true"></div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="#top">
+      <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+        <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset=".5" stop-color="#a855f7"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>
+        <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#hg)"/>
+        <path d="M16 46 L24 20 L32 38 L40 20 L48 46" fill="none" stroke="#0a0b12" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="49" cy="18" r="4.5" fill="#0a0b12"/>
+      </svg>
+      <span class="brand-name">Creator<span>Market</span></span>
+    </a>
+    <nav class="navlinks">
+      <a href="#marketplace">Marketplace</a>
+      <a href="#tools">Creator Tools</a>
+      <a href="#plans">Plans</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="navright">
+      <div id="userpill" class="userpill"><span class="userdot"></span><span id="useremail"></span></div>
+      <button id="authButton" class="btn btn-sm" onclick="openAuthModal()">Log in / Sign up</button>
+      <button id="sellButton" class="btn btn-primary btn-sm" onclick="openSellModal()">+ Sell</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <!-- Hero -->
+  <section class="wrap hero">
+    <div class="eyebrow">✦ MARKETPLACE + CREATOR TOOLS IN ONE PLACE</div>
+    <h1>Buy, sell &amp; <span class="grad">create</span> — all in one creator workspace</h1>
+    <p>Discover digital products from creators worldwide, list your own assets, analyze videos and generate platform-ready content. Secure checkout powered by Cashfree.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#marketplace">Explore Marketplace</a>
+      <a class="btn btn-ghost" href="#tools">Open Creator Tools</a>
+    </div>
+    <div class="trust">
+      <span>✓ Secure Cashfree checkout</span>
+      <span>✓ Mobile-first</span>
+      <span>✓ Creator focused</span>
+      <span>✓ No fake promises</span>
+    </div>
+    <div class="feature-strip">
+      <div class="feature-box"><b>🚀 Trending</b><span>Discover what creators use</span></div>
+      <div class="feature-box"><b>⭐ Verified Reviews</b><span>Ratings before you buy</span></div>
+      <div class="feature-box"><b>❤️ Wishlist</b><span>Save products for later</span></div>
+      <div class="feature-box"><b>🎁 Offers</b><span>Coupons &amp; deals</span></div>
+    </div>
+  </section>
+
+  <!-- Marketplace -->
+  <section class="wrap section" id="marketplace">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search prompts, templates, eBooks..." oninput="filterProducts()">
+    </div>
+    <div class="categories" id="categoryContainer">
+      <button class="cat-pill active" onclick="setCategory('All', this)">All</button>
+      <button class="cat-pill" onclick="setCategory('AI Prompts', this)">AI Prompts</button>
+      <button class="cat-pill" onclick="setCategory('Templates', this)">Templates</button>
+      <button class="cat-pill" onclick="setCategory('Finance', this)">Finance</button>
+      <button class="cat-pill" onclick="setCategory('eBooks', this)">eBooks</button>
+      <button class="cat-pill" onclick="setCategory('Creator Tools', this)">Creator Tools</button>
+    </div>
+
+    <div id="featuredSection" hidden>
+      <h2 class="section-title">⚡ Featured Promotions</h2>
+      <div class="products-grid" id="featuredGrid"></div>
+    </div>
+
+    <div class="market-tools">
+      <select id="sortSelect" onchange="filterProducts()">
+        <option value="featured">Sort: Featured</option>
+        <option value="newest">Newest</option>
+        <option value="priceLow">Price: Low → High</option>
+        <option value="priceHigh">Price: High → Low</option>
+        <option value="rating">Top Rated</option>
+      </select>
+      <button onclick="openWishlistModal()">❤️ Wishlist <span id="wishlistCount">(0)</span></button>
+      <button onclick="openNotificationsModal()">🔔 Notifications <span id="notificationCount"></span></button>
+      <button onclick="openLibraryModal()">📚 Purchases</button>
+      <button onclick="openSupportModal()">🛡️ Support</button>
+      <button onclick="openDashboardModal()">📊 Creator Dashboard</button>
+    </div>
+
+    <h2 class="section-title" id="marketTitle">Explore All Products</h2>
+    <div class="products-grid" id="productsGrid"></div>
+
+    <section id="recommendedSection" style="margin-top:24px">
+      <h2 class="section-title">✨ You May Also Like</h2>
+      <div class="products-grid" id="recommendedGrid"></div>
+    </section>
+  </section>
+
+  <!-- Creator Tools -->
+  <section class="wrap section" id="tools">
+    <div class="section-head">
+      <h2>Creator Tools</h2>
+      <p>One idea, adapted for every platform. Analyze videos, generate content packs and build reusable AI prompts — no starting from zero.</p>
+    </div>
+
+    <div class="tool">
+      <div class="toolhead"><h3>🎯 YouTube Video Analyzer</h3><span class="pill">FREE</span></div>
+      <p class="note">Paste a YouTube video or Shorts link. CreatorMarket tries the Data API and falls back to public oEmbed metadata.</p>
+      <div class="inputrow">
+        <input class="field" id="url" inputmode="url" placeholder="https://youtube.com/watch?v=...">
+        <button id="analyzeBtn" class="btn btn-primary" onclick="analyze()">Analyze Video</button>
+      </div>
+      <div id="status" class="status"></div>
+      <div id="result" class="result">
+        <div class="resultgrid">
+          <img id="rthumb" class="thumb" alt="Video thumbnail">
+          <div class="meta">
+            <h4 id="rtitle">—</h4>
+            <p id="rchannel">—</p>
+            <div class="stats"><span id="rviews" class="stat">Views —</span><span id="rduration" class="stat">Duration —</span><span class="stat">YouTube</span></div>
+            <div class="actions">
+              <button class="btn btn-sm" onclick="openThumb()">🖼 Preview</button>
+              <button class="btn btn-sm" onclick="downloadThumb()">⬇️ Download Thumbnail</button>
+              <button class="btn btn-sm" onclick="showIdea()">✨ Quick Idea</button>
+              <button class="btn btn-sm" onclick="copyTitle()">📋 Copy Title</button>
+            </div>
+          </div>
+        </div>
+        <div id="idea" class="status"></div>
+      </div>
+      <p class="note">Only download content you own or are authorized to download. Platform rules and copyright still apply.</p>
+    </div>
+
+    <div class="platforms">
+      <div class="platform"><b>▶ YouTube</b><small>Video analysis, titles, Shorts ideas and long-form workflow.</small></div>
+      <div class="platform"><b>◎ Instagram</b><small>Reels hooks, captions, hashtag sets and content ideas.</small></div>
+      <div class="platform"><b>f Facebook</b><small>Post copy, Reels captions and community-friendly CTAs.</small></div>
+      <div class="platform"><b>♪ TikTok</b><small>Fast hooks, short captions and trend-ready structures.</small></div>
+    </div>
+
+    <div class="studio" id="studio">
+      <h3 style="margin-bottom:8px">Social Content Studio</h3>
+      <p class="note" style="margin-top:0">Give CreatorMarket one topic and get a platform-specific content pack.</p>
+      <div class="tabs">
+        <button class="tab active" data-platform="youtube">▶ YouTube</button>
+        <button class="tab" data-platform="instagram">◎ Instagram</button>
+        <button class="tab" data-platform="facebook">f Facebook</button>
+        <button class="tab" data-platform="tiktok">♪ TikTok</button>
+      </div>
+      <textarea class="field" id="topic" placeholder="Example: 3 simple ways to grow a YouTube Shorts channel without spending money"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn btn-primary" id="generateBtn" onclick="generatePack()">✨ Generate Content Pack</button>
+        <button class="btn" onclick="clearPack()">Clear</button>
+      </div>
+      <div class="studioGrid">
+        <div><div class="note" style="margin-top:0">Input</div><div class="out" id="packInput">Choose a platform and enter your topic.</div></div>
+        <div><div class="note" style="margin-top:0">CreatorMarket result</div><div class="out" id="packOutput">Your platform-ready content will appear here.</div></div>
+      </div>
+      <p class="note">AI generation uses your configured OpenAI API key (stored server-side in Supabase). If it is not configured, you will see a setup message instead of a fake result.</p>
+    </div>
+
+    <div class="studio" id="prompt-creator">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="planbadge" id="planBadge">FREE — 10 AI generations / month</span>
+        <span class="note" id="promptCount" style="margin-top:0">10 remaining</span>
+      </div>
+      <h3 style="margin:12px 0 8px">AI Prompt Creator</h3>
+      <p class="note" style="margin-top:0">Describe what you want to create and get a clear, reusable AI prompt.</p>
+      <div class="promptForm">
+        <label>What do you want to create?<input class="field" id="promptGoal" placeholder="Example: a 30-second YouTube Shorts script about fitness"></label>
+        <label>Platform<select class="field" id="promptPlatform"><option value="youtube">YouTube</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="general">Any AI tool</option></select></label>
+        <label>Audience<input class="field" id="promptAudience" placeholder="Example: beginner creators in India"></label>
+        <label>Tone<select class="field" id="promptTone"><option>Clear &amp; professional</option><option>Friendly &amp; conversational</option><option>Viral &amp; energetic</option><option>Premium &amp; persuasive</option><option>Simple Hinglish</option></select></label>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn btn-primary" id="promptBtn" onclick="createPrompt()">✨ Create Prompt</button>
+        <button class="btn" onclick="clearPrompt()">Clear</button>
+      </div>
+      <div class="limitbar"><strong>Free AI usage</strong><div class="progress"><i id="promptProgress"></i></div><span id="promptLimitText">10/10</span></div>
+      <div class="out" id="promptOutput" style="margin-top:12px">Your ready-to-copy prompt will appear here.</div>
+      <p class="note">The free limit is tracked per browser and resets monthly. It is a convenience limit, not a security boundary.</p>
+    </div>
+  </section>
+
+  <!-- Plans -->
+  <section class="wrap section" id="plans">
+    <div class="section-head">
+      <h2>Plans</h2>
+      <p>Start free, prove the workflow, then upgrade when you need more AI generations and creator tools. Paid plans are one-time 30-day passes.</p>
+    </div>
+    <div class="pricing">
+      <div class="price-card">
+        <span class="planbadge">FREE</span>
+        <h3>Starter</h3>
+        <div class="amount">₹0</div>
+        <ul>
+          <li>10 AI generations / month</li>
+          <li>YouTube video analysis</li>
+          <li>Thumbnail preview &amp; download</li>
+          <li>Social Content Studio</li>
+          <li>AI Prompt Creator</li>
+        </ul>
+        <a class="btn btn-ghost btn-block" href="#prompt-creator" onclick="setTimeout(()=>document.getElementById('promptGoal')?.focus(),250)">Start Free</a>
+      </div>
+      <div class="price-card featured">
+        <span class="planbadge">CREATOR</span>
+        <h3>Creator Pass</h3>
+        <div class="amount">₹299<small> / 30 days</small></div>
+        <ul>
+          <li>100 AI generations</li>
+          <li>Advanced prompt creation</li>
+          <li>Hooks, titles, captions &amp; hashtags</li>
+          <li>Creator workflow tools</li>
+          <li>Priority feature access</li>
+        </ul>
+        <button class="btn btn-primary btn-block" onclick="startPlan('creator')">Pay ₹299 — 30-day pass</button>
+        <p class="note">One-time 30-day pass. Pay by UPI or Cashfree. Renew manually when it ends.</p>
+      </div>
+      <div class="price-card">
+        <span class="planbadge">PRO</span>
+        <h3>Pro Pass</h3>
+        <div class="amount">₹599<small> / 30 days</small></div>
+        <ul>
+          <li>500 AI generations</li>
+          <li>All creator AI tools</li>
+          <li>Premium prompt workflows</li>
+          <li>More automation features</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="btn btn-primary btn-block" onclick="startPlan('pro')">Pay ₹599 — 30-day pass</button>
+        <p class="note">One-time 30-day pass. Pay by UPI or Cashfree. Renew manually when it ends.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="wrap section" id="faq">
+    <div class="section-head"><h2>FAQ</h2></div>
+    <div class="faq">
+      <details><summary>How do payments work?</summary><p>Two ways. <b>UPI</b> (default — no gateway needed): pay straight to the owner's UPI ID by QR or UPI app; the order is then marked “awaiting confirmation”. <b>Cashfree</b> (when enabled): the order is created on a secure Supabase Edge Function and verified server-side before it is marked paid. Secret keys never touch the browser.</p></details>
+      <details><summary>Do you store my card details?</summary><p>No. Card, UPI and netbanking details are entered on Cashfree's PCI-compliant checkout. CreatorMarket only ever sees an order ID and payment status.</p></details>
+      <details><summary>Is login real?</summary><p>Yes. Accounts use Supabase Auth with email and password. Your password is never stored in this page.</p></details>
+      <details><summary>Can CreatorMarket publish to Instagram, Facebook or TikTok?</summary><p>The workspace generates platform-specific content. Direct publishing needs each platform's official API/OAuth setup; CreatorMarket will not fake a connection or ask for your social passwords.</p></details>
+      <details><summary>How many free AI generations do I get?</summary><p>10 free AI generations per calendar month in the Prompt Creator. The browser counter resets monthly; it is a convenience limit, not a security boundary.</p></details>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="fbrand">
+    <svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset=".5" stop-color="#a855f7"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#fg)"/>
+      <path d="M16 46 L24 20 L32 38 L40 20 L48 46" fill="none" stroke="#0a0b12" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="brand-name">Creator<span>Market</span></span>
+  </div>
+  <div class="flinks">
+    <a href="#marketplace">Marketplace</a><a href="#tools">Creator Tools</a><a href="#plans">Plans</a><a href="#faq">FAQ</a>
+  </div>
+  <p>© 2026 CreatorMarket. Marketplace &amp; Creator Tools for creators worldwide.</p>
+  <p style="margin-top:.5rem;font-size:.75rem">Payments by UPI (direct) &amp; Cashfree • Auth &amp; data by Supabase • Frontend is fully static.</p>
+</footer>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('authModal')">&times;</button>
+    <h2 class="section-title">🔐 CreatorMarket Account</h2>
+    <p id="authStatus" style="color:var(--muted);margin-bottom:12px;font-size:.9rem">Sign in to sell products, purchase products and manage your orders.</p>
+    <div class="form-group"><label>Email</label><input id="authEmail" type="email" class="form-control" placeholder="you@example.com"></div>
+    <div class="form-group"><label>Password</label><input id="authPassword" type="password" class="form-control" placeholder="Minimum 6 characters"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="signInUser()">Login</button>
+      <button class="btn" onclick="signUpUser()">Create Account</button>
+      <button class="btn" id="logoutButton" style="display:none" onclick="signOutUser()">Logout</button>
+    </div>
+    <small style="display:block;margin-top:10px;color:var(--faint)">Powered by Supabase Auth.</small>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('productModal')">&times;</button><div id="modalContent"></div></div>
+</div>
+
+<!-- Sell Modal -->
+<div class="modal-overlay" id="sellModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('sellModal')">&times;</button>
+    <h2 class="section-title">List Your Digital Asset</h2>
+    <form id="sellForm" onsubmit="handleSellProduct(event)">
+      <div class="form-group"><label>Product Title</label><input type="text" class="form-control" id="sellTitle" required placeholder="e.g. Ultimate UI Kit"></div>
+      <div class="form-group"><label>Category</label>
+        <select class="form-control" id="sellCategory">
+          <option value="AI Prompts">AI Prompts</option><option value="Templates">Templates</option>
+          <option value="Finance">Finance</option><option value="eBooks">eBooks</option><option value="Creator Tools">Creator Tools</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Price (₹ — put 0 for Free)</label><input type="number" step="1" class="form-control" id="sellPrice" required placeholder="999"></div>
+      <div class="form-group"><label>Description</label><textarea class="form-control" id="sellDesc" required placeholder="Describe what buyers get..."></textarea></div>
+      <div class="form-group"><label>Product / Delivery Link (optional)</label><input type="url" class="form-control" id="sellLink" placeholder="https://drive.google.com/... or your product page"></div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px">List Product</button>
+    </form>
+  </div>
+</div>
+
+<!-- Dashboard Modal -->
+<div class="modal-overlay" id="dashboardModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('dashboardModal')">&times;</button>
+    <h2 class="section-title">Creator Dashboard</h2>
+    <p style="color:var(--muted);font-size:.9rem">Manage your assets and boost visibility with promotions.</p>
+    <div id="dashboardContent"></div>
+  </div>
+</div>
+
+<!-- Promote Modal -->
+<div class="modal-overlay" id="promoteModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('promoteModal')">&times;</button>
+    <h2 class="section-title">🚀 Promote Product</h2>
+    <p id="promoteProductTitle" style="color:var(--muted);font-size:.9rem"></p>
+    <input type="hidden" id="promoteProductId">
+    <div class="form-group" style="margin-top:14px">
+      <label>Select Promotion Plan</label>
+      <div class="promo-options">
+        <div class="promo-card-option selected" onclick="selectPromoPlan(this, 1, 99)"><div class="days">1 Day</div><div class="cost">₹99</div></div>
+        <div class="promo-card-option" onclick="selectPromoPlan(this, 3, 199)"><div class="days">3 Days</div><div class="cost">₹199</div></div>
+        <div class="promo-card-option" onclick="selectPromoPlan(this, 7, 499)"><div class="days">7 Days</div><div class="cost">₹499</div></div>
+      </div>
+    </div>
+    <div class="notice">Pay by UPI (QR / app) or Cashfree. Your product appears in Featured Promotions once payment is confirmed.</div>
+    <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="confirmPromotion()">Pay &amp; Activate Promotion</button>
+  </div>
+</div>
+
+<!-- Wishlist Modal -->
+<div class="modal-overlay" id="wishlistModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('wishlistModal')">&times;</button>
+    <h2 class="section-title">❤️ Saved for Later</h2><div id="wishlistContent"></div>
+  </div>
+</div>
+
+<!-- Notifications Modal -->
+<div class="modal-overlay" id="notificationsModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('notificationsModal')">&times;</button>
+    <h2 class="section-title">🔔 Notifications</h2><div id="notificationsContent"></div>
+  </div>
+</div>
+
+<!-- Creator Modal -->
+<div class="modal-overlay" id="creatorModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('creatorModal')">&times;</button><div id="creatorContent"></div></div>
+</div>
+
+<!-- Library Modal -->
+<div class="modal-overlay" id="libraryModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('libraryModal')">&times;</button>
+    <h2 class="section-title">📚 Purchased Products</h2><div id="libraryContent"></div>
+  </div>
+</div>
+
+<!-- Support Modal -->
+<div class="modal-overlay" id="supportModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('supportModal')">&times;</button>
+    <h2 class="section-title">🛡️ Security &amp; Support</h2>
+    <div class="notice success"><b>Checkout safety:</b> UPI goes directly to the owner's UPI ID (no gateway). Cashfree secret keys live only on Supabase Edge Functions — never in this page.</div>
+    <ul style="padding-left:1.2rem;line-height:1.9;color:var(--muted);margin-top:1rem;font-size:.9rem">
+      <li>Supabase Row Level Security protects products, orders, reviews and creator data.</li>
+      <li>Authenticated users are required for selling and buying.</li>
+      <li>Cashfree order status is confirmed on the server before marking an order paid.</li>
+    </ul>
+    <button class="btn btn-primary" style="margin-top:1rem" onclick="requestSupport()">Contact Support</button>
+  </div>
+</div>
+
+<!-- Roadmap Modal -->
+<div class="modal-overlay" id="roadmapModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('roadmapModal')">&times;</button>
+    <h2 class="section-title">🧩 What's inside</h2>
+    <div class="mini-grid" style="margin-top:12px">
+      <div class="notice">✅ Marketplace UI</div><div class="notice">✅ Sell asset form</div>
+      <div class="notice">✅ Supabase auth &amp; data</div><div class="notice">✅ Creator dashboard</div>
+      <div class="notice">✅ Promotions ₹99/₹199/₹499</div><div class="notice">✅ Buyer purchases library</div>
+      <div class="notice success">✅ Cashfree payment + server verification</div><div class="notice success">✅ Reviews, wishlist, coupons, notifications</div>
+      <div class="notice">✅ YouTube analyzer &amp; content studio</div><div class="notice">✅ AI prompt creator</div>
+    </div>
+    <div class="notice" style="margin-top:1rem">Live payments require the Supabase Edge Functions and environment variables described in the README.</div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('payModal')">&times;</button><div id="payContent"></div></div>
+</div>
+
+<!-- Payout Settings Modal -->
+<div class="modal-overlay" id="payoutModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('payoutModal')">&times;</button><div id="payoutContent"></div></div>
+</div>
+
+<!-- Platform Earnings Modal -->
+<div class="modal-overlay" id="earningsModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('earningsModal')">&times;</button><div id="earningsContent"></div></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+   CreatorMarket — frontend
+   Payments: Cashfree (server-side order + verification via Supabase Edge Functions)
+   ============================================================ */
+
+const CONFIG = {
+  SUPABASE_URL: 'https://eqwmsjsqrhgyfpyssfop.supabase.co',
+  SUPABASE_KEY: 'sb_publishable_wYc_3ArDw5ghAcgYYxX_DA_LsrI4CsE',
+
+  // ---- Payments ----
+  // UPI works right now with no account/gateway. Just put your own UPI ID here.
+  UPI_ID: 'dineshkalia1982-2@okicici',   // aapki UPI ID
+  UPI_PAYEE_NAME: 'CreatorMarket',        // name shown in the buyer's UPI app
+
+  // Cashfree stays ready — flip this to true once your Cashfree account + secrets are set.
+  CASHFREE_ENABLED: false,
+  CASHFREE_MODE: 'sandbox',               // change to 'production' when using live Cashfree keys
+  CASHFREE_SPLIT_ENABLED: false,          // true once Easy Split is activated on your Cashfree account
+  COMMISSION_PERCENT: 10,                 // platform commission taken from each creator sale
+
+  FUNCTIONS_BASE: null                    // defaults to `${SUPABASE_URL}/functions/v1`
+};
+CONFIG.FUNCTIONS_BASE = CONFIG.FUNCTIONS_BASE || (CONFIG.SUPABASE_URL + '/functions/v1');
+
+let supabaseClient = null;
+let isSupabaseConnected = false;
+try {
+  if (window.supabase && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY) {
+    supabaseClient = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+    isSupabaseConnected = true;
+  }
+} catch (e) { console.warn('Supabase init unavailable:', e); }
+
+/* ---------------- UI helpers ---------------- */
+function toast(msg) {
+  const x = document.getElementById('toast');
+  x.textContent = msg; x.classList.add('show');
+  clearTimeout(window._toast); window._toast = setTimeout(() => x.classList.remove('show'), 3600);
+}
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+function money(n) { return Number(n) === 0 ? 'Free' : '₹' + Number(n).toLocaleString('en-IN'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+
+/* ---------------- Auth ---------------- */
+let currentUser = null;
+async function refreshCurrentUser() {
+  currentUser = null;
+  if (!isSupabaseConnected || !supabaseClient) return null;
+  try { const { data, error } = await supabaseClient.auth.getUser(); if (!error) currentUser = data?.user || null; }
+  catch (e) { console.warn('Auth check skipped:', e); }
+  updateAuthButton();
+  return currentUser;
+}
+function updateAuthButton() {
+  const b = document.getElementById('authButton');
+  const l = document.getElementById('logoutButton');
+  const st = document.getElementById('authStatus');
+  const up = document.getElementById('userpill');
+  const em = document.getElementById('useremail');
+  if (b) b.textContent = currentUser ? '👤 Account' : 'Log in / Sign up';
+  if (l) l.style.display = currentUser ? 'inline-flex' : 'none';
+  if (st) st.textContent = currentUser ? 'Logged in as ' + (currentUser.email || currentUser.id) : 'Sign in to sell products, purchase products and manage your orders.';
+  if (up) up.classList.toggle('show', !!currentUser);
+  if (em) em.textContent = currentUser ? (currentUser.email || 'Creator') : '';
+}
+function openAuthModal() { refreshCurrentUser().then(() => openModal('authModal')); }
+async function signInUser() {
+  if (!isSupabaseConnected) { toast('Supabase is not configured.'); return; }
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if (!email || !password) { toast('Enter email and password.'); return; }
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) { toast('Login failed: ' + error.message); return; }
+  currentUser = data.user; updateAuthButton(); closeModal('authModal');
+  await loadProductsFromSupabase(); toast('✅ Login successful.');
+}
+async function signUpUser() {
+  if (!isSupabaseConnected) { toast('Supabase is not configured.'); return; }
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if (!email || password.length < 6) { toast('Enter a valid email and a password of at least 6 characters.'); return; }
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if (error) { toast('Signup failed: ' + error.message); return; }
+  if (data?.session) { currentUser = data.user; updateAuthButton(); closeModal('authModal'); toast('✅ Account created and logged in.'); }
+  else toast('✅ Account created. Check your email to confirm, then log in.');
+}
+async function signOutUser() { if (supabaseClient) await supabaseClient.auth.signOut(); currentUser = null; updateAuthButton(); closeModal('authModal'); toast('Logged out.'); }
+function requireLogin() { if (currentUser) return true; toast('🔐 Please log in / sign up first.'); openAuthModal(); return false; }
+
+/* ---------------- Edge function caller ---------------- */
+async function callFunction(name, body) {
+  const session = supabaseClient ? (await supabaseClient.auth.getSession()).data.session : null;
+  const token = session?.access_token || '';
+  const res = await fetch(CONFIG.FUNCTIONS_BASE + '/' + name, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': CONFIG.SUPABASE_KEY,
+      'Authorization': 'Bearer ' + (token || CONFIG.SUPABASE_KEY)
+    },
+    body: JSON.stringify(body || {})
+  });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  return { ok: res.ok, status: res.status, data };
+}
+
+/* ---------------- Products ---------------- */
+const demoProducts = [
+  { id: 'demo-1', title: 'Cinematic 3D Pixar Prompt Pack', category: 'AI Prompts', price: 999, description: 'Generate hyper-detailed 3D animation character concepts and scenes instantly with Midjourney & DALL·E.' },
+  { id: 'demo-2', title: 'Notion Creator Master OS', category: 'Templates', price: 2499, description: 'The all-in-one workspace for creators to plan content, track sponsorships and manage business workflows.' },
+  { id: 'demo-3', title: 'Freelancer Invoice & Tax Tracker', category: 'Finance', price: 0, description: 'Clean, automated spreadsheet to track freelance invoices, client payments and estimated quarterly taxes.' },
+  { id: 'demo-4', title: 'Short-Form Growth Blueprint', category: 'eBooks', price: 799, description: 'A step-by-step framework to scale your Reels, TikToks and Shorts to 100k+ organic followers.' },
+  { id: 'demo-5', title: 'QuickThumbnail Template Bundle', category: 'Creator Tools', price: 0, description: 'High-CTR YouTube thumbnail templates designed to boost click-through rates significantly.' },
+  { id: 'demo-6', title: 'Mythology Short Video Scripts', category: 'AI Prompts', price: 1299, description: '100+ ready-to-use viral storytelling scripts about ancient myths, optimised for faceless channels.' }
+];
+
+let products = JSON.parse(localStorage.getItem('cmProducts') || 'null') || [...demoProducts];
+let promotions = JSON.parse(localStorage.getItem('cmPromotions') || '[]');
+let currentCategory = 'All';
+let selectedPromoDays = 1;
+let selectedPromoCost = 99;
+let wishlist = JSON.parse(localStorage.getItem('cmWishlist') || '[]');
+let reviewStore = JSON.parse(localStorage.getItem('cmReviews') || '{}');
+let notifications = JSON.parse(localStorage.getItem('cmNotifications') || '[]');
+let followedCreators = new Set(JSON.parse(localStorage.getItem('cmFollows') || '[]'));
+let reviewRating = 0;
+
+function averageRating(p) {
+  const arr = reviewStore[String(p.id)] || [];
+  if (!arr.length) return Number(p.rating || 0);
+  return arr.reduce((s, r) => s + Number(r.rating), 0) / arr.length;
+}
+function updateCounters() {
+  const w = document.getElementById('wishlistCount'); if (w) w.textContent = '(' + wishlist.length + ')';
+  const n = document.getElementById('notificationCount'); if (n) n.textContent = notifications.length ? '(' + notifications.length + ')' : '';
+}
+function cleanupExpiredPromotions() {
+  const now = Date.now();
+  promotions = promotions.filter(p => !p.expires_at || new Date(p.expires_at).getTime() > now);
+  localStorage.setItem('cmPromotions', JSON.stringify(promotions));
+}
+function renderProducts() {
+  const grid = document.getElementById('productsGrid');
+  const featuredGrid = document.getElementById('featuredGrid');
+  const featuredSection = document.getElementById('featuredSection');
+  const recommendedGrid = document.getElementById('recommendedGrid');
+  if (!grid || !featuredGrid) return;
+
+  cleanupExpiredPromotions();
+  const query = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+  const sort = document.getElementById('sortSelect')?.value || 'featured';
+  let filtered = products.filter(p => {
+    const catOk = currentCategory === 'All' || p.category === currentCategory;
+    const textOk = !query || `${p.title} ${p.category} ${p.description}`.toLowerCase().includes(query);
+    return catOk && textOk;
+  });
+  if (sort === 'newest') filtered.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  if (sort === 'priceLow') filtered.sort((a, b) => Number(a.price) - Number(b.price));
+  if (sort === 'priceHigh') filtered.sort((a, b) => Number(b.price) - Number(a.price));
+  if (sort === 'rating') filtered.sort((a, b) => averageRating(b) - averageRating(a));
+
+  const card = (p, featured = false) => {
+    const wished = wishlist.includes(String(p.id));
+    const avg = averageRating(p);
+    const promo = promotions.find(pr => String(pr.product_id) === String(p.id));
+    return `<article class="product-card" onclick="openProductModal('${escapeHtml(p.id)}')">
+      <div class="card-header">
+        <span class="card-category">${escapeHtml(p.category || 'Uncategorized')}</span>
+        <div>
+          ${featured ? '<span class="card-badge">Featured</span>' : ''}
+          ${promo ? '<span class="card-badge live" style="margin-left:4px">Promoted</span>' : ''}
+        </div>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">${escapeHtml(p.title)}</h3>
+        <p class="card-desc">${escapeHtml(p.description)}</p>
+        <div class="creator-line">by <button onclick="event.stopPropagation();openCreatorModal('${escapeHtml(p.creator_name || 'Creator')}')">${escapeHtml(p.creator_name || 'Creator')}</button></div>
+        <div style="margin-top:7px" class="rating">★ ${avg ? avg.toFixed(1) : 'New'} ${reviewStore[String(p.id)]?.length ? '(' + reviewStore[String(p.id)].length + ')' : ''}</div>
+        <div class="card-footer">
+          <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
+          <div class="product-actions">
+            <button class="icon-btn ${wished ? 'active' : ''}" title="Wishlist" onclick="event.stopPropagation();toggleWishlist('${escapeHtml(p.id)}')">${wished ? '♥' : '♡'}</button>
+            <span class="btn btn-sm">View →</span>
+          </div>
+        </div>
+      </div>
+    </article>`;
+  };
+
+  grid.innerHTML = filtered.length ? filtered.map(p => card(p)).join('') : '<div class="empty-state">No products found.</div>';
+  const featured = products.filter(p => promotions.some(pr => String(pr.product_id) === String(p.id)));
+  featuredGrid.innerHTML = featured.map(p => card(p, true)).join('');
+  featuredSection.hidden = featured.length === 0;
+
+  const rec = products.filter(p => !filtered.includes(p)).slice(0, 4);
+  recommendedGrid.innerHTML = rec.length ? rec.map(p => card(p)).join('') : '<div class="empty-state">More recommendations will appear as the marketplace grows.</div>';
+  updateCounters();
+}
+function filterProducts() { renderProducts(); }
+function setCategory(category, el) {
+  currentCategory = category;
+  document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderProducts();
+}
+function toggleWishlist(id) {
+  id = String(id);
+  wishlist = wishlist.includes(id) ? wishlist.filter(x => x !== id) : [...wishlist, id];
+  localStorage.setItem('cmWishlist', JSON.stringify(wishlist));
+  renderProducts();
+}
+function openWishlistModal() {
+  const items = products.filter(p => wishlist.includes(String(p.id)));
+  document.getElementById('wishlistContent').innerHTML = items.length
+    ? items.map(p => `<div class="dashboard-item"><strong>${escapeHtml(p.title)}</strong><div class="creator-line">${escapeHtml(p.category)} · ${money(p.price)}</div><button class="btn btn-sm" style="margin-top:8px" onclick="closeModal('wishlistModal');openProductModal('${escapeHtml(p.id)}')">View</button></div>`).join('')
+    : '<div class="empty-state">Your wishlist is empty. Tap ♡ on any product to save it.</div>';
+  openModal('wishlistModal');
+}
+function openNotificationsModal() {
+  const arr = notifications.length ? notifications : [{ title: 'Welcome to CreatorMarket', text: 'Save products, follow creators and watch for new offers.' }];
+  document.getElementById('notificationsContent').innerHTML = arr.map(n => `<div class="review"><strong>${escapeHtml(n.title)}</strong><p style="color:var(--muted);font-size:.9rem">${escapeHtml(n.text)}</p></div>`).join('')
+    + `<button class="btn" style="margin-top:10px" onclick="notifications=[];localStorage.setItem('cmNotifications','[]');updateCounters();closeModal('notificationsModal')">Mark all as read</button>`;
+  openModal('notificationsModal');
+}
+function openCreatorModal(name) {
+  const creator = String(name || 'Creator');
+  const list = products.filter(p => (p.creator_name || 'Creator') === creator);
+  document.getElementById('creatorContent').innerHTML = `<div class="profile-card" style="margin-top:0"><div class="avatar">${escapeHtml(creator.charAt(0).toUpperCase())}</div><div><h2>${escapeHtml(creator)}</h2><div class="creator-line">${list.length} product(s) · ${followedCreators.has(creator) ? 'Following' : 'Not followed'}</div></div></div>
+    <div style="display:flex;gap:8px;margin:12px 0"><button class="btn btn-primary" onclick="toggleFollow('${escapeHtml(creator)}');openCreatorModal('${escapeHtml(creator)}')">${followedCreators.has(creator) ? 'Following' : 'Follow Creator'}</button><button class="btn" onclick="closeModal('creatorModal')">Close</button></div>
+    ${list.map(p => `<div class="dashboard-item"><strong>${escapeHtml(p.title)}</strong><div class="creator-line">${escapeHtml(p.category)} · ${money(p.price)}</div></div>`).join('')}`;
+  openModal('creatorModal');
+}
+function toggleFollow(name) {
+  name = String(name || 'Creator');
+  followedCreators.has(name) ? followedCreators.delete(name) : followedCreators.add(name);
+  localStorage.setItem('cmFollows', JSON.stringify([...followedCreators]));
+  notifications.unshift({ title: `Creator ${followedCreators.has(name) ? 'followed' : 'unfollowed'}`, text: `${name} is now ${followedCreators.has(name) ? 'in' : 'out of'} your followed creators.` });
+  notifications = notifications.slice(0, 20);
+  localStorage.setItem('cmNotifications', JSON.stringify(notifications));
+  updateCounters(); renderProducts();
+}
+function setReviewRating(n) {
+  reviewRating = n;
+  for (let i = 1; i <= 5; i++) { const b = document.getElementById('star' + i); if (b) b.classList.toggle('on', i <= n); }
+}
+function renderReviews(id) {
+  const arr = reviewStore[String(id)] || [];
+  return arr.length ? arr.slice().reverse().map(r => `<div class="review"><div class="review-head"><strong>${escapeHtml(r.name || 'Buyer')}</strong><span class="rating">${'★'.repeat(Number(r.rating))}${'☆'.repeat(5 - Number(r.rating))}</span></div><p style="color:var(--muted);font-size:.9rem;margin-top:3px">${escapeHtml(r.text)}</p></div>`).join('') : '<p style="color:var(--muted);font-size:.9rem">No reviews yet. Be the first to review.</p>';
+}
+function submitReview(id) {
+  const text = document.getElementById('reviewText')?.value.trim();
+  if (!reviewRating || !text) { toast('Please select a rating and write a review.'); return; }
+  const arr = reviewStore[String(id)] || [];
+  arr.push({ rating: reviewRating, text, name: currentUser?.email || 'Buyer', created_at: new Date().toISOString() });
+  reviewStore[String(id)] = arr; localStorage.setItem('cmReviews', JSON.stringify(reviewStore));
+  openProductModal(id);
+}
+function applyCoupon() {
+  const code = (document.getElementById('couponInput')?.value || '').trim().toUpperCase();
+  const out = document.getElementById('couponResult');
+  if (code === 'CREATOR10') { out.textContent = '✅ Coupon accepted: 10% off (apply at checkout support).'; out.style.color = 'var(--good)'; }
+  else if (code) { out.textContent = 'Coupon not found or expired.'; out.style.color = 'var(--muted)'; }
+  else out.textContent = 'Enter a coupon code.';
+}
+
+function openProductModal(productId) {
+  const p = products.find(x => String(x.id) === String(productId));
+  if (!p) return;
+  const isCreatorProduct = !!p.creator || !!p.creator_id;
+  const avg = averageRating(p);
+  const wished = wishlist.includes(String(p.id));
+  const buyLabel = Number(p.price) === 0 ? 'Get Free Product →' : 'Buy Now — ' + money(p.price);
+
+  document.getElementById('modalContent').innerHTML = `
+    <div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start">
+      <div><span class="card-category">${escapeHtml(p.category)}</span>${isCreatorProduct ? '<span class="card-badge" style="margin-left:.5rem">Creator Listing</span>' : ''}</div>
+      <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
+    </div>
+    <h2 class="section-title" style="margin-top:.7rem">${escapeHtml(p.title)}</h2>
+    <div class="rating">★ ${avg ? avg.toFixed(1) : 'New'} · ${reviewStore[String(p.id)]?.length || 0} reviews</div>
+    <p style="margin:1rem 0;color:var(--muted);line-height:1.7">${escapeHtml(p.description)}</p>
+    <div class="profile-card">
+      <div class="avatar">${escapeHtml((p.creator_name || 'C').charAt(0).toUpperCase())}</div>
+      <div><strong>${escapeHtml(p.creator_name || 'Creator')}</strong><div class="creator-line">Creator profile · ${followedCreators.has(p.creator_name || 'Creator') ? 'Following' : 'Not followed'}</div></div>
+      <button class="btn btn-sm" style="margin-left:auto" onclick="toggleFollow('${escapeHtml(p.creator_name || 'Creator')}')">${followedCreators.has(p.creator_name || 'Creator') ? 'Following' : 'Follow'}</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin:1rem 0">
+      <button class="icon-btn ${wished ? 'active' : ''}" onclick="toggleWishlist('${escapeHtml(p.id)}');openProductModal('${escapeHtml(p.id)}')">${wished ? '♥ Saved' : '♡ Save for later'}</button>
+      <button class="btn btn-primary" onclick="startCheckout('${escapeHtml(p.id)}')">${buyLabel}</button>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem">
+      <h3 style="margin-bottom:.5rem">⭐ Reviews &amp; Ratings</h3>
+      <div id="reviewList">${renderReviews(p.id)}</div>
+      <div style="margin-top:10px">
+        <div class="rating-stars" id="reviewStars">${[1, 2, 3, 4, 5].map(i => `<button onclick="setReviewRating(${i})" id="star${i}">★</button>`).join('')}</div>
+        <textarea id="reviewText" class="form-control" style="width:100%;margin-top:7px;min-height:70px" placeholder="Share your experience..."></textarea>
+        <button class="btn" style="margin-top:7px" onclick="submitReview('${escapeHtml(p.id)}')">Submit Review</button>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem">
+      <h3 style="margin-bottom:.5rem">🎁 Have a coupon?</h3>
+      <div style="display:flex;gap:7px"><input id="couponInput" class="form-control" placeholder="Try CREATOR10"><button class="btn" onclick="applyCoupon()">Apply</button></div>
+      <small id="couponResult" style="color:var(--muted);display:block;margin-top:6px"></small>
+    </div>`;
+  reviewRating = 0;
+  openModal('productModal');
+}
+
+/* ---------------- Sell / Dashboard / Promotion ---------------- */
+function openSellModal() { refreshCurrentUser().then(() => { if (!requireLogin()) return; openModal('sellModal'); }); }
+
+async function handleSellProduct(e) {
+  e.preventDefault();
+  const title = document.getElementById('sellTitle').value.trim();
+  const category = document.getElementById('sellCategory').value;
+  const price = parseFloat(document.getElementById('sellPrice').value);
+  const description = document.getElementById('sellDesc').value.trim();
+  const link = document.getElementById('sellLink').value.trim();
+  if (!title || !category || isNaN(price) || !description) { toast('Please fill all required fields.'); return; }
+  if (link && !/^https?:\/\//i.test(link)) { toast('Please enter a valid link starting with https://'); return; }
+
+  await refreshCurrentUser();
+  const newProduct = { id: 'custom-' + Date.now(), title, category, price, description, link, product_url: link, creator: true, creator_name: currentUser?.email || 'Creator', created_at: new Date().toISOString() };
+  let saved = false;
+  if (isSupabaseConnected && supabaseClient && currentUser) {
+    try {
+      const payload = { creator_id: currentUser.id, title, description, price, product_url: link || null, is_published: true, created_at: newProduct.created_at };
+      const { data, error } = await supabaseClient.from('products').insert([payload]).select().single();
+      if (error) throw error;
+      if (data) { Object.assign(newProduct, data, { creator: true, creator_name: currentUser.email || 'Creator', link: data.product_url || link, category }); saved = true; }
+    } catch (err) { console.warn('Supabase product insert failed; using local fallback.', err); }
+  }
+  products.unshift(newProduct);
+  localStorage.setItem('cmProducts', JSON.stringify(products));
+  renderProducts(); closeModal('sellModal'); document.getElementById('sellForm').reset();
+  toast(saved ? '✅ Product listed and linked to your account.' : '✅ Product saved in this browser.');
+}
+
+async function openDashboardModal() {
+  const content = document.getElementById('dashboardContent');
+  await refreshCurrentUser();
+  const localOwn = products.filter(p => p.creator && String(p.id).startsWith('custom-'));
+  const own = currentUser ? products.filter(p => p.creator_id && String(p.creator_id) === String(currentUser.id)) : localOwn;
+  const totalValue = own.reduce((s, p) => s + Number(p.price || 0), 0);
+  const accountText = currentUser ? (currentUser.email || 'Signed-in creator') : 'Guest creator mode';
+
+  content.innerHTML = `
+    <div class="notice success" style="margin-top:14px"><strong>Creator Dashboard</strong><br><span style="font-size:.82rem">${escapeHtml(accountText)}</span></div>
+    <div class="dashboard-stats">
+      <div class="dashboard-stat"><strong>${own.length}</strong><span>Your Products</span></div>
+      <div class="dashboard-stat"><strong>${own.filter(p => Number(p.price) > 0).length}</strong><span>Paid Products</span></div>
+      <div class="dashboard-stat"><strong>${money(totalValue).replace('Free', '₹0')}</strong><span>Listed Value</span></div>
+    </div>
+    ${!currentUser ? '<div class="notice warn">You are not signed in. Products added in guest mode stay in this browser.</div>' : ''}
+    <div class="dashboard-actions">
+      <button class="btn btn-primary" onclick="closeModal('dashboardModal');openSellModal()">+ Add Product</button>
+      <button class="btn" onclick="openPayoutModal()">💳 Payout settings</button>
+      <button class="btn" onclick="openEarnings()">📈 Platform earnings</button>
+      <button class="btn" onclick="openDashboardModal()">↻ Refresh</button>
+    </div>
+    <h3 style="margin:1.1rem 0 .5rem">📦 Your Products</h3>
+    ${own.length ? own.map(p => `<div class="dashboard-item">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+        <div><strong>${escapeHtml(p.title)}</strong><div class="creator-line">${escapeHtml(p.category || 'Uncategorized')}</div></div>
+        <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
+      </div>
+      <div class="dashboard-actions">
+        <button class="btn btn-sm" onclick="closeModal('dashboardModal');openProductModal('${escapeHtml(p.id)}')">View</button>
+        ${(p.link || p.product_url) ? `<a class="btn btn-sm" href="${escapeHtml(p.link || p.product_url)}" target="_blank" rel="noopener noreferrer">Product Link</a>` : ''}
+        <button class="btn btn-sm" onclick="openPromotionModal('${escapeHtml(p.id)}')">🚀 Promote</button>
+      </div>
+    </div>`).join('') : '<div class="empty-state">No creator products yet. Tap “+ Add Product” to list your first asset.</div>'}`;
+  openModal('dashboardModal');
+}
+
+function openPromotionModal(productId) {
+  const p = products.find(x => String(x.id) === String(productId));
+  if (!p) return;
+  document.getElementById('promoteProductId').value = p.id;
+  document.getElementById('promoteProductTitle').innerHTML = `Promote <strong>${escapeHtml(p.title)}</strong> and show it in Featured Promotions.`;
+  selectedPromoDays = 1; selectedPromoCost = 99;
+  document.querySelectorAll('.promo-card-option').forEach((c, i) => c.classList.toggle('selected', i === 0));
+  openModal('promoteModal');
+}
+function selectPromoPlan(el, days, cost) {
+  document.querySelectorAll('.promo-card-option').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected'); selectedPromoDays = days; selectedPromoCost = cost;
+}
+async function confirmPromotion() {
+  const productId = document.getElementById('promoteProductId').value;
+  await refreshCurrentUser();
+  if (!requireLogin()) return;
+  closeModal('promoteModal');
+  openPayModal({
+    title: `Promotion — ${selectedPromoDays} day(s)`, subtitle: 'Featured promotion', amount: selectedPromoCost,
+    payload: { type: 'promotion', product_id: productId, promo_days: selectedPromoDays },
+    onPaid: async (method) => {
+      await recordOrder({ kind: 'promotion', product_id: productId, promo_days: selectedPromoDays, amount: selectedPromoCost, title: `Promotion — ${selectedPromoDays} day(s)`, method });
+      if (method === 'cashfree') { activatePromotion(productId, selectedPromoDays); toast(`🎉 Promotion active for ${selectedPromoDays} day(s).`); }
+      else toast('Promotion will activate once your UPI payment is confirmed.');
+    }
+  });
+}
+
+/* ---------------- Purchases library ---------------- */
+async function openLibraryModal() {
+  let orders = JSON.parse(localStorage.getItem('cmOrders') || '[]');
+  await refreshCurrentUser();
+  if (isSupabaseConnected && supabaseClient && currentUser) {
+    try {
+      const { data, error } = await supabaseClient.from('orders').select('id,product_id,amount,status,payment_id,created_at,kind,commission_amount,creator_payout').eq('buyer_id', currentUser.id).order('created_at', { ascending: false });
+      if (!error && Array.isArray(data)) {
+        const live = data.map(o => { const prod = products.find(p => String(p.id) === String(o.product_id)); return { ...o, title: prod?.title || (o.kind === 'plan' ? 'Creator plan pass' : 'Purchase'), link: prod?.link || prod?.product_url || '' }; });
+        orders = live.length ? live : orders;
+        localStorage.setItem('cmOrders', JSON.stringify(orders));
+      }
+    } catch (err) { console.warn('Orders load skipped:', err); }
+  }
+  document.getElementById('libraryContent').innerHTML = orders.length
+    ? orders.map(o => `<div class="dashboard-item"><strong>${escapeHtml(o.title)}</strong><div class="creator-line">${escapeHtml(o.status || 'Pending')} · ${escapeHtml(o.created_at || o.date || '')}${o.amount != null ? ' · ' + money(o.amount) : ''}</div>${o.commission_amount != null ? `<div class="creator-line">Platform fee ${money(o.commission_amount)} · Creator ${money(o.creator_payout)}</div>` : ''}${o.link ? `<a class="btn btn-sm" style="margin-top:8px" href="${escapeHtml(o.link)}" target="_blank" rel="noopener">Open Product</a>` : ''}</div>`).join('')
+    : '<div class="empty-state">No purchases yet.</div>';
+  openModal('libraryModal');
+}
+function openSupportModal() { openModal('supportModal'); }
+function requestSupport() { toast('Add your support email or endpoint before going live.'); }
+
+/* ============================================================
+   PAYMENTS — Cashfree via Supabase Edge Functions
+   ============================================================ */
+async function cashfreeCheckout(paymentSessionId) {
+  if (!window.Cashfree) { toast('Payment checkout is loading. Please try again.'); return { error: { message: 'SDK not loaded' } }; }
+  const cashfree = window.Cashfree({ mode: CONFIG.CASHFREE_MODE });
+  return await cashfree.checkout({ paymentSessionId, redirectTarget: '_modal' });
+}
+
+// Generic: create order on the server, open Cashfree, verify server-side. Returns {paid:boolean}.
+async function beginCashfreeOrder(payload) {
+  if (!isSupabaseConnected) { toast('Supabase is not configured.'); return { paid: false }; }
+  if (!requireLogin()) return { paid: false };
+  let created;
+  try {
+    created = await callFunction('create-order', payload);
+  } catch (e) { console.error(e); toast('Could not start checkout. Please try again.'); return { paid: false }; }
+  if (!created.ok || !created.data?.payment_session_id) {
+    toast(created.data?.message || 'Checkout could not be started.');
+    return { paid: false };
+  }
+  const result = await cashfreeCheckout(created.data.payment_session_id);
+  if (result?.error) { toast(result.error.message || 'Payment was cancelled or failed.'); return { paid: false }; }
+  // Confirm status on the server (never trust the browser alone).
+  const verify = await callFunction('verify-payment', { order_id: created.data.order_id });
+  if (verify.ok && verify.data?.verified) return { paid: true, order: verify.data };
+  toast(verify.data?.message || 'Payment could not be verified.');
+  return { paid: false };
+}
+
+/* ---------- Payment helpers (UPI + Cashfree) ---------- */
+function upiConfigured() { return !!CONFIG.UPI_ID && !/yourname@upi/i.test(CONFIG.UPI_ID); }
+function upiLink(amount, note) {
+  const pa = encodeURIComponent(CONFIG.UPI_ID);
+  const pn = encodeURIComponent(CONFIG.UPI_PAYEE_NAME || 'CreatorMarket');
+  const am = Number(amount).toFixed(2);
+  const tn = encodeURIComponent(note || 'CreatorMarket');
+  return `upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR&tn=${tn}`;
+}
+
+async function recordOrder(o) {
+  const status = o.method === 'cashfree' ? 'Paid' : 'Awaiting confirmation';
+  const orders = JSON.parse(localStorage.getItem('cmOrders') || '[]');
+  orders.unshift({ id: (o.method === 'cashfree' ? 'cf-' : 'upi-') + Date.now(), product_id: o.product_id || null, title: o.title, status, date: new Date().toLocaleString(), link: o.link || '' });
+  localStorage.setItem('cmOrders', JSON.stringify(orders));
+  // UPI has no gateway verification, so record a pending order for manual confirmation.
+  if (o.method === 'upi' && isSupabaseConnected && supabaseClient && currentUser) {
+    try {
+      await supabaseClient.from('orders').insert([{
+        buyer_id: currentUser.id, kind: o.kind, product_id: o.product_id || null,
+        plan: o.plan || null, promo_days: o.promo_days || null, amount: Number(o.amount) || 0,
+        status: 'pending', payment_id: 'UPI — awaiting confirmation'
+      }]);
+    } catch (e) { console.warn('UPI order record failed:', e); }
+  }
+}
+function activatePromotion(productId, days) {
+  const expiresAt = new Date(); expiresAt.setDate(expiresAt.getDate() + days);
+  promotions = promotions.filter(pr => String(pr.product_id) !== String(productId));
+  promotions.push({ id: 'promo-' + Date.now(), product_id: productId, expires_at: expiresAt.toISOString() });
+  localStorage.setItem('cmPromotions', JSON.stringify(promotions));
+  renderProducts();
+}
+
+function openPayModal(opts) {
+  window._payOnPaid = opts.onPaid;
+  window._payPayload = opts.payload || {};
+  const cfReady = !!CONFIG.CASHFREE_ENABLED;
+  const upiReady = upiConfigured();
+  document.getElementById('payContent').innerHTML = `
+    <h2 class="section-title">Checkout</h2>
+    <div class="notice" style="margin-bottom:12px"><strong>${escapeHtml(opts.title)}</strong><br><span style="font-size:.82rem;color:var(--muted)">${escapeHtml(opts.subtitle || '')}</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="color:var(--muted)">Amount to pay</span><span class="price">${money(opts.amount)}</span>
+    </div>
+    <div style="display:grid;gap:10px">
+      <button class="btn btn-primary btn-block" ${upiReady ? '' : 'disabled'} onclick="showUpiView(${Number(opts.amount)})">📱 Pay by UPI (QR / app)</button>
+      <button class="btn btn-block" ${cfReady ? '' : 'disabled'} onclick="payViaCashfree()">💳 Card / Netbanking — Cashfree${cfReady ? '' : ' (not set up yet)'}</button>
+    </div>
+    ${opts.note ? '<div class="note" style="margin-top:10px">' + escapeHtml(opts.note) + '</div>' : ''}
+    ${!upiReady ? '<div class="notice warn" style="margin-top:12px">UPI is not set up yet — add your UPI ID in the CONFIG block.</div>' : ''}
+    ${!cfReady ? '<div class="notice" style="margin-top:8px">Cashfree is ready in the code — enable it once your Cashfree account and keys are in place.</div>' : ''}
+    <div id="upiView" style="margin-top:14px"></div>`;
+  openModal('payModal');
+}
+
+function showUpiView(amount) {
+  const link = upiLink(amount, 'CreatorMarket payment');
+  const v = document.getElementById('upiView');
+  v.innerHTML = `
+    <div class="notice success">Scan this QR in any UPI app (GPay, PhonePe, Paytm, BHIM) — or use the button below on mobile.</div>
+    <div id="qrBox" style="background:#fff;padding:12px;border-radius:14px;width:max-content;margin:14px auto"></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input class="field" value="${escapeHtml(CONFIG.UPI_ID)}" readonly style="flex:1;min-width:180px">
+      <button class="btn btn-sm" onclick="copyUpiId()">Copy UPI ID</button>
+    </div>
+    <a class="btn btn-primary btn-block" style="margin-top:12px" href="${link}">Open UPI app to pay ${money(amount)}</a>
+    <button class="btn btn-block" style="margin-top:8px" onclick="upiPaid()">✅ I have paid — submit order</button>
+    <div class="notice" style="margin-top:10px">UPI payments go straight to the owner's account (no gateway), so the order is marked “awaiting confirmation” until it is verified.</div>`;
+  const box = document.getElementById('qrBox');
+  box.innerHTML = '';
+  try {
+    if (window.QRCode) new window.QRCode(box, { text: link, width: 190, height: 190, correctLevel: window.QRCode.CorrectLevel.M });
+    else box.innerHTML = '<div style="color:#111;font-size:12px;padding:10px">QR unavailable — use the UPI ID or the button below.</div>';
+  } catch (e) {
+    box.innerHTML = '<div style="color:#111;font-size:12px;padding:10px">QR unavailable — use the UPI ID or the button below.</div>';
+  }
+}
+function copyUpiId() {
+  const v = CONFIG.UPI_ID;
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(v).then(() => toast('UPI ID copied.')).catch(() => toast('UPI ID: ' + v));
+  else toast('UPI ID: ' + v);
+}
+async function upiPaid() {
+  const onPaid = window._payOnPaid;
+  closeModal('payModal');
+  if (onPaid) await onPaid('upi');
+}
+async function payViaCashfree() {
+  const onPaid = window._payOnPaid;
+  const res = await beginCashfreeOrder(window._payPayload || {});
+  if (res && res.paid) { closeModal('payModal'); if (onPaid) await onPaid('cashfree'); }
+}
+
+/* ---------- Creator payouts & platform earnings ---------- */
+function inr(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
+async function openPayoutModal() {
+  await refreshCurrentUser();
+  if (!requireLogin()) return;
+  const box = document.getElementById('payoutContent');
+  box.innerHTML = '<p class="note" style="margin-top:0">Loading…</p>';
+  let p = null;
+  if (isSupabaseConnected && supabaseClient) {
+    try { const { data } = await supabaseClient.from('creator_payouts').select('*').eq('creator_id', currentUser.id).maybeSingle(); p = data; } catch (e) {}
+  }
+  box.innerHTML = `
+    <h2 class="section-title">Payout details</h2>
+    <p class="note" style="margin-top:0">Aapki creator sales ke paise yahan bheje jayenge. (Cashfree Easy Split ke liye zaroori.)</p>
+    <div class="form-group"><label>Payout method</label>
+      <select class="form-control" id="poMethod" onchange="togglePayoutFields()">
+        <option value="upi" ${p?.method !== 'bank' ? 'selected' : ''}>UPI</option>
+        <option value="bank" ${p?.method === 'bank' ? 'selected' : ''}>Bank transfer</option>
+      </select>
+    </div>
+    <div id="poUpi" class="form-group"><label>UPI ID (VPA)</label><input class="form-control" id="poUpiVpa" value="${escapeHtml(p?.upi_vpa || '')}" placeholder="name@okhdfcbank"></div>
+    <div id="poBank" style="display:none">
+      <div class="form-group"><label>Account holder name</label><input class="form-control" id="poAccName" value="${escapeHtml(p?.account_name || '')}"></div>
+      <div class="form-group"><label>Account number</label><input class="form-control" id="poAccNo" value="${escapeHtml(p?.account_number || '')}"></div>
+      <div class="form-group"><label>IFSC</label><input class="form-control" id="poIfsc" value="${escapeHtml(p?.ifsc || '')}"></div>
+    </div>
+    <div class="form-group"><label>Phone</label><input class="form-control" id="poPhone" value="${escapeHtml(p?.phone || '')}" placeholder="10-digit mobile"></div>
+    <button class="btn btn-primary btn-block" onclick="savePayout()">Save payout details</button>
+    ${p?.cashfree_vendor_id ? '<div class="notice success" style="margin-top:10px">✅ Linked to Cashfree vendor: ' + escapeHtml(p.cashfree_vendor_id) + '</div>' : '<div class="notice" style="margin-top:10px">Cashfree vendor linking happens once Easy Split is activated on the platform account.</div>'}`;
+  togglePayoutFields();
+  openModal('payoutModal');
+}
+function togglePayoutFields() {
+  const m = document.getElementById('poMethod')?.value;
+  const upi = document.getElementById('poUpi'), bank = document.getElementById('poBank');
+  if (upi) upi.style.display = m === 'upi' ? 'block' : 'none';
+  if (bank) bank.style.display = m === 'bank' ? 'block' : 'none';
+}
+async function savePayout() {
+  await refreshCurrentUser();
+  if (!currentUser) { toast('Please log in first.'); return; }
+  if (!isSupabaseConnected) { toast('Supabase is not configured.'); return; }
+  const method = document.getElementById('poMethod').value;
+  const row = {
+    creator_id: currentUser.id, method,
+    upi_vpa: method === 'upi' ? document.getElementById('poUpiVpa').value.trim() : null,
+    account_name: method === 'bank' ? document.getElementById('poAccName').value.trim() : null,
+    account_number: method === 'bank' ? document.getElementById('poAccNo').value.trim() : null,
+    ifsc: method === 'bank' ? document.getElementById('poIfsc').value.trim() : null,
+    phone: document.getElementById('poPhone').value.trim(),
+    updated_at: new Date().toISOString()
+  };
+  if (method === 'upi' && !row.upi_vpa) { toast('Enter your UPI ID.'); return; }
+  if (method === 'bank' && (!row.account_number || !row.ifsc)) { toast('Enter account number and IFSC.'); return; }
+  try {
+    const { error } = await supabaseClient.from('creator_payouts').upsert([row], { onConflict: 'creator_id' });
+    if (error) throw error;
+    toast('✅ Payout details saved.');
+    closeModal('payoutModal');
+  } catch (e) { toast('Could not save payout details: ' + (e.message || e)); }
+}
+async function openEarnings() {
+  const box = document.getElementById('earningsContent');
+  box.innerHTML = '<p class="note" style="margin-top:0">Loading…</p>';
+  openModal('earningsModal');
+  const r = await callFunction('owner-report', {});
+  if (!r.ok) { box.innerHTML = '<h2 class="section-title">Platform earnings</h2><div class="notice warn">' + escapeHtml(r.data?.message || 'Not available.') + '</div>'; return; }
+  const d = r.data;
+  box.innerHTML = `<h2 class="section-title">Platform earnings</h2>
+    <div class="dashboard-stats">
+      <div class="dashboard-stat"><strong>${inr(d.gross)}</strong><span>Gross sales</span></div>
+      <div class="dashboard-stat"><strong>${inr(d.commission_earned)}</strong><span>Commission earned</span></div>
+      <div class="dashboard-stat"><strong>${inr(d.creator_payouts)}</strong><span>Creator payouts</span></div>
+    </div>
+    <div class="notice">Paid orders: ${Number(d.paid_orders || 0)} · Product sales: ${Number(d.product_sales || 0)}. Commission is ${CONFIG.COMMISSION_PERCENT}% per creator sale.</div>
+    <div class="notice" style="margin-top:10px">Auto-settlement to your account and to each creator needs Cashfree Easy Split activated. Until then this is a tracking report.</div>`;
+}
+
+async function startCheckout(productId) {
+  const p = products.find(x => String(x.id) === String(productId));
+  if (!p) return;
+  await refreshCurrentUser();
+  if (!requireLogin()) return;
+
+  if (Number(p.price) === 0) {
+    // Free product — no payment needed.
+    const orders = JSON.parse(localStorage.getItem('cmOrders') || '[]');
+    orders.unshift({ id: 'free-' + Date.now(), product_id: p.id, title: p.title, status: 'Free', date: new Date().toLocaleString(), link: p.link || p.product_url || '' });
+    localStorage.setItem('cmOrders', JSON.stringify(orders));
+    if (isSupabaseConnected && supabaseClient && currentUser) {
+      try { await supabaseClient.from('orders').insert([{ buyer_id: currentUser.id, product_id: p.id, kind: 'product', amount: 0, status: 'paid' }]); } catch (e) {}
+    }
+    closeModal('productModal'); openLibraryModal();
+    return;
+  }
+
+  closeModal('productModal');
+  openPayModal({
+    title: p.title, subtitle: 'Product purchase', amount: Number(p.price),
+    note: `Platform fee ${CONFIG.COMMISSION_PERCENT}% — the creator receives the rest.`,
+    payload: { type: 'product', product_id: p.id },
+    onPaid: async (method) => {
+      await recordOrder({ kind: 'product', product_id: p.id, amount: Number(p.price), title: p.title, link: p.link || p.product_url || '', method });
+      toast(method === 'cashfree' ? '✅ Payment successful. Product added to your library.' : 'Order submitted — the product unlocks once your UPI payment is confirmed.');
+      openLibraryModal();
+    }
+  });
+}
+
+async function startPlan(plan) {
+  const amount = plan === 'pro' ? 599 : 299;
+  await refreshCurrentUser();
+  if (!requireLogin()) return;
+  openPayModal({
+    title: (plan === 'pro' ? 'Pro' : 'Creator') + ' Pass — 30 days', subtitle: 'CreatorMarket plan', amount,
+    payload: { type: 'plan', plan },
+    onPaid: async (method) => {
+      await recordOrder({ kind: 'plan', plan, amount, title: (plan === 'pro' ? 'Pro' : 'Creator') + ' pass', method });
+      if (method === 'cashfree') {
+        localStorage.setItem('cmPlan', JSON.stringify({ plan, until: Date.now() + 30 * 24 * 60 * 60 * 1000 }));
+        applyPlanUI();
+        toast('✅ Pass active for 30 days.');
+      } else {
+        toast('Pass will activate once your UPI payment is confirmed.');
+      }
+    }
+  });
+}
+
+/* ---------------- Plan / AI usage ---------------- */
+const FREE_LIMIT = 10;
+function currentPlan() {
+  try { const p = JSON.parse(localStorage.getItem('cmPlan') || 'null'); if (p && p.until > Date.now()) return p.plan; } catch (e) {}
+  return 'free';
+}
+function planLimit() { const p = currentPlan(); return p === 'pro' ? 500 : p === 'creator' ? 100 : FREE_LIMIT; }
+function usageKey() { return `cm_ai_${new Date().getFullYear()}_${new Date().getMonth() + 1}`; }
+function getUsage() { return Math.max(0, Math.min(planLimit(), Number(localStorage.getItem(usageKey()) || 0))); }
+function setUsage(n) { localStorage.setItem(usageKey(), String(Math.max(0, Math.min(planLimit(), n)))); updateUsageUI(); }
+function applyPlanUI() {
+  const badge = document.getElementById('planBadge');
+  const p = currentPlan();
+  if (badge) badge.textContent = p === 'free' ? 'FREE — 10 AI generations / month' : (p.toUpperCase() + ' PASS ACTIVE');
+  updateUsageUI();
+}
+function updateUsageUI() {
+  const used = getUsage(), remaining = Math.max(0, planLimit() - used), pct = (remaining / planLimit()) * 100;
+  const c = document.getElementById('promptCount'), t = document.getElementById('promptLimitText'),
+        pr = document.getElementById('promptProgress'), b = document.getElementById('promptBtn');
+  if (c) c.textContent = remaining + ' remaining';
+  if (t) t.textContent = remaining + '/' + planLimit();
+  if (pr) pr.style.width = pct + '%';
+  if (b) { b.disabled = remaining <= 0; b.textContent = remaining <= 0 ? '🔒 Monthly limit reached' : '✨ Create Prompt'; }
+}
+
+/* ---------------- Creator tools ---------------- */
+let current = null, platform = 'youtube';
+document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); platform = b.dataset.platform;
+}));
+function getUrl() { return document.getElementById('url').value.trim(); }
+function fmtViews(v) { if (!v) return 'Views —'; return 'Views ' + Number(v).toLocaleString('en-IN'); }
+function isoDuration(s) {
+  if (!s || !s.startsWith('PT')) return 'Duration —';
+  const m = s.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return 'Duration —';
+  return 'Duration ' + [m[1] ? m[1] + 'h' : null, m[2] ? m[2] + 'm' : null, m[3] ? m[3] + 's' : null].filter(Boolean).join(' ');
+}
+async function analyze() {
+  const url = getUrl();
+  if (!url) { toast('Please paste a YouTube URL first.'); return; }
+  const b = document.getElementById('analyzeBtn'), st = document.getElementById('status');
+  b.disabled = true; b.textContent = 'Analyzing…';
+  st.classList.add('show'); st.textContent = 'Checking the video…';
+  document.getElementById('result').classList.remove('show');
+  try {
+    const r = await callFunction('analyze', { url });
+    if (!r.ok) { st.textContent = r.data.message || 'Analysis failed.'; return; }
+    current = { ...r.data, url };
+    document.getElementById('rtitle').textContent = r.data.title || 'Video found';
+    document.getElementById('rchannel').textContent = r.data.channel || r.data.author || '';
+    document.getElementById('rviews').textContent = fmtViews(r.data.views);
+    document.getElementById('rduration').textContent = isoDuration(r.data.duration);
+    document.getElementById('rthumb').src = r.data.thumbnail || '';
+    st.classList.remove('show');
+    document.getElementById('result').classList.add('show');
+  } catch (e) { st.textContent = 'Something went wrong. Please try again.'; }
+  finally { b.disabled = false; b.textContent = 'Analyze Video'; }
+}
+function openThumb() { if (current?.thumbnail) window.open(current.thumbnail, '_blank'); else toast('Thumbnail is not available.'); }
+async function downloadThumb() {
+  if (!current?.url) { toast('Analyze a YouTube video first.'); return; }
+  try {
+    toast('Preparing thumbnail…');
+    const r = await callFunction('thumbnail', { url: current.url });
+    if (!r.ok || !r.data?.url) throw new Error(r.data?.message || 'Download failed.');
+    const img = await fetch(r.data.url, { mode: 'cors' });
+    if (!img.ok) throw new Error('Could not fetch thumbnail.');
+    const blob = await img.blob();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'creatormarket-thumbnail.jpg';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    toast('Thumbnail downloaded.');
+  } catch (e) { toast(e.message || 'Thumbnail download failed.'); }
+}
+async function copyTitle() {
+  if (!current?.title) { toast('Analyze a video first.'); return; }
+  try {
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(current.title); toast('Title copied.'); return; }
+    const f = document.createElement('textarea'); f.value = current.title; f.setAttribute('readonly', ''); f.style.position = 'fixed'; f.style.opacity = '0';
+    document.body.appendChild(f); f.select(); const ok = document.execCommand('copy'); f.remove();
+    toast(ok ? 'Title copied.' : 'Copy failed. Please copy manually.');
+  } catch (e) { toast('Copy failed. Please copy manually.'); }
+}
+function showIdea() {
+  if (!current) return;
+  const t = current.title || 'your video';
+  const box = document.getElementById('idea');
+  box.classList.add('show');
+  box.textContent = 'Quick Shorts ideas:\n• 3 lessons creators can learn from: ' + t + '\n• The hook behind this video: ' + t + '\n• What most creators miss about: ' + t;
+}
+function clearPack() {
+  document.getElementById('topic').value = '';
+  document.getElementById('packInput').textContent = 'Choose a platform and enter your topic.';
+  document.getElementById('packOutput').textContent = 'Your platform-ready content will appear here.';
+}
+async function generatePack() {
+  const topic = document.getElementById('topic').value.trim();
+  if (!topic) { toast('Enter a topic or content idea first.'); return; }
+  if (getUsage() >= planLimit()) { toast('Your monthly AI limit is used up. Choose a higher plan for more generations.'); return; }
+  const b = document.getElementById('generateBtn'); b.disabled = true; b.textContent = 'Generating…';
+  document.getElementById('packInput').textContent = topic + '\n\nPlatform: ' + platform;
+  document.getElementById('packOutput').textContent = 'CreatorMarket AI is preparing your content pack…';
+  try {
+    const r = await callFunction('ai-tools', { mode: 'content-pack', topic, platform });
+    if (!r.ok) { document.getElementById('packOutput').textContent = r.data.message || 'AI content pack is not available yet.'; return; }
+    document.getElementById('packOutput').textContent = r.data.content || 'No content returned.';
+    setUsage(getUsage() + 1);
+  } catch (e) { document.getElementById('packOutput').textContent = 'Something went wrong. Please try again.'; }
+  finally { b.disabled = false; b.textContent = '✨ Generate Content Pack'; }
+}
+function clearPrompt() {
+  ['promptGoal', 'promptAudience'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('promptOutput').textContent = 'Your ready-to-copy prompt will appear here.';
+  updateUsageUI();
+}
+async function createPrompt() {
+  const goal = document.getElementById('promptGoal').value.trim();
+  const audience = document.getElementById('promptAudience').value.trim();
+  const p = document.getElementById('promptPlatform').value;
+  const tone = document.getElementById('promptTone').value;
+  if (!goal) { toast('Tell me what prompt you want to create first.'); return; }
+  if (getUsage() >= planLimit()) { toast('Your monthly AI limit is used up. Choose a paid plan for more.'); return; }
+  const b = document.getElementById('promptBtn'); b.disabled = true; b.textContent = 'Creating…';
+  document.getElementById('promptOutput').textContent = 'CreatorMarket is building your reusable prompt…';
+  try {
+    const r = await callFunction('ai-tools', { mode: 'prompt-creator', goal, audience, platform: p, tone });
+    if (!r.ok) { document.getElementById('promptOutput').textContent = r.data.message || 'Prompt creation failed.'; return; }
+    document.getElementById('promptOutput').textContent = r.data.prompt || 'No prompt returned.';
+    setUsage(getUsage() + 1);
+  } catch (e) { document.getElementById('promptOutput').textContent = 'Something went wrong. Please try again.'; }
+  finally { updateUsageUI(); }
+}
+
+/* ---------------- Supabase product sync ---------------- */
+async function loadProductsFromSupabase() {
+  if (!isSupabaseConnected || !supabaseClient) return;
+  try {
+    await refreshCurrentUser();
+    const { data, error } = await supabaseClient.from('products')
+      .select('id,creator_id,category,title,description,price,product_url,image_url,is_published,created_at')
+      .eq('is_published', true).order('created_at', { ascending: false });
+    if (error) throw error;
+    if (Array.isArray(data)) {
+      const live = data.map(p => ({
+        ...p, creator: true,
+        is_owner: !!currentUser && String(p.creator_id) === String(currentUser.id),
+        link: p.product_url || '',
+        category: p.category || 'Uncategorized',
+        creator_name: (currentUser && String(p.creator_id) === String(currentUser.id)) ? (currentUser.email || 'Creator') : 'Creator'
+      }));
+      const localCustom = JSON.parse(localStorage.getItem('cmProducts') || '[]').filter(p => String(p.id).startsWith('custom-'));
+      products = [...live, ...localCustom, ...demoProducts.filter(d => !data.some(x => String(x.id) === String(d.id)))];
+      localStorage.setItem('cmProducts', JSON.stringify(products));
+      renderProducts();
+    }
+  } catch (e) { console.warn('Supabase products load skipped:', e); }
+}
+
+/* ---------------- Init ---------------- */
+if (isSupabaseConnected && supabaseClient) {
+  supabaseClient.auth.onAuthStateChange((_e, session) => {
+    currentUser = session?.user || null; updateAuthButton();
+    setTimeout(() => loadProductsFromSupabase(), 0);
+  });
+}
+renderProducts();
+applyPlanUI();
+refreshCurrentUser().then(() => loadProductsFromSupabase());
+document.getElementById('url').addEventListener('keydown', e => { if (e.key === 'Enter') analyze(); });
+window.addEventListener('storage', () => {
+  try { wishlist = JSON.parse(localStorage.getItem('cmWishlist') || '[]'); notifications = JSON.parse(localStorage.getItem('cmNotifications') || '[]'); renderProducts(); } catch (e) {}
+});
+window.addEventListener('load', () => { setTimeout(() => document.getElementById('splash')?.classList.add('hide'), 1500); });
+</script>
+</body>
+</html>

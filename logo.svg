@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 96" width="420" height="96" role="img" aria-label="CreatorMarket logo">
+  <defs>
+    <linearGradient id="cmGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="0.5" stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="cmText" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <rect x="8" y="16" width="64" height="64" rx="19" fill="url(#cmGrad)"/>
+    <path d="M22 62 L31 34 L40 52 L49 34 L58 62" fill="none" stroke="#0a0b12" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="59" cy="28" r="5" fill="#0a0b12"/>
+  </g>
+  <text x="88" y="63" font-family="Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="34" font-weight="800" letter-spacing="-0.8">
+    <tspan fill="#f4f6ff">Creator</tspan><tspan fill="url(#cmText)">Market</tspan>
+  </text>
+</svg>
