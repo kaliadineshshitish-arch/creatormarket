@@ -1,0 +1,25 @@
+# CreatorMarket — Supabase project config
+# Replace project_id with your own Supabase project ref before deploying.
+project_id = "your-project-ref"
+
+# JWT verification is disabled at the platform level because the frontend uses
+# the new publishable key format. Each function performs its own auth check
+# (create-order / verify-payment require a logged-in user; analyze / thumbnail
+# / ai-tools are callable without a session).
+[functions.create-order]
+verify_jwt = false
+
+[functions.verify-payment]
+verify_jwt = false
+
+[functions.ai-tools]
+verify_jwt = false
+
+[functions.analyze]
+verify_jwt = false
+
+[functions.thumbnail]
+verify_jwt = false
+
+[functions.owner-report]
+verify_jwt = false
