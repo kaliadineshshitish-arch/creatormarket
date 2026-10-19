@@ -6,9 +6,15 @@ def call(method, path, body=None):
         headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"}, method=method)
     return urllib.request.urlopen(r, timeout=30).read().decode()
 
+print('Enabling: leaked-password protection + require current password on change ...')
+try:
+    call('PATCH', '/config/auth', {"password_hibp_enabled": True,
+                                   "security_update_password_require_current_password": True})
+    print('PATCH ok')
+except Exception as e:
+    print('PATCH err:', e)
+
 d = json.loads(call('GET', '/config/auth'))
-print('--- security-related auth settings ---')
-for k in sorted(d.keys()):
-    if any(t in k.lower() for t in ['password','security','hibp','leak','captcha','mfa','otp','rate','session','jwt','disable','enable']):
-        print(k, '=', d.get(k))
-print('--- done ---')
+for k in ['password_hibp_enabled','security_update_password_require_current_password',
+          'password_min_length','mfa_totp_enroll_enabled','external_phone_enabled']:
+    print('AFTER ->', k, '=', d.get(k))
