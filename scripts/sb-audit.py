@@ -6,15 +6,19 @@ def call(method, path, body=None):
         headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"}, method=method)
     return urllib.request.urlopen(r, timeout=30).read().decode()
 
-print('Enabling: leaked-password protection + require current password on change ...')
-try:
-    call('PATCH', '/config/auth', {"password_hibp_enabled": True,
-                                   "security_update_password_require_current_password": True})
-    print('PATCH ok')
-except Exception as e:
-    print('PATCH err:', e)
+tests = [
+    ('password_hibp_enabled', True),
+    ('security_update_password_require_current_password', True),
+    ('security_update_password_require_reauthentication', True),
+]
+for field, val in tests:
+    try:
+        call('PATCH', '/config/auth', {field: val})
+        print('OK  ->', field, 'set to', val)
+    except Exception as e:
+        print('ERR ->', field, '|', e)
 
 d = json.loads(call('GET', '/config/auth'))
-for k in ['password_hibp_enabled','security_update_password_require_current_password',
-          'password_min_length','mfa_totp_enroll_enabled','external_phone_enabled']:
-    print('AFTER ->', k, '=', d.get(k))
+print('--- current values ---')
+for f, _ in tests:
+    print(f, '=', d.get(f))
