@@ -417,6 +417,12 @@ footer.site .flinks a:hover{color:var(--text)}
       <h2 class="section-title">✨ You May Also Like</h2>
       <div class="products-grid" id="recommendedGrid"></div>
     </section>
+
+    <section id="topCreatorsSection" style="margin-top:24px" hidden>
+      <h2 class="section-title">🏆 Top Creators</h2>
+      <p style="color:var(--muted);margin:-6px 0 12px">Most trusted sellers on CreatorMarket — by verified sales.</p>
+      <div class="products-grid" id="topCreatorsGrid"></div>
+    </section>
   </section>
 
   <!-- Creator Tools -->
@@ -756,6 +762,8 @@ CONFIG.FUNCTIONS_BASE = CONFIG.FUNCTIONS_BASE || (CONFIG.SUPABASE_URL + '/functi
 
 let supabaseClient = null;
 let isSupabaseConnected = false;
+let creatorStats = {};
+let profilesMap = {};
 try {
   if (window.supabase && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY) {
     supabaseClient = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -832,6 +840,43 @@ async function signUpUser() {
 }
 async function signOutUser() { if (supabaseClient) await supabaseClient.auth.signOut(); currentUser = null; updateAuthButton(); closeModal('authModal'); toast('Logged out.'); }
 function requireLogin() { if (currentUser) return true; openAuthModal(); setTimeout(() => setAuthMsg('Please log in or create an account to continue.', 'error'), 120); return false; }
+
+// ---------- Trust: verified sales stats (aggregate views, no buyer data) ----------
+function creatorTrustLine(p) {
+  const cs = creatorStats[String(p.creator_id)] || null;
+  const parts = [];
+  if (cs && cs.sales_count > 0) {
+    parts.push('✓ ' + cs.sales_count + ' verified sales');
+    parts.push(cs.products_sold + ' product' + (cs.products_sold === 1 ? '' : 's') + ' sold');
+  } else { parts.push('New creator'); }
+  if (p.created_at) { try { parts.push('joined ' + new Date(p.created_at).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })); } catch (e) {} }
+  return parts.join(' · ');
+}
+function creatorNameById(id) {
+  const p = products.find(function (x) { return String(x.creator_id) === String(id); });
+  return (p && p.creator_name) || profilesMap[String(id)] || 'Creator';
+}
+function renderTopCreators() {
+  const sec = document.getElementById('topCreatorsSection');
+  const grid = document.getElementById('topCreatorsGrid');
+  if (!sec || !grid) return;
+  const rows = Object.keys(creatorStats).map(function (id) {
+    return { id: id, sales_count: creatorStats[id].sales_count, products_sold: creatorStats[id].products_sold };
+  }).filter(function (r) { return r.sales_count > 0; })
+    .sort(function (a, b) { return b.sales_count - a.sales_count; }).slice(0, 6);
+  if (!rows.length) { sec.hidden = true; return; }
+  sec.hidden = false;
+  const medal = ['🥇 ', '🥈 ', '🥉 '];
+  grid.innerHTML = rows.map(function (r, i) {
+    const nm = creatorNameById(r.id);
+    return '<article class="product-card"><div class="card-body">' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+      '<div class="avatar">' + escapeHtml((nm || 'C').charAt(0).toUpperCase()) + '</div>' +
+      '<div><strong>' + (medal[i] || '') + escapeHtml(nm) + '</strong>' +
+      '<div class="creator-line" style="color:var(--good)">✓ ' + r.sales_count + ' verified sales</div></div>' +
+      '</div></div></article>';
+  }).join('');
+}
 
 /* ---------------- Edge function caller ---------------- */
 async function callFunction(name, body) {
@@ -916,13 +961,14 @@ function renderProducts() {
         <div>
           ${featured ? '<span class="card-badge">Featured</span>' : ''}
           ${promo ? '<span class="card-badge live" style="margin-left:4px">Promoted</span>' : ''}
+          ${Number(p.sales_count) >= 3 ? '<span class="card-badge" style="margin-left:4px;background:linear-gradient(120deg,#f59e0b,#ef4444);color:#fff">🔥 Best Seller</span>' : ''}
         </div>
       </div>
       <div class="card-body">
         <h3 class="card-title">${escapeHtml(p.title)}</h3>
         <p class="card-desc">${escapeHtml(p.description)}</p>
         <div class="creator-line">by <button onclick="event.stopPropagation();openCreatorModal('${escapeHtml(p.creator_name || 'Creator')}')">${escapeHtml(p.creator_name || 'Creator')}</button></div>
-        <div style="margin-top:7px" class="rating">★ ${avg ? avg.toFixed(1) : 'New'} ${reviewStore[String(p.id)]?.length ? '(' + reviewStore[String(p.id)].length + ')' : ''}</div>
+        <div style="margin-top:7px" class="rating">★ ${avg ? avg.toFixed(1) : 'New'} ${reviewStore[String(p.id)]?.length ? '(' + reviewStore[String(p.id)].length + ')' : ''}${Number(p.sales_count) > 0 ? ' · <span style="color:var(--good)">✓ ' + Number(p.sales_count) + ' sold</span>' : ''}</div>
         <div class="card-footer">
           <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
           <div class="product-actions">
@@ -941,6 +987,7 @@ function renderProducts() {
 
   const rec = products.filter(p => !filtered.includes(p)).slice(0, 4);
   recommendedGrid.innerHTML = rec.length ? rec.map(p => card(p)).join('') : '<div class="empty-state">More recommendations will appear as the marketplace grows.</div>';
+  renderTopCreators();
   updateCounters();
 }
 function filterProducts() { renderProducts(); }
@@ -1028,7 +1075,7 @@ function openProductModal(productId) {
     <p style="margin:1rem 0;color:var(--muted);line-height:1.7">${escapeHtml(p.description)}</p>
     <div class="profile-card">
       <div class="avatar">${escapeHtml((p.creator_name || 'C').charAt(0).toUpperCase())}</div>
-      <div><strong>${escapeHtml(p.creator_name || 'Creator')}</strong><div class="creator-line">Creator profile · ${followedCreators.has(p.creator_name || 'Creator') ? 'Following' : 'Not followed'}</div></div>
+      <div><strong>${escapeHtml(p.creator_name || 'Creator')}</strong><div class="creator-line">${creatorTrustLine(p)}</div></div>
       <button class="btn btn-sm" style="margin-left:auto" onclick="toggleFollow('${escapeHtml(p.creator_name || 'Creator')}')">${followedCreators.has(p.creator_name || 'Creator') ? 'Following' : 'Follow'}</button>
     </div>
     <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin:1rem 0">
@@ -1564,13 +1611,29 @@ async function loadProductsFromSupabase() {
       .select('id,creator_id,category,title,description,price,product_url,image_url,is_published,created_at')
       .eq('is_published', true).order('created_at', { ascending: false });
     if (error) throw error;
+    // Verified sales stats (aggregate views — counts only, no buyer data) + public creator names.
+    const pStats = {}; const cStats = {}; profilesMap = {};
+    try {
+      const { data: ps } = await supabaseClient.from('product_stats').select('product_id,sales_count');
+      (ps || []).forEach(r => { pStats[String(r.product_id)] = Number(r.sales_count) || 0; });
+    } catch (e) { console.warn('product_stats skipped', e); }
+    try {
+      const { data: cs } = await supabaseClient.from('creator_stats').select('creator_id,sales_count,products_sold');
+      (cs || []).forEach(r => { cStats[String(r.creator_id)] = { sales_count: Number(r.sales_count) || 0, products_sold: Number(r.products_sold) || 0 }; });
+    } catch (e) { console.warn('creator_stats skipped', e); }
+    try {
+      const { data: pf } = await supabaseClient.from('profiles').select('id,full_name');
+      (pf || []).forEach(r => { if (r.full_name) profilesMap[String(r.id)] = r.full_name; });
+    } catch (e) { console.warn('profiles skipped', e); }
+    creatorStats = cStats;
     if (Array.isArray(data)) {
       const live = data.map(p => ({
         ...p, creator: true,
         is_owner: !!currentUser && String(p.creator_id) === String(currentUser.id),
         link: p.product_url || '',
         category: p.category || 'Uncategorized',
-        creator_name: (currentUser && String(p.creator_id) === String(currentUser.id)) ? (currentUser.email || 'Creator') : 'Creator'
+        sales_count: pStats[String(p.id)] || 0,
+        creator_name: profilesMap[String(p.creator_id)] || ((currentUser && String(p.creator_id) === String(currentUser.id)) ? (currentUser.email || 'Creator') : 'Creator')
       }));
       const localCustom = JSON.parse(localStorage.getItem('cmProducts') || '[]').filter(p => String(p.id).startsWith('custom-'));
       products = [...live, ...localCustom, ...demoProducts.filter(d => !data.some(x => String(x.id) === String(d.id)))];
