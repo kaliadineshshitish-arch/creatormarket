@@ -604,6 +604,14 @@ footer.site .flinks a:hover{color:var(--text)}
       <button class="btn" onclick="signUpUser()">Create Account</button>
       <button class="btn" id="logoutButton" style="display:none" onclick="signOutUser()">Logout</button>
     </div>
+    <div id="privacySection" style="display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
+      <div style="font-weight:600;margin-bottom:6px">🔒 Privacy</div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted)">
+        <input type="checkbox" id="showEarningsToggle" onchange="saveShowEarnings(this.checked)">
+        Show my verified earnings publicly on my products
+      </label>
+      <div id="privacyStatus" style="font-size:.8rem;color:var(--faint);margin-top:6px"></div>
+    </div>
     <small style="display:block;margin-top:10px;color:var(--faint)">Powered by Supabase Auth.</small>
   </div>
 </div>
@@ -764,6 +772,7 @@ let supabaseClient = null;
 let isSupabaseConnected = false;
 let creatorStats = {};
 let profilesMap = {};
+let earningsHidden = {};
 try {
   if (window.supabase && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY) {
     supabaseClient = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -808,7 +817,7 @@ function updateAuthButton() {
   if (up) up.classList.toggle('show', !!currentUser);
   if (em) em.textContent = currentUser ? (currentUser.email || 'Creator') : '';
 }
-function openAuthModal() { refreshCurrentUser().then(() => openModal('authModal')); }
+function openAuthModal() { refreshCurrentUser().then(() => { openModal('authModal'); refreshPrivacyUI(); }); }
 function setAuthMsg(msg, kind) {
   const el = document.getElementById('authStatus');
   if (!el) return;
@@ -838,7 +847,7 @@ async function signUpUser() {
   if (data?.session) { currentUser = data.user; updateAuthButton(); closeModal('authModal'); setAuthMsg('✅ Account created and logged in.', 'ok'); toast('✅ Account created and logged in.'); }
   else setAuthMsg('✅ Account created. Please confirm via the email we sent, then log in.', 'ok');
 }
-async function signOutUser() { if (supabaseClient) await supabaseClient.auth.signOut(); currentUser = null; updateAuthButton(); closeModal('authModal'); toast('Logged out.'); }
+async function signOutUser() { if (supabaseClient) await supabaseClient.auth.signOut(); currentUser = null; updateAuthButton(); const _ps = document.getElementById('privacySection'); if (_ps) _ps.style.display = 'none'; closeModal('authModal'); toast('Logged out.'); }
 function requireLogin() { if (currentUser) return true; openAuthModal(); setTimeout(() => setAuthMsg('Please log in or create an account to continue.', 'error'), 120); return false; }
 
 // ---------- Trust: verified sales stats (aggregate views, no buyer data) ----------
@@ -847,7 +856,7 @@ function creatorTrustLine(p) {
   const parts = [];
   if (cs && cs.sales_count > 0) {
     parts.push('✓ ' + cs.sales_count + ' verified sales');
-    if (cs.gross > 0) parts.push(money(cs.gross) + ' earned');
+    if (cs.gross > 0 && !earningsHidden[String(p.creator_id)]) parts.push(money(cs.gross) + ' earned');
     parts.push(cs.products_sold + ' product' + (cs.products_sold === 1 ? '' : 's') + ' sold');
   } else { parts.push('New creator'); }
   if (p.created_at) { try { parts.push('joined ' + new Date(p.created_at).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })); } catch (e) {} }
@@ -874,9 +883,32 @@ function renderTopCreators() {
       '<div style="display:flex;align-items:center;gap:10px">' +
       '<div class="avatar">' + escapeHtml((nm || 'C').charAt(0).toUpperCase()) + '</div>' +
       '<div><strong>' + (medal[i] || '') + escapeHtml(nm) + '</strong>' +
-      '<div class="creator-line" style="color:var(--good)">✓ ' + r.sales_count + ' sales' + (r.gross > 0 ? ' · ' + money(r.gross) : '') + '</div></div>' +
+      '<div class="creator-line" style="color:var(--good)">✓ ' + r.sales_count + ' sales' + (r.gross > 0 && !earningsHidden[String(r.id)] ? ' · ' + money(r.gross) : '') + '</div></div>' +
       '</div></div></article>';
   }).join('');
+}
+
+// ---------- Earnings privacy opt-out ----------
+async function refreshPrivacyUI() {
+  const sec = document.getElementById('privacySection');
+  if (!sec) return;
+  if (!currentUser || !supabaseClient) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  try {
+    const { data } = await supabaseClient.from('profiles').select('show_earnings').eq('id', currentUser.id).maybeSingle();
+    document.getElementById('showEarningsToggle').checked = data ? (data.show_earnings !== false) : true;
+  } catch (e) {}
+}
+async function saveShowEarnings(val) {
+  if (!currentUser || !supabaseClient) return;
+  const st = document.getElementById('privacyStatus');
+  if (st) st.textContent = 'Saving…';
+  try {
+    const { error } = await supabaseClient.from('profiles').upsert({ id: currentUser.id, show_earnings: !!val }, { onConflict: 'id' });
+    if (error) throw error;
+    if (st) st.textContent = val ? '✅ Your earnings will show publicly.' : '✅ Your earnings are now hidden.';
+    await loadProductsFromSupabase();
+  } catch (e) { if (st) st.textContent = 'Could not save: ' + (e.message || e); }
 }
 
 /* ---------------- Edge function caller ---------------- */
@@ -969,7 +1001,7 @@ function renderProducts() {
         <h3 class="card-title">${escapeHtml(p.title)}</h3>
         <p class="card-desc">${escapeHtml(p.description)}</p>
         <div class="creator-line">by <button onclick="event.stopPropagation();openCreatorModal('${escapeHtml(p.creator_name || 'Creator')}')">${escapeHtml(p.creator_name || 'Creator')}</button></div>
-        <div style="margin-top:7px" class="rating">★ ${avg ? avg.toFixed(1) : 'New'} ${reviewStore[String(p.id)]?.length ? '(' + reviewStore[String(p.id)].length + ')' : ''}${Number(p.sales_count) > 0 ? ' · <span style="color:var(--good)">✓ ' + Number(p.sales_count) + ' sold' + (Number(p.gross) > 0 ? ' · ' + money(Number(p.gross)) : '') + '</span>' : ''}</div>
+        <div style="margin-top:7px" class="rating">★ ${avg ? avg.toFixed(1) : 'New'} ${reviewStore[String(p.id)]?.length ? '(' + reviewStore[String(p.id)].length + ')' : ''}${Number(p.sales_count) > 0 ? ' · <span style="color:var(--good)">✓ ' + Number(p.sales_count) + ' sold' + (Number(p.gross) > 0 && !earningsHidden[String(p.creator_id)] ? ' · ' + money(Number(p.gross)) : '') + '</span>' : ''}</div>
         <div class="card-footer">
           <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
           <div class="product-actions">
@@ -1613,7 +1645,7 @@ async function loadProductsFromSupabase() {
       .eq('is_published', true).order('created_at', { ascending: false });
     if (error) throw error;
     // Verified sales stats (aggregate views — counts only, no buyer data) + public creator names.
-    const pStats = {}; const cStats = {}; profilesMap = {};
+    const pStats = {}; const cStats = {}; profilesMap = {}; earningsHidden = {};
     try {
       const { data: ps } = await supabaseClient.from('product_stats').select('product_id,sales_count,gross');
       (ps || []).forEach(r => { pStats[String(r.product_id)] = { sales_count: Number(r.sales_count) || 0, gross: Number(r.gross) || 0 }; });
@@ -1623,8 +1655,8 @@ async function loadProductsFromSupabase() {
       (cs || []).forEach(r => { cStats[String(r.creator_id)] = { sales_count: Number(r.sales_count) || 0, products_sold: Number(r.products_sold) || 0, gross: Number(r.gross) || 0 }; });
     } catch (e) { console.warn('creator_stats skipped', e); }
     try {
-      const { data: pf } = await supabaseClient.from('profiles').select('id,full_name');
-      (pf || []).forEach(r => { if (r.full_name) profilesMap[String(r.id)] = r.full_name; });
+      const { data: pf } = await supabaseClient.from('profiles').select('id,full_name,show_earnings');
+      (pf || []).forEach(r => { if (r.full_name) profilesMap[String(r.id)] = r.full_name; if (r.show_earnings === false) earningsHidden[String(r.id)] = true; });
     } catch (e) { console.warn('profiles skipped', e); }
     creatorStats = cStats;
     if (Array.isArray(data)) {
