@@ -346,6 +346,7 @@ footer.site .flinks a:hover{color:var(--text)}
     <div class="navright">
       <div id="userpill" class="userpill"><span class="userdot"></span><span id="useremail"></span></div>
       <button id="authButton" class="btn btn-sm" onclick="openAuthModal()">Log in / Sign up</button>
+      <button id="headerLogout" class="btn btn-sm" style="display:none" onclick="signOutUser()">Logout</button>
       <button id="sellButton" class="btn btn-primary btn-sm" onclick="openSellModal()">+ Sell</button>
     </div>
   </div>
@@ -849,11 +850,13 @@ async function refreshCurrentUser() {
 function updateAuthButton() {
   const b = document.getElementById('authButton');
   const l = document.getElementById('logoutButton');
+  const hl = document.getElementById('headerLogout');
   const st = document.getElementById('authStatus');
   const up = document.getElementById('userpill');
   const em = document.getElementById('useremail');
   if (b) b.textContent = currentUser ? '👤 Account' : 'Log in / Sign up';
   if (l) l.style.display = currentUser ? 'inline-flex' : 'none';
+  if (hl) hl.style.display = currentUser ? 'inline-flex' : 'none';
   if (st) st.textContent = currentUser ? 'Logged in as ' + (currentUser.email || currentUser.id) : 'Sign in to sell products, purchase products and manage your orders.';
   if (up) up.classList.toggle('show', !!currentUser);
   if (em) em.textContent = currentUser ? (currentUser.email || 'Creator') : '';
@@ -888,7 +891,7 @@ async function signUpUser() {
   if (data?.session) { currentUser = data.user; updateAuthButton(); closeModal('authModal'); setAuthMsg('✅ Account created and logged in.', 'ok'); toast('✅ Account created and logged in.'); }
   else setAuthMsg('✅ Account created. Please confirm via the email we sent, then log in.', 'ok');
 }
-async function signOutUser() { if (supabaseClient) await supabaseClient.auth.signOut(); currentUser = null; updateAuthButton(); const _ps = document.getElementById('privacySection'); if (_ps) _ps.style.display = 'none'; closeModal('authModal'); toast('Logged out.'); }
+async function signOutUser() { if (supabaseClient) await supabaseClient.auth.signOut(); currentUser = null; updateAuthButton(); const _ps = document.getElementById('privacySection'); if (_ps) _ps.style.display = 'none'; try { await loadProductsFromSupabase(); } catch (e) {} closeModal('authModal'); toast('Logged out.'); }
 function requireLogin() { if (currentUser) return true; openAuthModal(); setTimeout(() => setAuthMsg('Please log in or create an account to continue.', 'error'), 120); return false; }
 
 // ---------- Trust: verified sales stats (aggregate views, no buyer data) ----------
