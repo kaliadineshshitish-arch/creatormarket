@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sell Digital Products &amp; Templates Online — CreatorMarket</title>
+<meta name="description" content="Sell digital products, templates and AI prompt packs online on CreatorMarket. Keep 90% of every sale, get verified sales stats and reach buyers — free to list, no monthly fee.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#0a0b12">
+<meta property="og:title" content="Sell Digital Products & Templates Online — CreatorMarket">
+<meta property="og:description" content="List templates, UI kits, eBooks and AI prompt packs. Keep 90% of every sale, get verified stats and reach buyers worldwide.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://creatormarket-nu.vercel.app/sell-digital-products">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://creatormarket-nu.vercel.app/sell-digital-products">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='.5' stop-color='%23a855f7'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='60' height='60' rx='18' fill='url(%23g)'/%3E%3Cpath d='M16 46 L24 20 L32 38 L40 20 L48 46' fill='none' stroke='%230a0b12' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b12; --card:#12141f; --border:#232838; --line:#1c2130;
+  --text:#f4f6ff; --muted:#98a2b8; --faint:#6c7891;
+  --grad:linear-gradient(120deg,#6366f1,#a855f7 52%,#22d3ee);
+  --good:#10b981; --radius:14px; --radius-lg:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+header{position:sticky;top:0;z-index:10;background:rgba(10,11,18,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;font-family:Sora,Inter,sans-serif}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--grad);display:grid;place-items:center;color:#0a0b12;font-weight:900}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:var(--radius);font-weight:600;border:1px solid var(--border);background:#151827;color:var(--text);cursor:pointer;font-size:.95rem}
+.btn-primary{background:var(--grad);color:#0a0b12;border:none}
+.btn:hover{transform:translateY(-1px)}
+.hero{padding:64px 0 40px;text-align:center}
+h1{font-family:Sora,Inter,sans-serif;font-size:clamp(2rem,5vw,3.3rem);font-weight:800;line-height:1.08;margin-bottom:16px;letter-spacing:-1px}
+.hero p{color:var(--muted);font-size:clamp(1rem,2vw,1.15rem);max-width:640px;margin:0 auto 26px}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
+.chip{font-size:.82rem;color:var(--muted);border:1px solid var(--line);padding:5px 12px;border-radius:999px;background:#0e1018}
+section{padding:44px 0}
+h2{font-family:Sora,Inter,sans-serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:800;margin-bottom:10px;letter-spacing:-.5px}
+.lead{color:var(--muted);max-width:640px;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.card .ic{font-size:1.6rem}
+.card h3{font-size:1.05rem;margin:.5rem 0 .35rem;font-family:Sora,Inter,sans-serif}
+.card p{color:var(--muted);font-size:.92rem}
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.step{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;position:relative}
+.step .n{width:30px;height:30px;border-radius:50%;background:var(--grad);color:#0a0b12;display:grid;place-items:center;font-weight:800;margin-bottom:10px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{background:#0e1018;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:.88rem;color:var(--muted)}
+.faq details{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
+.faq summary{cursor:pointer;font-weight:600}
+.faq p{color:var(--muted);margin-top:8px;font-size:.93rem}
+.cta{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px 24px;text-align:center;margin:20px 0}
+.cta h2{margin-bottom:8px}
+.cta p{color:var(--muted);max-width:520px;margin:0 auto 20px}
+footer{border-top:1px solid var(--line);padding:26px 0;color:var(--faint);font-size:.85rem;text-align:center;margin-top:30px}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="logo">M</span> CreatorMarket</a>
+    <a class="btn" href="/">Explore Marketplace →</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Sell Digital Products, <span class="grad">Templates &amp; AI Prompt Packs</span></h1>
+    <p>Turn your work into income. List templates, UI kits, eBooks, presets and AI prompt packs on CreatorMarket — keep 90% of every sale, and reach buyers who are already looking.</p>
+    <div class="chips">
+      <span class="chip">✓ Free to list</span>
+      <span class="chip">✓ No monthly fee</span>
+      <span class="chip">✓ Keep 90% of every sale</span>
+      <span class="chip">✓ Verified sales stats</span>
+    </div>
+    <a class="btn btn-primary" href="/">Start Selling Free →</a>
+  </section>
+
+  <section>
+    <h2>Why sell on CreatorMarket</h2>
+    <p class="lead">Built for creators who want to sell digital products online without giving away most of their earnings.</p>
+    <div class="grid">
+      <div class="card"><div class="ic">💸</div><h3>Keep 90% of every sale</h3><p>Only a 10% platform fee. The rest is yours — settled straight to your account.</p></div>
+      <div class="card"><div class="ic">✅</div><h3>Verified sales &amp; earnings</h3><p>Your numbers are proven, not claimed — buyers see real, verified stats on your products.</p></div>
+      <div class="card"><div class="ic">🔥</div><h3>Best Seller badge</h3><p>Hit 3+ sales and your product earns a Best Seller badge automatically.</p></div>
+      <div class="card"><div class="ic">🏆</div><h3>Top Creators leaderboard</h3><p>Top sellers get featured on the homepage — free discovery for your store.</p></div>
+      <div class="card"><div class="ic">🔒</div><h3>Privacy you control</h3><p>Show your verified earnings publicly, or hide them anytime with one click.</p></div>
+      <div class="card"><div class="ic">🛡️</div><h3>Secure payments</h3><p>Safe checkout by Cashfree, with server-side validation and protected data.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What you can sell</h2>
+    <p class="lead">If it is digital and useful, it belongs here.</p>
+    <div class="tags">
+      <span class="tag">Notion &amp; Excel templates</span>
+      <span class="tag">UI kits &amp; design systems</span>
+      <span class="tag">AI prompt packs</span>
+      <span class="tag">eBooks &amp; guides</span>
+      <span class="tag">Lightroom &amp; video presets</span>
+      <span class="tag">Resume &amp; CV templates</span>
+      <span class="tag">Icon &amp; font packs</span>
+      <span class="tag">Social media content packs</span>
+      <span class="tag">Spreadsheets &amp; calculators</span>
+      <span class="tag">Mini courses &amp; worksheets</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>How selling works</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Create your free account</h3><p>Sign up with your email in seconds. No card, no monthly fee.</p></div>
+      <div class="step"><div class="n">2</div><h3>List your product</h3><p>Add a title, price, description and a link to your file. Publish instantly.</p></div>
+      <div class="step"><div class="n">3</div><h3>Get paid &amp; grow</h3><p>Buyers pay by UPI or card. Your verified sales grow your ranking automatically.</p></div>
+    </div>
+  </section>
+
+  <section class="faq">
+    <h2>Frequently asked questions</h2>
+    <details><summary>Is it free to sell digital products on CreatorMarket?</summary><p>Yes. Creating an account and listing your digital products is free. There is no monthly fee — CreatorMarket only takes a 10% commission when you actually make a sale.</p></details>
+    <details><summary>How do I get paid?</summary><p>Buyers pay by UPI or card through a secure Cashfree checkout. Your creator payout is tracked per sale and settled to your account.</p></details>
+    <details><summary>What is a verified sales badge?</summary><p>CreatorMarket shows real sales counts and earnings taken straight from your orders — not screenshots or claims. After 3+ sales a product earns a Best Seller badge.</p></details>
+    <details><summary>Can I hide how much I earn?</summary><p>Yes. In your account you can turn off public earnings with one click — your sales count still shows, but your revenue stays private.</p></details>
+    <details><summary>Do I need my own website to sell?</summary><p>No. CreatorMarket gives you a storefront, a product page, checkout and buyer trust signals — all in one place.</p></details>
+  </section>
+
+  <div class="cta">
+    <h2>Ready to sell your first digital product?</h2>
+    <p>Join CreatorMarket free, list your template or AI prompt pack, and start earning — you keep 90% of every sale.</p>
+    <a class="btn btn-primary" href="/">Start Selling Free →</a>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>© 2026 CreatorMarket. Marketplace &amp; Creator Tools for creators worldwide.</p>
+    <p style="margin-top:.5rem"><a href="/">Marketplace</a> · <a href="/#faq">FAQ</a> · <a href="/#whySell">Why sell</a></p>
+  </div>
+</footer>
+</body>
+</html>
