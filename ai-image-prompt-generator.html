@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Image Prompt Generator — Free &amp; Easy | CreatorMarket</title>
+<meta name="description" content="Free AI image prompt generator. Describe the image you want and get a detailed, reusable prompt for Midjourney, DALL·E and Stable Diffusion.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#0a0b12">
+<meta property="og:title" content="AI Image Prompt Generator — Free &amp; Easy | CreatorMarket">
+<meta property="og:description" content="Free AI image prompt generator. Describe the image you want and get a detailed, reusable prompt for Midjourney, DALL·E and Stable Diffusion.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://creatormarket-nu.vercel.app/ai-image-prompt-generator">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://creatormarket-nu.vercel.app/ai-image-prompt-generator">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='.5' stop-color='%23a855f7'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='60' height='60' rx='18' fill='url(%23g)'/%3E%3Cpath d='M16 46 L24 20 L32 38 L40 20 L48 46' fill='none' stroke='%230a0b12' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0b12;--card:#12141f;--border:#232838;--line:#1c2130;--text:#f4f6ff;--muted:#98a2b8;--faint:#6c7891;--grad:linear-gradient(120deg,#6366f1,#a855f7 52%,#22d3ee);--good:#10b981;--radius:14px;--radius-lg:20px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+header{position:sticky;top:0;z-index:10;background:rgba(10,11,18,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;font-family:Sora,Inter,sans-serif}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--grad);display:grid;place-items:center;color:#0a0b12;font-weight:900}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:var(--radius);font-weight:600;border:1px solid var(--border);background:#151827;color:var(--text);cursor:pointer;font-size:.95rem}
+.btn-primary{background:var(--grad);color:#0a0b12;border:none}
+.hero{padding:60px 0 36px;text-align:center}
+h1{font-family:Sora,Inter,sans-serif;font-size:clamp(1.9rem,4.8vw,3.1rem);font-weight:800;line-height:1.1;margin-bottom:16px;letter-spacing:-1px}
+.hero p{color:var(--muted);font-size:clamp(1rem,2vw,1.15rem);max-width:640px;margin:0 auto 24px}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.chip{font-size:.82rem;color:var(--muted);border:1px solid var(--line);padding:5px 12px;border-radius:999px;background:#0e1018}
+section{padding:38px 0}
+h2{font-family:Sora,Inter,sans-serif;font-size:clamp(1.35rem,3vw,1.9rem);font-weight:800;margin-bottom:10px;letter-spacing:-.5px}
+h3{font-family:Sora,Inter,sans-serif;font-size:1.05rem;margin-bottom:.4rem}
+.lead{color:var(--muted);max-width:680px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.card p{color:var(--muted);font-size:.92rem}
+.card .ic{font-size:1.5rem}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.step{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.step .n{width:30px;height:30px;border-radius:50%;background:var(--grad);color:#0a0b12;display:grid;place-items:center;font-weight:800;margin-bottom:10px}
+.step p{color:var(--muted);font-size:.92rem}
+ul.list{list-style:none;display:grid;gap:8px}
+ul.list li{color:var(--muted);padding-left:22px;position:relative}
+ul.list li:before{content:"✓";position:absolute;left:0;color:var(--good);font-weight:700}
+.faq details{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
+.faq summary{cursor:pointer;font-weight:600}
+.faq p{color:var(--muted);margin-top:8px;font-size:.93rem}
+.cta{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px 24px;text-align:center;margin:18px 0}
+.cta p{color:var(--muted);max-width:540px;margin:0 auto 20px}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.links a{font-size:.88rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+footer{border-top:1px solid var(--line);padding:26px 0;color:var(--faint);font-size:.85rem;text-align:center;margin-top:30px}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="logo">M</span> CreatorMarket</a>
+    <a class="btn" href="/#tools">Try it Free →</a>
+  </div>
+</header>
+<main class="wrap">
+  <section class="hero">
+    <h1><span class="grad">AI Image Prompt Generator</span></h1>
+    <p>Describe the image in your head and get a detailed, structured prompt you can paste into Midjourney, DALL·E or Stable Diffusion.</p>
+    <div class="chips"><span class="chip">✓ Free to try</span><span class="chip">✓ Midjourney &amp; DALL·E</span><span class="chip">✓ Detailed prompts</span><span class="chip">✓ Copy-paste ready</span></div>
+  </section>
+  <section>
+    <h2>Turn a simple idea into a strong image prompt</h2>
+    <p class="lead">Great AI images start with a clear prompt. CreatorMarket helps you build one from a plain-language description.</p>
+    <div class="grid">
+      <div class="card"><div class="ic">🎨</div><h3>Describe the subject</h3><p>What is in the image — the person, product or scene.</p></div>
+      <div class="card"><div class="ic">🖌️</div><h3>Add style &amp; mood</h3><p>Lighting, colours, art style and camera feel.</p></div>
+      <div class="card"><div class="ic">📐</div><h3>Get structure</h3><p>A prompt with the details AI image tools respond to best.</p></div>
+      <div class="card"><div class="ic">♻️</div><h3>Reuse &amp; refine</h3><p>Save the prompt and tweak it for your next image.</p></div>
+    </div>
+  </section>
+  <section>
+    <h2>How it works</h2>
+    <p class="lead">No prompt-writing skill needed.</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Write your idea</h3><p>Example: “a cosy coffee shop on a rainy evening, warm lights, cinematic”.</p></div>
+      <div class="step"><div class="n">2</div><h3>Generate the prompt</h3><p>CreatorMarket expands it into a detailed image prompt.</p></div>
+      <div class="step"><div class="n">3</div><h3>Paste into your AI tool</h3><p>Use it in Midjourney, DALL·E, Stable Diffusion or any image AI.</p></div>
+    </div>
+  </section>
+  <section class="faq">
+    <h2>Frequently asked questions</h2>
+    <details><summary>Is this AI image prompt generator free?</summary><p>Yes — you get 10 free AI generations a month, no card required.</p></details>
+    <details><summary>Which image AI tools does it work with?</summary><p>The prompts are plain text, so they work with Midjourney, DALL·E, Stable Diffusion and others.</p></details>
+    <details><summary>Can I sell AI prompt packs here?</summary><p>Yes. CreatorMarket is built for creators to sell digital products like prompt packs — and keep 90% of every sale.</p></details>
+  </section>
+  <div class="cta">
+    <h2>Generate your first image prompt free</h2>
+    <p>Describe the image, get the prompt. No design or prompt-writing skills needed.</p>
+    <a class="btn btn-primary" href="/#tools">Try the Free Image Prompt Generator →</a>
+  </div>
+  <div class="links"><a href="/ai-prompt-generator">Ai Prompt Generator</a><a href="/ai-prompts-for-youtube">Ai Prompts For Youtube</a><a href="/digital-templates-for-creators">Digital Templates For Creators</a><a href="/sell-digital-products">Sell Digital Products</a></div>
+</main>
+<footer>
+  <div class="wrap">
+    <p>© 2026 CreatorMarket. Marketplace &amp; Creator Tools for creators worldwide.</p>
+    <p style="margin-top:.5rem"><a href="/">Marketplace</a> · <a href="/#tools">Creator Tools</a> · <a href="/sell-digital-products">Sell Digital Products</a></p>
+  </div>
+</footer>
+</body>
+</html>
