@@ -619,6 +619,12 @@ footer.site .flinks a:hover{color:var(--text)}
     <div style="margin-top:14px"><a class="btn btn-sm" href="/sell-digital-products">💰 Sell Digital Products &amp; Templates →</a></div>
   </section>
 
+  <section class="wrap section" id="reviewsSection">
+    <h2 class="section-title">⭐ What People Say</h2>
+    <p style="color:var(--muted);margin:-6px 0 16px">Real, verified reviews from CreatorMarket buyers.</p>
+    <div id="reviewsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px"></div>
+  </section>
+
   <section class="wrap section" id="faq">
     <div class="section-head"><h2>FAQ</h2></div>
     <div class="faq">
@@ -831,6 +837,7 @@ let isSupabaseConnected = false;
 let creatorStats = {};
 let profilesMap = {};
 let earningsHidden = {};
+let latestReviews = [];
 try {
   if (window.supabase && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY) {
     supabaseClient = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
@@ -971,6 +978,23 @@ async function saveShowEarnings(val) {
   } catch (e) { if (st) st.textContent = 'Could not save: ' + (e.message || e); }
 }
 
+function renderHomeReviews() {
+  const grid = document.getElementById('reviewsGrid');
+  if (!grid) return;
+  const rows = (latestReviews || []).slice(0, 6);
+  if (!rows.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:.92rem">No reviews yet — be the first to review a product. ⭐</div>';
+    return;
+  }
+  grid.innerHTML = rows.map(function (r) {
+    const stars = '★'.repeat(Number(r.rating)) + '☆'.repeat(5 - Number(r.rating));
+    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px">' +
+      '<div class="rating">' + stars + '</div>' +
+      '<p style="color:var(--muted);font-size:.92rem;margin:.5rem 0">' + escapeHtml(r.text) + '</p>' +
+      '<div class="creator-line">— ' + escapeHtml(r.name || 'Verified buyer') + '</div></div>';
+  }).join('');
+}
+
 /* ---------------- Edge function caller ---------------- */
 async function callFunction(name, body) {
   const session = supabaseClient ? (await supabaseClient.auth.getSession()).data.session : null;
@@ -1081,6 +1105,7 @@ function renderProducts() {
   const rec = products.filter(p => !filtered.includes(p)).slice(0, 4);
   recommendedGrid.innerHTML = rec.length ? rec.map(p => card(p)).join('') : '<div class="empty-state">More recommendations will appear as the marketplace grows.</div>';
   renderTopCreators();
+  renderHomeReviews();
   updateCounters();
 }
 function filterProducts() { renderProducts(); }
@@ -1134,12 +1159,23 @@ function renderReviews(id) {
   const arr = reviewStore[String(id)] || [];
   return arr.length ? arr.slice().reverse().map(r => `<div class="review"><div class="review-head"><strong>${escapeHtml(r.name || 'Buyer')}</strong><span class="rating">${'★'.repeat(Number(r.rating))}${'☆'.repeat(5 - Number(r.rating))}</span></div><p style="color:var(--muted);font-size:.9rem;margin-top:3px">${escapeHtml(r.text)}</p></div>`).join('') : '<p style="color:var(--muted);font-size:.9rem">No reviews yet. Be the first to review.</p>';
 }
-function submitReview(id) {
+async function submitReview(id) {
   const text = document.getElementById('reviewText')?.value.trim();
   if (!reviewRating || !text) { toast('Please select a rating and write a review.'); return; }
-  const arr = reviewStore[String(id)] || [];
-  arr.push({ rating: reviewRating, text, name: currentUser?.email || 'Buyer', created_at: new Date().toISOString() });
-  reviewStore[String(id)] = arr; localStorage.setItem('cmReviews', JSON.stringify(reviewStore));
+  if (isSupabaseConnected && supabaseClient && currentUser) {
+    try {
+      const { error } = await supabaseClient.from('reviews').upsert(
+        { product_id: id, buyer_id: currentUser.id, rating: reviewRating, review_text: text },
+        { onConflict: 'product_id,buyer_id' });
+      if (error) throw error;
+      toast('✅ Review posted');
+    } catch (e) { toast('Could not post review: ' + (e.message || e)); return; }
+  } else {
+    const arr = reviewStore[String(id)] || [];
+    arr.push({ rating: reviewRating, text, name: currentUser?.email || 'Buyer', created_at: new Date().toISOString() });
+    reviewStore[String(id)] = arr; localStorage.setItem('cmReviews', JSON.stringify(reviewStore));
+  }
+  await loadProductsFromSupabase();
   openProductModal(id);
 }
 function applyCoupon() {
@@ -1719,6 +1755,22 @@ async function loadProductsFromSupabase() {
       (pf || []).forEach(r => { if (r.full_name) profilesMap[String(r.id)] = r.full_name; if (r.show_earnings === false) earningsHidden[String(r.id)] = true; });
     } catch (e) { console.warn('profiles skipped', e); }
     creatorStats = cStats;
+    // Reviews — real, from Supabase (public read).
+    latestReviews = [];
+    try {
+      const { data: rv } = await supabaseClient.from('reviews')
+        .select('product_id,buyer_id,rating,review_text,created_at')
+        .order('created_at', { ascending: false }).limit(200);
+      if (Array.isArray(rv)) {
+        const store = {};
+        rv.forEach(r => {
+          const k = String(r.product_id);
+          (store[k] = store[k] || []).push({ rating: r.rating, text: r.review_text, name: profilesMap[String(r.buyer_id)] || 'Verified buyer', created_at: r.created_at });
+        });
+        reviewStore = store;
+        latestReviews = rv.slice(0, 6).map(r => ({ rating: r.rating, text: r.review_text, name: profilesMap[String(r.buyer_id)] || 'Verified buyer' }));
+      }
+    } catch (e) { console.warn('reviews skipped', e); }
     if (Array.isArray(data)) {
       const live = data.map(p => ({
         ...p, creator: true,
