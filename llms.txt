@@ -1,0 +1,23 @@
+# CreatorMarket
+
+> CreatorMarket is a marketplace and creator-tools workspace for digital products. Creators list templates, UI kits, AI prompt packs, presets and eBooks and keep 90% of every sale (10% platform commission, free to list, no monthly fee). It also includes free AI creator tools — an AI prompt generator, a YouTube video analyzer and a social content studio. Buyers pay by UPI or card through a secure Cashfree checkout.
+
+## Key pages
+- [Marketplace (home)](https://creatormarket-nu.vercel.app/): Browse and buy digital products; list your own.
+- [Sell Digital Products & Templates](https://creatormarket-nu.vercel.app/sell-digital-products): How to sell digital products online on CreatorMarket.
+- [Pricing](https://creatormarket-nu.vercel.app/pricing): Free to list, 10% commission, creator-tool passes from free to ₹599 / 30 days.
+- [Why CreatorMarket](https://creatormarket-nu.vercel.app/why-creator-market): What makes it different for creators.
+- [Free AI Prompt Generator](https://creatormarket-nu.vercel.app/ai-prompt-generator): Turn an idea into a reusable AI prompt.
+- [AI Prompts for YouTube](https://creatormarket-nu.vercel.app/ai-prompts-for-youtube): Scripts, hooks, titles, descriptions and Shorts ideas.
+- [AI Image Prompt Generator](https://creatormarket-nu.vercel.app/ai-image-prompt-generator): Image prompts for Midjourney, DALL·E and Stable Diffusion.
+- [Digital Templates for Creators](https://creatormarket-nu.vercel.app/digital-templates-for-creators): Buy ready-made templates or sell your own.
+
+## Key facts
+- Platform commission: 10% per sale — creators keep 90%. Listing is free; no monthly fee.
+- Payments: UPI and card, via a secure Cashfree checkout. CreatorMarket does not store card details.
+- Creator tools: free tier includes 10 AI generations / month and the YouTube analyzer; Creator Pass is ₹299 / 30 days; Pro Pass is ₹599 / 30 days (one-time passes, not auto-renewing).
+- Trust: verified sales counts and earnings come from real orders (not screenshots); buyers can leave reviews; creators can hide their earnings.
+- Privacy: accounts use Supabase Auth with email and password; passwords are never stored by the site.
+
+## Contact
+- Website: https://creatormarket-nu.vercel.app/
