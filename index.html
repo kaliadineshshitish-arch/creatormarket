@@ -691,6 +691,7 @@ footer.site .flinks a:hover{color:var(--text)}
       <button class="btn" onclick="signUpUser()">Create Account</button>
       <button class="btn" id="logoutButton" style="display:none" onclick="signOutUser()">Logout</button>
     </div>
+    <div style="margin-top:10px"><button class="btn btn-sm" onclick="sendLoginLink('auth')">✉️ Email me a login link</button></div>
     <div id="privacySection" style="display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
       <div style="font-weight:600;margin-bottom:6px">🔒 Privacy</div>
       <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted)">
@@ -820,6 +821,19 @@ footer.site .flinks a:hover{color:var(--text)}
   <div class="modal"><button class="modal-close" onclick="closeModal('payModal')">&times;</button><div id="payContent"></div></div>
 </div>
 
+<!-- Guest checkout modal -->
+<div class="modal-overlay" id="guestModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('guestModal')">&times;</button>
+    <h2 class="section-title">⚡ Quick checkout</h2>
+    <p class="note" style="margin-top:0">No password needed. We'll create your CreatorMarket account with this email so you can access your purchase anytime.</p>
+    <div class="form-group"><label>Email</label><input id="guestEmail" type="email" class="form-control" placeholder="you@example.com"></div>
+    <div class="form-group"><label>Name (optional)</label><input id="guestName" type="text" class="form-control" placeholder="Your name"></div>
+    <button class="btn btn-primary btn-block" onclick="startGuestCheckout()">Continue to payment →</button>
+    <p class="note" style="margin-top:10px">Bought before? <a href="#" onclick="event.preventDefault();closeModal('guestModal');openAuthModal();">Log in</a> or <a href="#" onclick="event.preventDefault();sendLoginLink('guest')">email me a login link</a>.</p>
+  </div>
+</div>
+
 <!-- Payout Settings Modal -->
 <div class="modal-overlay" id="payoutModal">
   <div class="modal"><button class="modal-close" onclick="closeModal('payoutModal')">&times;</button><div id="payoutContent"></div></div>
@@ -941,6 +955,47 @@ async function signUpUser() {
 }
 async function signOutUser() { if (supabaseClient) await supabaseClient.auth.signOut(); currentUser = null; updateAuthButton(); const _ps = document.getElementById('privacySection'); if (_ps) _ps.style.display = 'none'; try { await loadProductsFromSupabase(); } catch (e) {} closeModal('authModal'); toast('Logged out.'); }
 function requireLogin() { if (currentUser) return true; openAuthModal(); setTimeout(() => setAuthMsg('Please log in or create an account to continue.', 'error'), 120); return false; }
+
+/* ---------- Guest checkout (account auto-created, no password) ---------- */
+let pendingCheckoutProduct = null;
+function openGuestCheckout() {
+  const e = document.getElementById('guestEmail'); if (e) e.value = '';
+  const n = document.getElementById('guestName'); if (n) n.value = '';
+  openModal('guestModal');
+}
+async function startGuestCheckout() {
+  const email = (document.getElementById('guestEmail')?.value || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Please enter a valid email.'); return; }
+  if (!isSupabaseConnected || !supabaseClient) { toast('Checkout is not configured.'); return; }
+  const name = (document.getElementById('guestName')?.value || '').trim();
+  const pass = 'cm-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + 'A1!';
+  try {
+    const { error } = await supabaseClient.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
+    if (error) {
+      if (/already|registered|exists/i.test(String(error.message || ''))) {
+        toast('This email already has an account — sending you a login link…');
+        await sendLoginLink('guest');
+        return;
+      }
+      throw error;
+    }
+    await refreshCurrentUser();
+    closeModal('guestModal');
+    const pid = pendingCheckoutProduct; pendingCheckoutProduct = null;
+    if (pid) { await startCheckout(pid); } else { toast('✅ Account ready — you can buy now.'); }
+  } catch (e) { toast('Could not start checkout: ' + (e.message || e)); }
+}
+async function sendLoginLink(source) {
+  const el = document.getElementById(source === 'auth' ? 'authEmail' : 'guestEmail');
+  const email = ((el && el.value) || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Enter your email first.'); return; }
+  if (!isSupabaseConnected || !supabaseClient) { toast('Not configured.'); return; }
+  try {
+    const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin } });
+    if (error) throw error;
+    toast('✅ Login link sent — check your email.');
+  } catch (e) { toast('Could not send link: ' + (e.message || e)); }
+}
 
 // ---------- Trust: verified sales stats (aggregate views, no buyer data) ----------
 function creatorTrustLine(p) {
@@ -1690,7 +1745,7 @@ async function startCheckout(productId) {
   const p = products.find(x => String(x.id) === String(productId));
   if (!p) return;
   await refreshCurrentUser();
-  if (!requireLogin()) return;
+  if (!currentUser) { pendingCheckoutProduct = productId; openGuestCheckout(); return; }
 
   if (Number(p.price) === 0) {
     // Free product — no payment needed.
