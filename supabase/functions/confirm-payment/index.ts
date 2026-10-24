@@ -13,9 +13,10 @@ Deno.serve(async (req) => {
   const supabaseUrl = env('SUPABASE_URL');
   const serviceKey = env('SUPABASE_SERVICE_ROLE_KEY');
   const anonKey = env('SUPABASE_ANON_KEY') || env('SUPABASE_PUBLISHABLE_KEY');
-  const ownerEmail = (env('OWNER_EMAIL') || 'kaliadineshshitish@gmail.com').toLowerCase();
+  // OWNER_EMAIL may be a comma-separated list of the site owner's login emails.
+  const ownerEmails = (env('OWNER_EMAIL') || 'kaliadineshshitish@gmail.com')
+    .toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
   if (!supabaseUrl || !serviceKey) return json({ confirmed: false, message: 'Supabase server environment variables are missing.' }, 500);
-  if (!ownerEmail) return json({ confirmed: false, message: 'OWNER_EMAIL is not configured on the server.' }, 503);
 
   try {
     const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
@@ -25,7 +26,7 @@ Deno.serve(async (req) => {
     });
     const { data: { user } } = await userClient.auth.getUser();
     if (!user?.id) return json({ confirmed: false, message: 'Login required.' }, 401);
-    if (String(user.email || '').toLowerCase() !== ownerEmail) return json({ confirmed: false, message: 'Not authorized.' }, 403);
+    if (!ownerEmails.includes(String(user.email || '').toLowerCase())) return json({ confirmed: false, message: 'Not authorized.' }, 403);
 
     const body = await req.json().catch(() => ({}));
     const orderId = Number(body.order_id || 0);
