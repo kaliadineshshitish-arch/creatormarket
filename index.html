@@ -1291,6 +1291,7 @@ function openProductModal(productId) {
     </div>
     <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin:1rem 0">
       <button class="icon-btn ${wished ? 'active' : ''}" onclick="toggleWishlist('${escapeHtml(p.id)}');openProductModal('${escapeHtml(p.id)}')">${wished ? '♥ Saved' : '♡ Save for later'}</button>
+      <button class="icon-btn" onclick="event.stopPropagation();shareProductUrl('${escapeHtml(p.id)}')" title="Share this product">🔗</button>
       <button class="btn btn-primary" onclick="startCheckout('${escapeHtml(p.id)}')">${buyLabel}</button>
     </div>
     ${downloadRow(p)}
@@ -1988,9 +1989,26 @@ if (isSupabaseConnected && supabaseClient) {
     setTimeout(() => loadProductsFromSupabase(), 0);
   });
 }
+/* Deep link: /?p=<product-id> opens that product (shareable product links) */
+function openProductFromUrl() {
+  try {
+    const u = new URLSearchParams(location.search);
+    let id = u.get('p') || '';
+    if (!id && location.hash.indexOf('#p=') === 0) id = location.hash.slice(3);
+    if (!id) return;
+    if ((products || []).some(x => String(x.id) === String(id))) openProductModal(id);
+  } catch (e) {}
+}
+function shareProductUrl(id) {
+  const url = location.origin + '/?p=' + encodeURIComponent(id);
+  if (navigator.share) { navigator.share({ title: 'CreatorMarket', url }).catch(() => {}); return; }
+  if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast('✅ Product link copied.'));
+  else toast(url);
+}
+
 renderProducts();
 applyPlanUI();
-refreshCurrentUser().then(() => loadProductsFromSupabase());
+refreshCurrentUser().then(() => loadProductsFromSupabase()).then(() => openProductFromUrl());
 document.getElementById('url').addEventListener('keydown', e => { if (e.key === 'Enter') analyze(); });
 window.addEventListener('storage', () => {
   try { wishlist = JSON.parse(localStorage.getItem('cmWishlist') || '[]'); notifications = JSON.parse(localStorage.getItem('cmNotifications') || '[]'); renderProducts(); } catch (e) {}
