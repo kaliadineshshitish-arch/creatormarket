@@ -240,6 +240,9 @@ textarea.form-control{resize:vertical;min-height:90px}
 .review-head{display:flex;justify-content:space-between;gap:8px}
 .rating-stars button{border:0;background:none;color:#454c60;font-size:20px;padding:0 2px;cursor:pointer}
 .rating-stars button.on{color:#fbbf24}
+.card-thumb{width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:12px;margin-bottom:12px;background:linear-gradient(120deg,#1a1d29,#0f1118);display:flex;align-items:center;justify-content:center;font-size:2.4rem}
+.card-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.rating .stars{letter-spacing:1px;color:#fbbf24}
 .notice{padding:.85rem;border:1px solid var(--border);border-radius:12px;background:var(--bg2);color:var(--muted);font-size:.85rem;line-height:1.55}
 .notice.success{border-color:#10b98155;background:var(--good-soft)}
 .notice.warn{border-color:#f59e0b55;background:var(--warn-soft)}
@@ -720,6 +723,7 @@ footer.site .flinks a:hover{color:var(--text)}
       </div>
       <div class="form-group"><label>Price (₹ — put 0 for Free)</label><input type="number" step="1" class="form-control" id="sellPrice" required placeholder="999"></div>
       <div class="form-group"><label>Description</label><textarea class="form-control" id="sellDesc" required placeholder="Describe what buyers get..."></textarea></div>
+      <div class="form-group"><label>Product photo (optional — shown on your product card)</label><input type="file" accept="image/*" class="form-control" id="sellImage" onchange="uploadSellImage()"><small id="sellImageStatus" style="color:var(--muted);display:block;margin-top:6px"></small></div>
       <div class="form-group"><label>Upload product file (optional — delivered securely to buyers only)</label><input type="file" class="form-control" id="sellFile" onchange="uploadSellFile()"><small id="sellFileStatus" style="color:var(--muted);display:block;margin-top:6px"></small></div>
       <div class="form-group"><label>Product / Delivery Link (optional)</label><input type="url" class="form-control" id="sellLink" placeholder="https://drive.google.com/... or your product page"></div>
       <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px">List Product</button>
@@ -1094,6 +1098,7 @@ function renderProducts() {
     const avg = averageRating(p);
     const promo = promotions.find(pr => String(pr.product_id) === String(p.id));
     return `<article class="product-card" onclick="openProductModal('${escapeHtml(p.id)}')">
+      ${cardThumb(p)}
       <div class="card-header">
         <span class="card-category">${escapeHtml(p.category || 'Uncategorized')}</span>
         <div>
@@ -1106,7 +1111,7 @@ function renderProducts() {
         <h3 class="card-title">${escapeHtml(p.title)}</h3>
         <p class="card-desc">${escapeHtml(p.description)}</p>
         <div class="creator-line">by <button onclick="event.stopPropagation();openCreatorModal('${escapeHtml(p.creator_name || 'Creator')}')">${escapeHtml(p.creator_name || 'Creator')}</button></div>
-        <div style="margin-top:7px" class="rating">★ ${avg ? avg.toFixed(1) : 'New'} ${reviewStore[String(p.id)]?.length ? '(' + reviewStore[String(p.id)].length + ')' : ''}${Number(p.sales_count) > 0 ? ' · <span style="color:var(--good)">✓ ' + Number(p.sales_count) + ' sold' + (Number(p.gross) > 0 && !earningsHidden[String(p.creator_id)] ? ' · ' + money(Number(p.gross)) : '') + '</span>' : ''}</div>
+        <div style="margin-top:7px" class="rating">${starsOnly(p)}${Number(p.sales_count) > 0 ? ' · <span style="color:var(--good)">✓ ' + Number(p.sales_count) + ' sold' + (Number(p.gross) > 0 && !earningsHidden[String(p.creator_id)] ? ' · ' + money(Number(p.gross)) : '') + '</span>' : ''}</div>
         <div class="card-footer">
           <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
           <div class="product-actions">
@@ -1221,7 +1226,8 @@ function openProductModal(productId) {
       <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
     </div>
     <h2 class="section-title" style="margin-top:.7rem">${escapeHtml(p.title)}</h2>
-    <div class="rating">★ ${avg ? avg.toFixed(1) : 'New'} · ${reviewStore[String(p.id)]?.length || 0} reviews</div>
+    <div class="rating">${starsOnly(p)} · ${reviewStore[String(p.id)]?.length || 0} reviews</div>
+    ${p.image_url ? '<div class="card-thumb" style="aspect-ratio:16/9;margin:12px 0"><img src="' + escapeHtml(p.image_url) + '" alt="' + escapeHtml(p.title || 'Product') + '"></div>' : ''}
     <p style="margin:1rem 0;color:var(--muted);line-height:1.7">${escapeHtml(p.description)}</p>
     <div class="profile-card">
       <div class="avatar">${escapeHtml((p.creator_name || 'C').charAt(0).toUpperCase())}</div>
@@ -1252,7 +1258,7 @@ function openProductModal(productId) {
 }
 
 /* ---------------- Sell / Dashboard / Promotion ---------------- */
-function openSellModal() { uploadedFilePath = null; const _fs = document.getElementById('sellFileStatus'); if (_fs) _fs.textContent = ''; const _fi = document.getElementById('sellFile'); if (_fi) _fi.value = ''; refreshCurrentUser().then(() => { if (!requireLogin()) return; openModal('sellModal'); }); }
+function openSellModal() { uploadedFilePath = null; uploadedImageUrl = null; const _fs = document.getElementById('sellFileStatus'); if (_fs) _fs.textContent = ''; const _fi = document.getElementById('sellFile'); if (_fi) _fi.value = ''; const _is = document.getElementById('sellImageStatus'); if (_is) _is.textContent = ''; const _ii = document.getElementById('sellImage'); if (_ii) _ii.value = ''; refreshCurrentUser().then(() => { if (!requireLogin()) return; openModal('sellModal'); }); }
 
 async function handleSellProduct(e) {
   e.preventDefault();
@@ -1265,11 +1271,11 @@ async function handleSellProduct(e) {
   if (link && !/^https?:\/\//i.test(link)) { toast('Please enter a valid link starting with https://'); return; }
 
   await refreshCurrentUser();
-  const newProduct = { id: 'custom-' + Date.now(), title, category, price, description, link, product_url: link, file_path: uploadedFilePath || null, creator: true, creator_name: currentUser?.email || 'Creator', created_at: new Date().toISOString() };
+  const newProduct = { id: 'custom-' + Date.now(), title, category, price, description, link, product_url: link, file_path: uploadedFilePath || null, image_url: uploadedImageUrl || null, creator: true, creator_name: currentUser?.email || 'Creator', created_at: new Date().toISOString() };
   let saved = false;
   if (isSupabaseConnected && supabaseClient && currentUser) {
     try {
-      const payload = { creator_id: currentUser.id, title, description, price, product_url: link || null, file_path: uploadedFilePath || null, is_published: true, created_at: newProduct.created_at };
+      const payload = { creator_id: currentUser.id, title, description, price, product_url: link || null, file_path: uploadedFilePath || null, image_url: uploadedImageUrl || null, is_published: true, created_at: newProduct.created_at };
       const { data, error } = await supabaseClient.from('products').insert([payload]).select().single();
       if (error) throw error;
       if (data) { Object.assign(newProduct, data, { creator: true, creator_name: currentUser.email || 'Creator', link: data.product_url || link, category }); saved = true; }
@@ -1491,6 +1497,42 @@ async function payViaCashfree() {
   const onPaid = window._payOnPaid;
   const res = await beginCashfreeOrder(window._payPayload || {});
   if (res && res.paid) { closeModal('payModal'); if (onPaid) await onPaid('cashfree'); }
+}
+
+/* ---------- Product image upload (public bucket) ---------- */
+let uploadedImageUrl = null;
+async function uploadSellImage() {
+  const el = document.getElementById('sellImage');
+  const st = document.getElementById('sellImageStatus');
+  const f = el && el.files && el.files[0];
+  if (!f) return;
+  await refreshCurrentUser();
+  if (!isSupabaseConnected || !supabaseClient || !currentUser) { if (st) st.textContent = 'Please log in to upload a photo.'; return; }
+  if (!/^image\//.test(f.type)) { if (st) st.textContent = 'Please choose an image file (JPG/PNG/WebP).'; return; }
+  if (f.size > 5 * 1024 * 1024) { if (st) st.textContent = 'Image too large — max 5 MB.'; return; }
+  if (st) st.textContent = '⏳ Uploading…';
+  try {
+    const safe = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = currentUser.id + '/' + Date.now() + '-' + safe;
+    const { error } = await supabaseClient.storage.from('product-images').upload(path, f, { upsert: false, contentType: f.type });
+    if (error) throw error;
+    const { data } = supabaseClient.storage.from('product-images').getPublicUrl(path);
+    uploadedImageUrl = data.publicUrl;
+    if (st) st.textContent = '✅ Photo added.';
+  } catch (e) { uploadedImageUrl = null; if (st) st.textContent = '❌ Upload failed: ' + (e.message || e); }
+}
+function starsOnly(p) {
+  const n = (reviewStore[String(p.id)] || []).length;
+  const avg = averageRating(p);
+  if (!n) return '<span class="stars">☆☆☆☆☆</span> <span style="color:var(--muted)">New</span>';
+  const full = Math.max(0, Math.min(5, Math.round(avg)));
+  return '<span class="stars">' + '★'.repeat(full) + '☆'.repeat(5 - full) + '</span> <b>' + avg.toFixed(1) + '</b> <span style="color:var(--muted)">(' + n + ')</span>';
+}
+function cardThumb(p) {
+  const img = p.image_url || p.image || '';
+  if (img) return '<div class="card-thumb"><img src="' + escapeHtml(img) + '" alt="' + escapeHtml(p.title || 'Product') + '" loading="lazy"></div>';
+  const icons = { 'AI Prompts': '🤖', 'Templates': '🎨', 'Finance': '💰', 'eBooks': '📚', 'Creator Tools': '🛠️' };
+  return '<div class="card-thumb">' + (icons[p.category] || '🛍️') + '</div>';
 }
 
 /* ---------- Product file upload (Supabase Storage, private) ---------- */
