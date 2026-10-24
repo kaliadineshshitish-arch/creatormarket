@@ -720,6 +720,7 @@ footer.site .flinks a:hover{color:var(--text)}
       </div>
       <div class="form-group"><label>Price (₹ — put 0 for Free)</label><input type="number" step="1" class="form-control" id="sellPrice" required placeholder="999"></div>
       <div class="form-group"><label>Description</label><textarea class="form-control" id="sellDesc" required placeholder="Describe what buyers get..."></textarea></div>
+      <div class="form-group"><label>Upload product file (optional — delivered securely to buyers only)</label><input type="file" class="form-control" id="sellFile" onchange="uploadSellFile()"><small id="sellFileStatus" style="color:var(--muted);display:block;margin-top:6px"></small></div>
       <div class="form-group"><label>Product / Delivery Link (optional)</label><input type="url" class="form-control" id="sellLink" placeholder="https://drive.google.com/... or your product page"></div>
       <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px">List Product</button>
     </form>
@@ -1231,6 +1232,7 @@ function openProductModal(productId) {
       <button class="icon-btn ${wished ? 'active' : ''}" onclick="toggleWishlist('${escapeHtml(p.id)}');openProductModal('${escapeHtml(p.id)}')">${wished ? '♥ Saved' : '♡ Save for later'}</button>
       <button class="btn btn-primary" onclick="startCheckout('${escapeHtml(p.id)}')">${buyLabel}</button>
     </div>
+    ${downloadRow(p)}
     <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem">
       <h3 style="margin-bottom:.5rem">⭐ Reviews &amp; Ratings</h3>
       <div id="reviewList">${renderReviews(p.id)}</div>
@@ -1250,7 +1252,7 @@ function openProductModal(productId) {
 }
 
 /* ---------------- Sell / Dashboard / Promotion ---------------- */
-function openSellModal() { refreshCurrentUser().then(() => { if (!requireLogin()) return; openModal('sellModal'); }); }
+function openSellModal() { uploadedFilePath = null; const _fs = document.getElementById('sellFileStatus'); if (_fs) _fs.textContent = ''; const _fi = document.getElementById('sellFile'); if (_fi) _fi.value = ''; refreshCurrentUser().then(() => { if (!requireLogin()) return; openModal('sellModal'); }); }
 
 async function handleSellProduct(e) {
   e.preventDefault();
@@ -1263,11 +1265,11 @@ async function handleSellProduct(e) {
   if (link && !/^https?:\/\//i.test(link)) { toast('Please enter a valid link starting with https://'); return; }
 
   await refreshCurrentUser();
-  const newProduct = { id: 'custom-' + Date.now(), title, category, price, description, link, product_url: link, creator: true, creator_name: currentUser?.email || 'Creator', created_at: new Date().toISOString() };
+  const newProduct = { id: 'custom-' + Date.now(), title, category, price, description, link, product_url: link, file_path: uploadedFilePath || null, creator: true, creator_name: currentUser?.email || 'Creator', created_at: new Date().toISOString() };
   let saved = false;
   if (isSupabaseConnected && supabaseClient && currentUser) {
     try {
-      const payload = { creator_id: currentUser.id, title, description, price, product_url: link || null, is_published: true, created_at: newProduct.created_at };
+      const payload = { creator_id: currentUser.id, title, description, price, product_url: link || null, file_path: uploadedFilePath || null, is_published: true, created_at: newProduct.created_at };
       const { data, error } = await supabaseClient.from('products').insert([payload]).select().single();
       if (error) throw error;
       if (data) { Object.assign(newProduct, data, { creator: true, creator_name: currentUser.email || 'Creator', link: data.product_url || link, category }); saved = true; }
@@ -1353,14 +1355,14 @@ async function openLibraryModal() {
     try {
       const { data, error } = await supabaseClient.from('orders').select('id,product_id,amount,status,payment_id,created_at,kind,commission_amount,creator_payout').eq('buyer_id', currentUser.id).order('created_at', { ascending: false });
       if (!error && Array.isArray(data)) {
-        const live = data.map(o => { const prod = products.find(p => String(p.id) === String(o.product_id)); return { ...o, title: prod?.title || (o.kind === 'plan' ? 'Creator plan pass' : 'Purchase'), link: prod?.link || prod?.product_url || '' }; });
+        const live = data.map(o => { const prod = products.find(p => String(p.id) === String(o.product_id)); return { ...o, title: prod?.title || (o.kind === 'plan' ? 'Creator plan pass' : 'Purchase'), link: prod?.link || prod?.product_url || '', file_path: prod?.file_path || '' }; });
         orders = live.length ? live : orders;
         localStorage.setItem('cmOrders', JSON.stringify(orders));
       }
     } catch (err) { console.warn('Orders load skipped:', err); }
   }
   document.getElementById('libraryContent').innerHTML = orders.length
-    ? orders.map(o => `<div class="dashboard-item"><strong>${escapeHtml(o.title)}</strong><div class="creator-line">${escapeHtml(o.status || 'Pending')} · ${escapeHtml(o.created_at || o.date || '')}${o.amount != null ? ' · ' + money(o.amount) : ''}</div>${o.commission_amount != null ? `<div class="creator-line">Platform fee ${money(o.commission_amount)} · Creator ${money(o.creator_payout)}</div>` : ''}${o.link ? `<a class="btn btn-sm" style="margin-top:8px" href="${escapeHtml(o.link)}" target="_blank" rel="noopener">Open Product</a>` : ''}</div>`).join('')
+    ? orders.map(o => `<div class="dashboard-item"><strong>${escapeHtml(o.title)}</strong><div class="creator-line">${escapeHtml(o.status || 'Pending')} · ${escapeHtml(o.created_at || o.date || '')}${o.amount != null ? ' · ' + money(o.amount) : ''}</div>${o.commission_amount != null ? `<div class="creator-line">Platform fee ${money(o.commission_amount)} · Creator ${money(o.creator_payout)}</div>` : ''}${o.link ? `<a class="btn btn-sm" style="margin-top:8px" href="${escapeHtml(o.link)}" target="_blank" rel="noopener">Open Product</a>` : ''}${o.file_path ? `<button class="btn btn-sm" style="margin-top:8px;margin-left:6px" onclick="downloadPurchasedFile('${escapeHtml(o.file_path)}')">⬇ Download</button>` : ''}</div>`).join('')
     : '<div class="empty-state">No purchases yet.</div>';
   openModal('libraryModal');
 }
@@ -1491,6 +1493,43 @@ async function payViaCashfree() {
   if (res && res.paid) { closeModal('payModal'); if (onPaid) await onPaid('cashfree'); }
 }
 
+/* ---------- Product file upload (Supabase Storage, private) ---------- */
+let uploadedFilePath = null;
+async function uploadSellFile() {
+  const el = document.getElementById('sellFile');
+  const st = document.getElementById('sellFileStatus');
+  const f = el && el.files && el.files[0];
+  if (!f) return;
+  await refreshCurrentUser();
+  if (!isSupabaseConnected || !supabaseClient || !currentUser) { if (st) st.textContent = 'Please log in to upload a file.'; return; }
+  if (f.size > 50 * 1024 * 1024) { if (st) st.textContent = 'File too large — max 50 MB.'; return; }
+  if (st) st.textContent = '⏳ Uploading…';
+  try {
+    const safe = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = currentUser.id + '/' + Date.now() + '-' + safe;
+    const { error } = await supabaseClient.storage.from('product-files').upload(path, f, { upsert: false });
+    if (error) throw error;
+    uploadedFilePath = path;
+    if (st) st.textContent = '✅ Uploaded: ' + f.name + ' (buyers only)';;
+  } catch (e) { uploadedFilePath = null; if (st) st.textContent = '❌ Upload failed: ' + (e.message || e); }
+}
+function downloadRow(p) {
+  if (!p || !p.file_path) return '';
+  let ords = [];
+  try { ords = JSON.parse(localStorage.getItem('cmOrders') || '[]'); } catch (e) {}
+  const bought = !!p.is_owner || ords.some(o => String(o.product_id) === String(p.id) && String(o.status || '').toLowerCase() === 'paid');
+  if (!bought) return '';
+  return '<button class="btn btn-block" style="margin-bottom:10px" onclick="downloadPurchasedFile(\'' + escapeHtml(p.file_path) + '\')">⬇ Download your file</button>';
+}
+async function downloadPurchasedFile(path) {
+  if (!supabaseClient) { toast('Not available.'); return; }
+  try {
+    const { data, error } = await supabaseClient.storage.from('product-files').createSignedUrl(path, 3600);
+    if (error) throw error;
+    window.open(data.signedUrl, '_blank');
+  } catch (e) { toast('You need to purchase this product to download the file.'); }
+}
+
 /* ---------- Creator payouts & platform earnings ---------- */
 function inr(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
 async function openPayoutModal() {
@@ -1502,49 +1541,85 @@ async function openPayoutModal() {
   if (isSupabaseConnected && supabaseClient) {
     try { const { data } = await supabaseClient.from('creator_payouts').select('*').eq('creator_id', currentUser.id).maybeSingle(); p = data; } catch (e) {}
   }
+  const m = (p && p.method) ? p.method : 'upi';
   box.innerHTML = `
     <h2 class="section-title">Payout details</h2>
-    <p class="note" style="margin-top:0">Aapki creator sales ke paise yahan bheje jayenge. (Cashfree Easy Split ke liye zaroori.)</p>
-    <div class="form-group"><label>Payout method</label>
-      <select class="form-control" id="poMethod" onchange="togglePayoutFields()">
-        <option value="upi" ${p?.method !== 'bank' ? 'selected' : ''}>UPI</option>
-        <option value="bank" ${p?.method === 'bank' ? 'selected' : ''}>Bank transfer</option>
+    <p class="note" style="margin-top:0">Aapki creator sales ke paise yahan bheje jayenge. <b>India</b>: UPI ya Bank (IFSC). <b>International</b>: PayPal, Payoneer, Wise ya International bank transfer (SWIFT/IBAN).</p>
+    <div class="form-group"><label>Country</label>
+      <select class="form-control" id="poCountry">
+        <option value="IN" ${p?.country !== 'INTL' ? 'selected' : ''}>India</option>
+        <option value="INTL" ${p?.country === 'INTL' ? 'selected' : ''}>Outside India (international)</option>
       </select>
     </div>
-    <div id="poUpi" class="form-group"><label>UPI ID (VPA)</label><input class="form-control" id="poUpiVpa" value="${escapeHtml(p?.upi_vpa || '')}" placeholder="name@okhdfcbank"></div>
+    <div class="form-group"><label>Payout method</label>
+      <select class="form-control" id="poMethod" onchange="togglePayoutFields()">
+        <option value="upi" ${m === 'upi' ? 'selected' : ''}>UPI (India)</option>
+        <option value="bank" ${m === 'bank' ? 'selected' : ''}>Bank transfer — India (IFSC)</option>
+        <option value="paypal" ${m === 'paypal' ? 'selected' : ''}>PayPal (international)</option>
+        <option value="payoneer" ${m === 'payoneer' ? 'selected' : ''}>Payoneer (international)</option>
+        <option value="wise" ${m === 'wise' ? 'selected' : ''}>Wise (international)</option>
+        <option value="bank_intl" ${m === 'bank_intl' ? 'selected' : ''}>Bank transfer — international (SWIFT / IBAN)</option>
+      </select>
+    </div>
+    <div id="poUpi" style="display:none"><div class="form-group"><label>UPI ID (VPA)</label><input class="form-control" id="poUpiVpa" value="${escapeHtml(p?.upi_vpa || '')}" placeholder="name@okhdfcbank"></div></div>
     <div id="poBank" style="display:none">
       <div class="form-group"><label>Account holder name</label><input class="form-control" id="poAccName" value="${escapeHtml(p?.account_name || '')}"></div>
       <div class="form-group"><label>Account number</label><input class="form-control" id="poAccNo" value="${escapeHtml(p?.account_number || '')}"></div>
       <div class="form-group"><label>IFSC</label><input class="form-control" id="poIfsc" value="${escapeHtml(p?.ifsc || '')}"></div>
     </div>
-    <div class="form-group"><label>Phone</label><input class="form-control" id="poPhone" value="${escapeHtml(p?.phone || '')}" placeholder="10-digit mobile"></div>
+    <div id="poPaypal" style="display:none"><div class="form-group"><label>PayPal email</label><input class="form-control" id="poPaypalEmail" value="${escapeHtml(p?.paypal_email || '')}" placeholder="you@example.com"></div></div>
+    <div id="poPayoneer" style="display:none"><div class="form-group"><label>Payoneer email</label><input class="form-control" id="poPayoneerEmail" value="${escapeHtml(p?.payoneer_email || '')}" placeholder="you@example.com"></div></div>
+    <div id="poWise" style="display:none"><div class="form-group"><label>Wise email</label><input class="form-control" id="poWiseEmail" value="${escapeHtml(p?.wise_email || '')}" placeholder="you@example.com"></div></div>
+    <div id="poBankIntl" style="display:none">
+      <div class="form-group"><label>Account holder name</label><input class="form-control" id="poIntlName" value="${escapeHtml(p?.account_name || '')}"></div>
+      <div class="form-group"><label>Bank name</label><input class="form-control" id="poBankName" value="${escapeHtml(p?.bank_name || '')}"></div>
+      <div class="form-group"><label>Account number / IBAN</label><input class="form-control" id="poIban" value="${escapeHtml(p?.bank_iban || p?.account_number || '')}"></div>
+      <div class="form-group"><label>SWIFT / BIC code</label><input class="form-control" id="poSwift" value="${escapeHtml(p?.bank_swift || '')}" placeholder="e.g. HDFCINBB"></div>
+      <div class="form-group"><label>Bank country</label><input class="form-control" id="poBankCountry" value="${escapeHtml(p?.bank_country || '')}" placeholder="e.g. United States"></div>
+    </div>
+    <div class="form-group"><label>Phone (optional)</label><input class="form-control" id="poPhone" value="${escapeHtml(p?.phone || '')}"></div>
     <button class="btn btn-primary btn-block" onclick="savePayout()">Save payout details</button>
-    ${p?.cashfree_vendor_id ? '<div class="notice success" style="margin-top:10px">✅ Linked to Cashfree vendor: ' + escapeHtml(p.cashfree_vendor_id) + '</div>' : '<div class="notice" style="margin-top:10px">Cashfree vendor linking happens once Easy Split is activated on the platform account.</div>'}`;
+    ${p?.cashfree_vendor_id ? '<div class="notice success" style="margin-top:10px">✅ Linked to Cashfree vendor: ' + escapeHtml(p.cashfree_vendor_id) + '</div>' : '<div class="notice" style="margin-top:10px">India payouts settle via Cashfree Easy Split once activated. International payouts settle via your chosen provider (PayPal / Payoneer / Wise / bank).</div>'}`;
   togglePayoutFields();
   openModal('payoutModal');
 }
 function togglePayoutFields() {
-  const m = document.getElementById('poMethod')?.value;
-  const upi = document.getElementById('poUpi'), bank = document.getElementById('poBank');
-  if (upi) upi.style.display = m === 'upi' ? 'block' : 'none';
-  if (bank) bank.style.display = m === 'bank' ? 'block' : 'none';
+  const m = document.getElementById('poMethod')?.value || 'upi';
+  const show = (id, on) => { const el = document.getElementById(id); if (el) el.style.display = on ? 'block' : 'none'; };
+  show('poUpi', m === 'upi');
+  show('poBank', m === 'bank');
+  show('poPaypal', m === 'paypal');
+  show('poPayoneer', m === 'payoneer');
+  show('poWise', m === 'wise');
+  show('poBankIntl', m === 'bank_intl');
 }
 async function savePayout() {
   await refreshCurrentUser();
   if (!currentUser) { toast('Please log in first.'); return; }
   if (!isSupabaseConnected) { toast('Supabase is not configured.'); return; }
+  const g = id => (document.getElementById(id)?.value || '').trim();
   const method = document.getElementById('poMethod').value;
   const row = {
     creator_id: currentUser.id, method,
-    upi_vpa: method === 'upi' ? document.getElementById('poUpiVpa').value.trim() : null,
-    account_name: method === 'bank' ? document.getElementById('poAccName').value.trim() : null,
-    account_number: method === 'bank' ? document.getElementById('poAccNo').value.trim() : null,
-    ifsc: method === 'bank' ? document.getElementById('poIfsc').value.trim() : null,
-    phone: document.getElementById('poPhone').value.trim(),
+    country: g('poCountry') || 'IN',
+    upi_vpa: method === 'upi' ? g('poUpiVpa') : null,
+    account_name: method === 'bank' ? g('poAccName') : (method === 'bank_intl' ? g('poIntlName') : null),
+    account_number: method === 'bank' ? g('poAccNo') : (method === 'bank_intl' ? g('poIban') : null),
+    ifsc: method === 'bank' ? g('poIfsc') : null,
+    paypal_email: method === 'paypal' ? g('poPaypalEmail') : null,
+    payoneer_email: method === 'payoneer' ? g('poPayoneerEmail') : null,
+    wise_email: method === 'wise' ? g('poWiseEmail') : null,
+    bank_name: method === 'bank_intl' ? g('poBankName') : null,
+    bank_swift: method === 'bank_intl' ? g('poSwift') : null,
+    bank_iban: method === 'bank_intl' ? g('poIban') : null,
+    bank_country: method === 'bank_intl' ? g('poBankCountry') : null,
+    phone: g('poPhone') || null,
     updated_at: new Date().toISOString()
   };
   if (method === 'upi' && !row.upi_vpa) { toast('Enter your UPI ID.'); return; }
   if (method === 'bank' && (!row.account_number || !row.ifsc)) { toast('Enter account number and IFSC.'); return; }
+  if ((method === 'paypal' || method === 'payoneer' || method === 'wise') && !row[method + '_email']) { toast('Enter your ' + method + ' email.'); return; }
+  if (method === 'bank_intl' && (!row.account_number || !row.bank_swift)) { toast('Enter your account number / IBAN and SWIFT code.'); return; }
   try {
     const { error } = await supabaseClient.from('creator_payouts').upsert([row], { onConflict: 'creator_id' });
     if (error) throw error;
@@ -1757,7 +1832,7 @@ async function loadProductsFromSupabase() {
   try {
     await refreshCurrentUser();
     const { data, error } = await supabaseClient.from('products')
-      .select('id,creator_id,category,title,description,price,product_url,image_url,is_published,created_at')
+      .select('id,creator_id,category,title,description,price,product_url,image_url,file_path,is_published,created_at')
       .eq('is_published', true).order('created_at', { ascending: false });
     if (error) throw error;
     // Verified sales stats (aggregate views — counts only, no buyer data) + public creator names.
