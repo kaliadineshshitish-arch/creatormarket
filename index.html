@@ -1166,7 +1166,7 @@ function renderProducts() {
         <h3 class="card-title">${escapeHtml(p.title)}</h3>
         <p class="card-desc">${escapeHtml(p.description)}</p>
         <div class="creator-line">by <button onclick="event.stopPropagation();openCreatorModal('${escapeHtml(p.creator_name || 'Creator')}')">${escapeHtml(p.creator_name || 'Creator')}</button></div>
-        <div style="margin-top:7px" class="rating">${starsOnly(p)}${Number(p.sales_count) > 0 ? ' · <span style="color:var(--good)">✓ ' + Number(p.sales_count) + ' sold' + (Number(p.gross) > 0 && !earningsHidden[String(p.creator_id)] ? ' · ' + money(Number(p.gross)) : '') + '</span>' : ''}</div>
+        <div style="margin-top:7px" class="rating">${starsOnly(p)}${' · <span style="color:var(--good)">🛒 ' + Number(p.sales_count || 0) + ' sold' + (Number(p.gross) > 0 && !earningsHidden[String(p.creator_id)] ? ' · ' + money(Number(p.gross)) : '') + '</span>'}</div>
         <div class="card-footer">
           <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
           <div class="product-actions">
@@ -1472,20 +1472,26 @@ function upiLink(amount, note) {
 }
 
 async function recordOrder(o) {
+  const isUpi = o.method === 'upi';
   const orders = JSON.parse(localStorage.getItem('cmOrders') || '[]');
-  orders.unshift({ id: (o.method === 'cashfree' ? 'cf-' : 'upi-') + Date.now(), product_id: o.product_id || null, title: o.title, status: 'Paid', date: new Date().toLocaleString(), link: o.link || '' });
+  orders.unshift({ id: (o.method === 'cashfree' ? 'cf-' : 'upi-') + Date.now(), product_id: o.product_id || null, title: o.title, status: isUpi ? 'Pending' : 'Paid', date: new Date().toLocaleString(), link: o.link || '' });
   localStorage.setItem('cmOrders', JSON.stringify(orders));
-  // UPI is self-declared (no gateway verification): the order is stored as paid,
-  // with a marker so the owner can still reconcile it against their bank/UPI app.
-  if (o.method === 'upi' && isSupabaseConnected && supabaseClient && currentUser) {
+  // UPI is self-declared (no gateway verification). The order is stored as PENDING
+  // so the file stays locked until the seller confirms the payment was received.
+  if (isUpi && isSupabaseConnected && supabaseClient && currentUser) {
     try {
       await supabaseClient.from('orders').insert([{
         buyer_id: currentUser.id, kind: o.kind, product_id: o.product_id || null,
         plan: o.plan || null, promo_days: o.promo_days || null, amount: Number(o.amount) || 0,
-        status: 'paid', payment_id: 'UPI — self-declared'
+        status: 'pending', payment_id: 'UPI — awaiting confirmation'
       }]);
     } catch (e) { console.warn('UPI order record failed:', e); }
   }
+}
+async function confirmPayment(orderId) {
+  const r = await callFunction('confirm-payment', { order_id: orderId });
+  if (r.ok && r.data && r.data.confirmed) { toast('✅ Payment confirmed — the buyer can download now.'); openEarnings(); }
+  else toast((r.data && r.data.message) || 'Could not confirm payment.');
 }
 function activatePromotion(productId, days) {
   const expiresAt = new Date(); expiresAt.setDate(expiresAt.getDate() + days);
@@ -1506,6 +1512,7 @@ function openPayModal(opts) {
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <span style="color:var(--muted)">Amount to pay</span><span class="price">${money(opts.amount)}</span>
     </div>
+    <div class="form-group"><label>Phone (for the payment receipt — optional)</label><input id="payPhone" class="form-control" inputmode="numeric" placeholder="10-digit mobile" value="${escapeHtml(window._buyerPhone || '')}"></div>
     <div style="display:grid;gap:10px">
       <button class="btn btn-primary btn-block" ${upiReady ? '' : 'disabled'} onclick="showUpiView(${Number(opts.amount)})">📱 Pay by UPI (QR / app)</button>
       <button class="btn btn-block" ${cfReady ? '' : 'disabled'} onclick="payViaCashfree()">💳 Pay online — Cashfree (UPI / Card / Netbanking)${cfReady ? '' : ' (not set up yet)'}</button>
@@ -1552,7 +1559,10 @@ async function upiPaid() {
 }
 async function payViaCashfree() {
   const onPaid = window._payOnPaid;
-  const res = await beginCashfreeOrder(window._payPayload || {});
+  const phone = (document.getElementById('payPhone')?.value || '').trim();
+  window._buyerPhone = phone;
+  const payload = Object.assign({}, window._payPayload || {}, phone ? { customer_phone: phone } : {});
+  const res = await beginCashfreeOrder(payload);
   if (res && res.paid) { closeModal('payModal'); if (onPaid) await onPaid('cashfree'); }
 }
 
@@ -1751,6 +1761,11 @@ async function openEarnings() {
     </div>
     <div class="notice">Paid orders: ${Number(d.paid_orders || 0)} · Product sales: ${Number(d.product_sales || 0)}. Commission is ${CONFIG.COMMISSION_PERCENT}% per creator sale.</div>
     <div class="notice" style="margin-top:10px">Auto-settlement to your account and to each creator needs Cashfree Easy Split activated. Until then this is a tracking report.</div>`;
+  const pend = Array.isArray(d.pending_orders) ? d.pending_orders : [];
+  box.innerHTML += `
+    <h3 style="margin:1.2rem 0 .5rem">⏳ Pending UPI payments (${pend.length})</h3>
+    ${pend.length ? pend.map(o => `<div class="dashboard-item"><strong>${escapeHtml(o.title || ('Order #' + o.id))}</strong><div class="creator-line">${money(o.amount)}${o.buyer_email ? ' · ' + escapeHtml(o.buyer_email) : ''}${o.created_at ? ' · ' + escapeHtml(String(o.created_at).slice(0, 16).replace('T', ' ')) : ''}</div><button class="btn btn-sm" style="margin-top:8px" onclick="confirmPayment(${Number(o.id)})">✅ Confirm payment received</button></div>`).join('') : '<div class="empty-state">No pending UPI payments. 🎉</div>'}
+    <div class="note" style="margin-top:8px">UPI payments have no gateway verification — check your bank/UPI app, then confirm here. The buyer can download only after you confirm.</div>`;
 }
 
 async function startCheckout(productId) {
@@ -1779,7 +1794,7 @@ async function startCheckout(productId) {
     onPaid: async (method) => {
       await recordOrder({ kind: 'product', product_id: p.id, amount: Number(p.price), title: p.title, link: p.link || p.product_url || '', method });
       try { await loadMyPaidOrders(); } catch (e) {}
-      toast('✅ Payment successful. Your download is ready below.');
+      toast(method === 'upi' ? '⏳ Order submitted — the seller will confirm your payment shortly. You will be able to download after confirmation.' : '✅ Payment successful. Your download is ready below.');
       openLibraryModal();
     }
   });

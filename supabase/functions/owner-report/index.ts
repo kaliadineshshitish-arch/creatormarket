@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     const admin = createClient(supabaseUrl, serviceKey);
     const { data, error } = await admin
       .from('orders')
-      .select('kind,amount,status,commission_amount,creator_payout,product_id,buyer_id,created_at');
+      .select('id,kind,amount,status,payment_id,commission_amount,creator_payout,product_id,buyer_id,created_at');
     if (error) return json({ message: 'Could not read orders.' }, 500);
 
     const paid = (data || []).filter((o) => o.status === 'paid');
@@ -40,7 +40,32 @@ Deno.serve(async (req) => {
     const commission = paid.reduce((s, o) => s + Number(o.commission_amount || 0), 0);
     const payouts = paid.reduce((s, o) => s + Number(o.creator_payout || 0), 0);
 
+    // Pending self-declared UPI orders the owner should verify and confirm.
+    const pending = (data || []).filter((o) => o.status === 'pending');
+    const pendingOrders = [];
+    for (const o of pending.slice(0, 100)) {
+      let title = null;
+      let buyerEmail = null;
+      if (o.product_id) {
+        const { data: pr } = await admin.from('products').select('title').eq('id', o.product_id).limit(1);
+        title = pr && pr[0] ? pr[0].title : null;
+      }
+      try {
+        const { data: u } = await admin.auth.admin.getUserById(o.buyer_id);
+        buyerEmail = u && u.user ? u.user.email : null;
+      } catch (_) { /* email is optional */ }
+      pendingOrders.push({
+        id: o.id, kind: o.kind, product_id: o.product_id,
+        title: title || ('Order #' + o.id),
+        amount: Number(o.amount || 0),
+        buyer_email: buyerEmail,
+        payment_id: o.payment_id || null,
+        created_at: o.created_at,
+      });
+    }
+
     return json({
+      pending_orders: pendingOrders,
       paid_orders: paid.length,
       product_sales: productSales.length,
       gross: round2(gross),

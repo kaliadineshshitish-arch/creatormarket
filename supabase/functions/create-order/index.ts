@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
       customer_details: {
         customer_id: String(user.id),
         customer_email: user.email || 'guest@creatormarket.app',
-        customer_phone: '9999999999',
+        customer_phone: (/^[0-9]{10,15}$/.test(String(body.customer_phone || '').replace(/[^0-9]/g, '')) ? String(body.customer_phone).replace(/[^0-9]/g, '') : '9999999999'),
       },
       order_meta: { return_url: returnUrl },
     };
