@@ -1508,11 +1508,12 @@ function openPayModal(opts) {
     </div>
     <div style="display:grid;gap:10px">
       <button class="btn btn-primary btn-block" ${upiReady ? '' : 'disabled'} onclick="showUpiView(${Number(opts.amount)})">📱 Pay by UPI (QR / app)</button>
-      <button class="btn btn-block" ${cfReady ? '' : 'disabled'} onclick="payViaCashfree()">💳 Card / Netbanking — Cashfree${cfReady ? '' : ' (not set up yet)'}</button>
+      <button class="btn btn-block" ${cfReady ? '' : 'disabled'} onclick="payViaCashfree()">💳 Pay online — Cashfree (UPI / Card / Netbanking)${cfReady ? '' : ' (not set up yet)'}</button>
     </div>
     ${opts.note ? '<div class="note" style="margin-top:10px">' + escapeHtml(opts.note) + '</div>' : ''}
     ${!upiReady ? '<div class="notice warn" style="margin-top:12px">UPI is not set up yet — add your UPI ID in the CONFIG block.</div>' : ''}
     ${!cfReady ? '<div class="notice" style="margin-top:8px">Cashfree is ready in the code — enable it once your Cashfree account and keys are in place.</div>' : ''}
+    ${cfReady ? '<div class="notice" style="margin-top:8px">Card / Netbanking is enabled by Cashfree after account approval — until then UPI works through Cashfree.</div>' : ''}
     <div id="upiView" style="margin-top:14px"></div>`;
   openModal('payModal');
 }
