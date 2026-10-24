@@ -1611,11 +1611,21 @@ async function uploadSellFile() {
     if (st) st.textContent = '✅ Uploaded: ' + f.name + ' (buyers only)';;
   } catch (e) { uploadedFilePath = null; if (st) st.textContent = '❌ Upload failed: ' + (e.message || e); }
 }
+let myPaidProductIds = new Set();
+async function loadMyPaidOrders() {
+  myPaidProductIds = new Set();
+  if (!isSupabaseConnected || !supabaseClient || !currentUser) return;
+  try {
+    const { data } = await supabaseClient.from('orders').select('product_id,status').eq('buyer_id', currentUser.id).eq('status', 'paid');
+    (data || []).forEach(o => { if (o.product_id) myPaidProductIds.add(String(o.product_id)); });
+  } catch (e) {}
+}
 function downloadRow(p) {
   if (!p || !p.file_path) return '';
   let ords = [];
   try { ords = JSON.parse(localStorage.getItem('cmOrders') || '[]'); } catch (e) {}
-  const bought = !!p.is_owner || ords.some(o => String(o.product_id) === String(p.id) && String(o.status || '').toLowerCase() === 'paid');
+  const localPaid = ords.some(o => String(o.product_id) === String(p.id) && String(o.status || '').toLowerCase() === 'paid');
+  const bought = !!p.is_owner || localPaid || myPaidProductIds.has(String(p.id));
   if (!bought) return '';
   return '<button class="btn btn-block" style="margin-bottom:10px" onclick="downloadPurchasedFile(\'' + escapeHtml(p.file_path) + '\')">⬇ Download your file</button>';
 }
@@ -1767,7 +1777,8 @@ async function startCheckout(productId) {
     payload: { type: 'product', product_id: p.id },
     onPaid: async (method) => {
       await recordOrder({ kind: 'product', product_id: p.id, amount: Number(p.price), title: p.title, link: p.link || p.product_url || '', method });
-      toast('✅ Payment successful. Product added to your library.');
+      try { await loadMyPaidOrders(); } catch (e) {}
+      toast('✅ Payment successful. Your download is ready below.');
       openLibraryModal();
     }
   });
@@ -1987,6 +1998,7 @@ if (isSupabaseConnected && supabaseClient) {
   supabaseClient.auth.onAuthStateChange((_e, session) => {
     currentUser = session?.user || null; updateAuthButton();
     setTimeout(() => loadProductsFromSupabase(), 0);
+    setTimeout(() => loadMyPaidOrders(), 0);
   });
 }
 /* Deep link: /?p=<product-id> opens that product (shareable product links) */
@@ -2008,7 +2020,7 @@ function shareProductUrl(id) {
 
 renderProducts();
 applyPlanUI();
-refreshCurrentUser().then(() => loadProductsFromSupabase()).then(() => openProductFromUrl());
+refreshCurrentUser().then(() => loadProductsFromSupabase()).then(() => loadMyPaidOrders()).then(() => openProductFromUrl());
 document.getElementById('url').addEventListener('keydown', e => { if (e.key === 'Enter') analyze(); });
 window.addEventListener('storage', () => {
   try { wishlist = JSON.parse(localStorage.getItem('cmWishlist') || '[]'); notifications = JSON.parse(localStorage.getItem('cmNotifications') || '[]'); renderProducts(); } catch (e) {}
