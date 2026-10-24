@@ -1480,11 +1480,12 @@ async function recordOrder(o) {
   // so the file stays locked until the seller confirms the payment was received.
   if (isUpi && isSupabaseConnected && supabaseClient && currentUser) {
     try {
-      await supabaseClient.from('orders').insert([{
+      const { data: ins } = await supabaseClient.from('orders').insert([{
         buyer_id: currentUser.id, kind: o.kind, product_id: o.product_id || null,
         plan: o.plan || null, promo_days: o.promo_days || null, amount: Number(o.amount) || 0,
         status: 'pending', payment_id: 'UPI — awaiting confirmation'
-      }]);
+      }]).select('id').single();
+      if (ins && ins.id) { try { await callFunction('notify-owner', { order_id: ins.id }); } catch (e) {} }
     } catch (e) { console.warn('UPI order record failed:', e); }
   }
 }

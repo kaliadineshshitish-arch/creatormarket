@@ -23,7 +23,7 @@ jobs:
       - name: Deploy functions
         run: |
           set -e
-          for fn in create-order verify-payment ai-tools analyze thumbnail owner-report confirm-payment confirm-payment-link; do
+          for fn in create-order verify-payment ai-tools analyze thumbnail owner-report confirm-payment confirm-payment-link notify-owner; do
             echo "Deploying $fn ..."
             supabase functions deploy "$fn" --project-ref "$PROJECT_REF" --no-verify-jwt
           done
@@ -39,6 +39,7 @@ jobs:
             [SARVAM_API_KEY]="${{ secrets.SARVAM_API_KEY }}"
             [YOUTUBE_API_KEY]="${{ secrets.YOUTUBE_API_KEY }}"
             [OWNER_EMAIL]="${{ secrets.OWNER_EMAIL }}"
+            [RESEND_API_KEY]="${{ secrets.RESEND_API_KEY }}"
           )
           ARGS=("CASHFREE_ENV=production")
           for k in "${!S[@]}"; do
