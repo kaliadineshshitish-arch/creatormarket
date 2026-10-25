@@ -10,20 +10,36 @@ const PLATFORM_NAMES: Record<string, string> = {
 
 async function chat(system: string, user: string, temperature: number): Promise<string> {
   const key = env('SARVAM_API_KEY');
-  const res = await fetch('https://api.sarvam.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'api-subscription-key': key },
-    body: JSON.stringify({
-      model: MODEL(), temperature, max_tokens: 2400, reasoning_effort: 'low',
-      messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-    }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error?.message || ('Sarvam request failed (HTTP ' + res.status + ').'));
-  const ch = (data && data.choices && data.choices[0]) || {};
-  const content = (ch.message && ch.message.content) || '';
-  if (!content) throw new Error('The AI returned an empty reply. Please try again.');
-  return content;
+  let lastMsg = '';
+  // sarvam-105b is a reasoning model: it can spend the whole token budget on
+  // reasoning and return empty content. Big budget + low effort + retries.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch('https://api.sarvam.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'api-subscription-key': key },
+        body: JSON.stringify({
+          model: MODEL(), temperature, max_tokens: 4096, reasoning_effort: 'low',
+          messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        lastMsg = data?.error?.message || ('Sarvam request failed (HTTP ' + res.status + ').');
+        if (res.status >= 400 && res.status < 500 && res.status !== 429) throw new Error(lastMsg);
+      } else {
+        const ch = (data && data.choices && data.choices[0]) || {};
+        const content = (ch.message && ch.message.content) || '';
+        if (content) return content;
+        lastMsg = 'The AI returned an empty reply.';
+      }
+    } catch (e) {
+      lastMsg = (e as Error).message || 'AI request failed.';
+      if (/invalid|api key|not configured/i.test(lastMsg)) throw new Error(lastMsg);
+    }
+    await new Promise((r) => setTimeout(r, 700));
+  }
+  throw new Error(lastMsg || 'The AI could not generate a reply. Please try again.');
 }
 
 Deno.serve(async (req) => {
