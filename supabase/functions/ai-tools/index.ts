@@ -1,4 +1,4 @@
-// ai-tools — content-pack and prompt-creator (Sarvam). Replaces the old Netlify functions.
+// ai-tools — content-pack and prompt-creator, powered by Sarvam AI (api.sarvam.ai).
 import { json, handleOptions } from '../_shared/cors.ts';
 
 function env(k: string) { return String(Deno.env.get(k) || '').trim(); }
@@ -19,7 +19,7 @@ async function chat(system: string, user: string, temperature: number): Promise<
     }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error?.message || 'Sarvam request failed.');
+  if (!res.ok) throw new Error(data?.error?.message || ('Sarvam request failed (HTTP ' + res.status + ').'));
   return data?.choices?.[0]?.message?.content || '';
 }
 

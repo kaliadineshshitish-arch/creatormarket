@@ -1946,7 +1946,7 @@ async function createPrompt() {
   try {
     const r = await callFunction('ai-tools', { mode: 'prompt-creator', goal, audience, platform: p, tone });
     if (!r.ok) { document.getElementById('promptOutput').textContent = r.data.message || 'Prompt creation failed.'; return; }
-    document.getElementById('promptOutput').textContent = r.data.prompt || 'No prompt returned.';
+    document.getElementById('promptOutput').textContent = r.data.prompt || (r.data && r.data.message) || 'No prompt returned.';
     setUsage(getUsage() + 1);
   } catch (e) { document.getElementById('promptOutput').textContent = 'Something went wrong. Please try again.'; }
   finally { updateUsageUI(); }
