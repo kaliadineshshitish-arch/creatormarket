@@ -1,0 +1,17 @@
+name: Test AI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call ai-tools
+        run: |
+          echo "--- prompt-creator ---"
+          curl -s -m 90 -w "\nHTTP %{http_code}\n" -X POST "https://eqwmsjsqrhgyfpyssfop.supabase.co/functions/v1/ai-tools" \
+            -H "Content-Type: application/json" \
+            -H "apikey: sb_publishable_wYc_3ArDw5ghAcgYYxX_DA_LsrI4CsE" \
+            -H "Authorization: Bearer sb_publishable_wYc_3ArDw5ghAcgYYxX_DA_LsrI4CsE" \
+            -d '{"mode":"prompt-creator","goal":"10-second cinematic 3D Mahadev devotional video for YouTube","audience":"Indian devotees","platform":"general","tone":"clear"}' | head -c 1200
