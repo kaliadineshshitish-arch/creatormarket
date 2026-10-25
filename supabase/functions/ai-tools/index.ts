@@ -14,7 +14,7 @@ async function chat(system: string, user: string, temperature: number): Promise<
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'api-subscription-key': key },
     body: JSON.stringify({
-      model: MODEL(), temperature, max_tokens: 900,
+      model: MODEL(), temperature, max_tokens: 2400, reasoning_effort: 'low',
       messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
     }),
   });
