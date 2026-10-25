@@ -8,36 +8,46 @@ const PLATFORM_NAMES: Record<string, string> = {
   youtube: 'YouTube', instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', general: 'any AI tool',
 };
 
-async function chat(system: string, user: string, temperature: number): Promise<string> {
+async function callSarvam(url: string, model: string, extra: Record<string, unknown>, system: string, user: string, temperature: number): Promise<string> {
   const key = env('SARVAM_API_KEY');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'api-subscription-key': key },
+    body: JSON.stringify(Object.assign({
+      model, temperature,
+      messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+    }, extra)),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error?.message || ('Sarvam request failed (HTTP ' + res.status + ').'));
+  const ch = (data && data.choices && data.choices[0]) || {};
+  return (ch.message && ch.message.content) || '';
+}
+
+// sarvam-105b is a reasoning model: it can spend the whole token budget on
+// reasoning and return empty content. So we try it with a big budget + low
+// reasoning, then fall back to gemma4 (no reasoning at all) — which always
+// returns visible content.
+async function chat(system: string, user: string, temperature: number): Promise<string> {
+  const main = env('SARVAM_MODEL') || 'sarvam-105b';
+  const plans: Array<{ url: string; model: string; extra: Record<string, unknown> }> = [
+    { url: 'https://api.sarvam.ai/v1/chat/completions', model: main, extra: { max_tokens: 4096, reasoning_effort: 'low' } },
+    { url: 'https://api.sarvam.ai/v2/chat/completions', model: 'gemma4', extra: { max_tokens: 2048 } },
+    { url: 'https://api.sarvam.ai/v1/chat/completions', model: main, extra: { max_tokens: 8192, reasoning_effort: 'low' } },
+  ];
   let lastMsg = '';
-  // sarvam-105b is a reasoning model: it can spend the whole token budget on
-  // reasoning and return empty content. Big budget + low effort + retries.
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const res = await fetch('https://api.sarvam.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'api-subscription-key': key },
-        body: JSON.stringify({
-          model: MODEL(), temperature, max_tokens: 4096, reasoning_effort: 'low',
-          messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        lastMsg = data?.error?.message || ('Sarvam request failed (HTTP ' + res.status + ').');
-        if (res.status >= 400 && res.status < 500 && res.status !== 429) throw new Error(lastMsg);
-      } else {
-        const ch = (data && data.choices && data.choices[0]) || {};
-        const content = (ch.message && ch.message.content) || '';
-        if (content) return content;
+  for (const p of plans) {
+    for (let i = 0; i < 2; i++) {
+      try {
+        const c = await callSarvam(p.url, p.model, p.extra, system, user, temperature);
+        if (c) return c;
         lastMsg = 'The AI returned an empty reply.';
+      } catch (e) {
+        lastMsg = (e as Error).message || 'AI request failed.';
+        if (/invalid|api key|not configured/i.test(lastMsg)) throw new Error(lastMsg);
       }
-    } catch (e) {
-      lastMsg = (e as Error).message || 'AI request failed.';
-      if (/invalid|api key|not configured/i.test(lastMsg)) throw new Error(lastMsg);
+      await new Promise((r) => setTimeout(r, 500));
     }
-    await new Promise((r) => setTimeout(r, 700));
   }
   throw new Error(lastMsg || 'The AI could not generate a reply. Please try again.');
 }
