@@ -22,14 +22,7 @@ async function chat(system: string, user: string, temperature: number): Promise<
   if (!res.ok) throw new Error(data?.error?.message || ('Sarvam request failed (HTTP ' + res.status + ').'));
   const ch = (data && data.choices && data.choices[0]) || {};
   const content = (ch.message && ch.message.content) || '';
-  if (!content) {
-    const rc = String((ch.message && ch.message.reasoning_content) || '');
-    throw new Error('DIAG finish=' + (ch.finish_reason || '?')
-      + ' | usage=' + JSON.stringify((data && data.usage) || {})
-      + ' | msgkeys=' + Object.keys((ch.message) || {}).join(',')
-      + ' | reasoning_len=' + rc.length
-      + ' | topkeys=' + Object.keys(data || {}).join(','));
-  }
+  if (!content) throw new Error('The AI returned an empty reply. Please try again.');
   return content;
 }
 
