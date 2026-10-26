@@ -861,6 +861,12 @@ const CONFIG = {
   UPI_ID: 'dineshkalia1982-2@okicici',   // aapki UPI ID
   UPI_PAYEE_NAME: 'CreatorMarket',        // name shown in the buyer's UPI app
 
+  // PayPal — for international buyers. Put your PayPal.me username here
+  // (e.g. 'dineshkalia' for https://paypal.me/dineshkalia).
+  // Leave empty to hide the PayPal button.
+  PAYPAL_ME: '',
+  INR_PER_USD: 88,                        // rough conversion used to show the USD amount
+
   // Cashfree stays ready — flip this to true once your Cashfree account + secrets are set.
   CASHFREE_ENABLED: false,           // disabled: Cashfree rejected the marketplace model. Re-enable with a single-seller account.
   CASHFREE_MODE: 'production',            // LIVE Cashfree keys are in use on the server
@@ -1472,7 +1478,7 @@ function upiLink(amount, note) {
 }
 
 async function recordOrder(o) {
-  const isUpi = o.method === 'upi';
+  const isUpi = o.method === 'upi' || o.method === 'paypal';
   const orders = JSON.parse(localStorage.getItem('cmOrders') || '[]');
   orders.unshift({ id: (o.method === 'cashfree' ? 'cf-' : 'upi-') + Date.now(), product_id: o.product_id || null, title: o.title, status: isUpi ? 'Pending' : 'Paid', date: new Date().toLocaleString(), link: o.link || '' });
   localStorage.setItem('cmOrders', JSON.stringify(orders));
@@ -1515,7 +1521,8 @@ function openPayModal(opts) {
     </div>
     <div class="form-group"><label>Phone (for the payment receipt — optional)</label><input id="payPhone" class="form-control" inputmode="numeric" placeholder="10-digit mobile" value="${escapeHtml(window._buyerPhone || '')}"></div>
     <div style="display:grid;gap:10px">
-      <button class="btn btn-primary btn-block" ${upiReady ? '' : 'disabled'} onclick="showUpiView(${Number(opts.amount)})">📱 Pay by UPI (QR / app)</button>
+      <button class="btn btn-primary btn-block" ${upiReady ? '' : 'disabled'} onclick="showUpiView(${Number(opts.amount)})">📱 Pay by UPI (India)</button>
+      ${CONFIG.PAYPAL_ME ? `<button class="btn btn-block" onclick="showPaypalView(${Number(opts.amount)})">🌍 Pay with PayPal (international)</button>` : ''}
       <button class="btn btn-block" ${cfReady ? '' : 'disabled'} onclick="payViaCashfree()">💳 Pay online — Cashfree (UPI / Card / Netbanking)${cfReady ? '' : ' (not set up yet)'}</button>
     </div>
     ${opts.note ? '<div class="note" style="margin-top:10px">' + escapeHtml(opts.note) + '</div>' : ''}
@@ -1557,6 +1564,27 @@ async function upiPaid() {
   const onPaid = window._payOnPaid;
   closeModal('payModal');
   if (onPaid) await onPaid('upi');
+}
+
+/* ---------- PayPal (international buyers) ---------- */
+function paypalAmountUsd(inr) {
+  const rate = Number(CONFIG.INR_PER_USD) || 88;
+  return Math.max(1, Math.round((Number(inr) || 0) / rate * 100) / 100);
+}
+function showPaypalView(amount) {
+  const usd = paypalAmountUsd(amount);
+  const url = 'https://paypal.me/' + encodeURIComponent(CONFIG.PAYPAL_ME) + '/' + usd;
+  const v = document.getElementById('upiView');
+  v.innerHTML = `
+    <div class="notice success">Pay with PayPal or any international card. Amount: <b>${money(amount)}</b> (≈ <b>$${usd.toFixed(2)}</b> USD).</div>
+    <a class="btn btn-primary btn-block" style="margin-top:12px" href="${url}" target="_blank" rel="noopener">Open PayPal to pay $${usd.toFixed(2)} →</a>
+    <button class="btn btn-block" style="margin-top:8px" onclick="paypalPaid()">✅ I have paid — submit order</button>
+    <div class="notice" style="margin-top:10px">PayPal payments are confirmed manually by the seller (usually within a few hours). You will be able to download your file once confirmed.</div>`;
+}
+async function paypalPaid() {
+  const onPaid = window._payOnPaid;
+  closeModal('payModal');
+  if (onPaid) await onPaid('paypal');
 }
 async function payViaCashfree() {
   const onPaid = window._payOnPaid;
@@ -1795,7 +1823,7 @@ async function startCheckout(productId) {
     onPaid: async (method) => {
       await recordOrder({ kind: 'product', product_id: p.id, amount: Number(p.price), title: p.title, link: p.link || p.product_url || '', method });
       try { await loadMyPaidOrders(); } catch (e) {}
-      toast(method === 'upi' ? '⏳ Order submitted — the seller will confirm your payment shortly. You will be able to download after confirmation.' : '✅ Payment successful. Your download is ready below.');
+      toast((method === 'upi' || method === 'paypal') ? '⏳ Order submitted — the seller will confirm your payment shortly. You will be able to download after confirmation.' : '✅ Payment successful. Your download is ready below.');
       openLibraryModal();
     }
   });
