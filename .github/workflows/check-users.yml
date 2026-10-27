@@ -1,0 +1,32 @@
+name: Check Users
+
+on:
+  workflow_dispatch:
+
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: eqwmsjsqrhgyfpyssfop
+    steps:
+      - name: Query
+        run: |
+          q() {
+            curl -s -m 40 -X POST "https://api.supabase.com/v1/projects/$REF/database/query" \
+              -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+              -d "{\"query\": \"$1\"}"
+            echo
+          }
+          echo "=== total users ==="
+          q "select count(*)::int as users from auth.users;"
+          echo "=== recent signups (masked) ==="
+          q "select left(split_part(email,'@',1),3) || '***@' || split_part(email,'@',2) as email, created_at::date as joined from auth.users order by created_at desc limit 10;"
+          echo "=== profiles ==="
+          q "select count(*)::int as profiles from public.profiles;"
+          echo "=== products ==="
+          q "select count(*)::int as products from public.products;"
+          echo "=== orders ==="
+          q "select count(*)::int as orders from public.orders;"
+          echo "=== orders by status ==="
+          q "select status, count(*)::int as n from public.orders group by status;"
