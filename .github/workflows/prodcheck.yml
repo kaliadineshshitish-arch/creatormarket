@@ -1,0 +1,17 @@
+name: Products Check
+on:
+  workflow_dispatch:
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: eqwmsjsqrhgyfpyssfop
+    steps:
+      - name: Q
+        run: |
+          q() { curl -s -m 40 -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "{\"query\": \"$1\"}"; echo; }
+          echo "=== products ==="
+          q "select id, left(title,28) as title, price, image_url, user_id from public.products order by created_at;"
+          echo "=== profiles ==="
+          q "select id, full_name, role from public.profiles;"
