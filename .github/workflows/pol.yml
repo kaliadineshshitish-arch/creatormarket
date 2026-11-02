@@ -1,0 +1,17 @@
+name: Orders Policy
+on:
+  workflow_dispatch:
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: eqwmsjsqrhgyfpyssfop
+    steps:
+      - name: Q
+        run: |
+          q() { curl -s -m 40 -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "{\"query\": \"$1\"}"; echo; }
+          echo "=== orders policies ==="
+          q "select policyname, cmd, qual, with_check from pg_policies where schemaname='public' and tablename='orders';"
+          echo "=== orders RLS enabled? ==="
+          q "select relname, relrowsecurity from pg_class where relname='orders';"
