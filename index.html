@@ -1177,7 +1177,7 @@ function renderProducts() {
           <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
           <div class="product-actions">
             <button class="icon-btn ${wished ? 'active' : ''}" title="Wishlist" onclick="event.stopPropagation();toggleWishlist('${escapeHtml(p.id)}')">${wished ? '♥' : '♡'}</button>
-${(currentUser && String(p.creator_id) === String(currentUser.id)) ? `<button class="icon-btn" title="Edit this product" onclick="event.stopPropagation();openEditProduct('${escapeHtml(p.id)}')">✏️</button>` : ''}
+${canEditProduct(p) ? `<button class="icon-btn" title="Edit this product" onclick="event.stopPropagation();openEditProduct('${escapeHtml(p.id)}')">✏️</button>` : ''}
             <span class="btn btn-sm">View →</span>
           </div>
         </div>
@@ -1299,6 +1299,7 @@ function openProductModal(productId) {
     <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin:1rem 0">
       <button class="icon-btn ${wished ? 'active' : ''}" onclick="toggleWishlist('${escapeHtml(p.id)}');openProductModal('${escapeHtml(p.id)}')">${wished ? '♥ Saved' : '♡ Save for later'}</button>
       <button class="icon-btn" onclick="event.stopPropagation();shareProductUrl('${escapeHtml(p.id)}')" title="Share this product">🔗</button>
+      ${canEditProduct(p) ? `<button class="btn btn-sm" onclick="event.stopPropagation();closeModal('productModal');openEditProduct('${escapeHtml(p.id)}')">✏️ Edit</button>` : ''}
       <button class="btn btn-primary" onclick="startCheckout('${escapeHtml(p.id)}')">${buyLabel}</button>
     </div>
     ${downloadRow(p)}
@@ -1321,6 +1322,13 @@ function openProductModal(productId) {
 }
 
 /* ---------------- Sell / Dashboard / Promotion ---------------- */
+function canEditProduct(p) {
+  if (!currentUser) return false;
+  const owner = 'kaliadineshshitish@gmail.com';
+  if ((currentUser.email || '').toLowerCase() === owner) return true;
+  return !!(p && p.creator_id && String(p.creator_id) === String(currentUser.id));
+}
+
 function openEditProduct(id) {
   const p = products.find(x => String(x.id) === String(id));
   if (!p) return;
