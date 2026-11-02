@@ -1597,11 +1597,10 @@ function openPayModal(opts) {
     <div style="display:grid;gap:10px">
       <button class="btn btn-primary btn-block" ${upiReady ? '' : 'disabled'} onclick="showUpiView(${Number(opts.amount)})">📱 Pay by UPI (India)</button>
       ${CONFIG.PAYPAL_ME ? `<button class="btn btn-block" onclick="showPaypalView(${Number(opts.amount)})">🌍 Pay with PayPal (international)</button>` : ''}
-      <button class="btn btn-block" ${cfReady ? '' : 'disabled'} onclick="payViaCashfree()">💳 Pay online — Cashfree (UPI / Card / Netbanking)${cfReady ? '' : ' (not set up yet)'}</button>
+      ${cfReady ? '<button class="btn btn-block" onclick="payViaCashfree()">💳 Pay online — Cashfree (UPI / Card / Netbanking)</button>' : ''}
     </div>
     ${opts.note ? '<div class="note" style="margin-top:10px">' + escapeHtml(opts.note) + '</div>' : ''}
     ${!upiReady ? '<div class="notice warn" style="margin-top:12px">UPI is not set up yet — add your UPI ID in the CONFIG block.</div>' : ''}
-    ${!cfReady ? '<div class="notice" style="margin-top:8px">Cashfree is ready in the code — enable it once your Cashfree account and keys are in place.</div>' : ''}
     ${cfReady ? '<div class="notice" style="margin-top:8px">Card / Netbanking is enabled by Cashfree after account approval — until then UPI works through Cashfree.</div>' : ''}
     <div id="upiView" style="margin-top:14px"></div>`;
   openModal('payModal');
@@ -1868,7 +1867,7 @@ async function openEarnings() {
       <div class="dashboard-stat"><strong>${inr(d.commission_earned)}</strong><span>Commission earned</span></div>
       <div class="dashboard-stat"><strong>${inr(d.creator_payouts)}</strong><span>Creator payouts</span></div>
     </div>
-    <div class="notice">Paid orders: ${Number(d.paid_orders || 0)} · Product sales: ${Number(d.product_sales || 0)}. Commission is ${CONFIG.COMMISSION_PERCENT}% per creator sale.</div>
+    <div class="notice">Paid orders: ${Number(d.paid_orders || 0)} · Product sales: ${Number(d.product_sales || 0)}. </div>
     <div class="notice" style="margin-top:10px">This is a tracking report of your sales. Payouts are sent to the UPI / PayPal details you save above.</div>`;
   const pend = Array.isArray(d.pending_orders) ? d.pending_orders : [];
   box.innerHTML += `
@@ -1898,7 +1897,7 @@ async function startCheckout(productId) {
   closeModal('productModal');
   openPayModal({
     title: p.title, subtitle: 'Product purchase', amount: Number(p.price),
-    note: `Platform fee ${CONFIG.COMMISSION_PERCENT}% — the creator receives the rest.`,
+    note: 'Instant download after payment — your file unlocks as soon as the seller confirms.',
     payload: { type: 'product', product_id: p.id },
     onPaid: async (method) => {
       await recordOrder({ kind: 'product', product_id: p.id, amount: Number(p.price), title: p.title, link: p.link || p.product_url || '', method });
