@@ -1807,7 +1807,7 @@ async function openPayoutModal() {
     </div>
     <div class="form-group"><label>Phone (optional)</label><input class="form-control" id="poPhone" value="${escapeHtml(p?.phone || '')}"></div>
     <button class="btn btn-primary btn-block" onclick="savePayout()">Save payout details</button>
-    ${p?.cashfree_vendor_id ? '<div class="notice success" style="margin-top:10px">✅ Linked to Cashfree vendor: ' + escapeHtml(p.cashfree_vendor_id) + '</div>' : '<div class="notice" style="margin-top:10px">India payouts settle via Cashfree Easy Split once activated. International payouts settle via your chosen provider (PayPal / Payoneer / Wise / bank).</div>'}`;
+    ${p?.cashfree_vendor_id ? '<div class="notice success" style="margin-top:10px">✅ Linked to Cashfree vendor: ' + escapeHtml(p.cashfree_vendor_id) + '</div>' : '<div class="notice" style="margin-top:10px">Payouts are sent by CreatorMarket to your UPI ID (India) or PayPal / Payoneer / Wise / bank (international) once a sale is confirmed. You are paid for every confirmed sale.</div>'}`;
   togglePayoutFields();
   openModal('payoutModal');
 }
