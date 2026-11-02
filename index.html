@@ -1869,7 +1869,7 @@ async function openEarnings() {
       <div class="dashboard-stat"><strong>${inr(d.creator_payouts)}</strong><span>Creator payouts</span></div>
     </div>
     <div class="notice">Paid orders: ${Number(d.paid_orders || 0)} · Product sales: ${Number(d.product_sales || 0)}. Commission is ${CONFIG.COMMISSION_PERCENT}% per creator sale.</div>
-    <div class="notice" style="margin-top:10px">Auto-settlement to your account and to each creator needs Cashfree Easy Split activated. Until then this is a tracking report.</div>`;
+    <div class="notice" style="margin-top:10px">This is a tracking report of your sales. Payouts are sent to the UPI / PayPal details you save above.</div>`;
   const pend = Array.isArray(d.pending_orders) ? d.pending_orders : [];
   box.innerHTML += `
     <h3 style="margin:1.2rem 0 .5rem">⏳ Pending UPI payments (${pend.length})</h3>
