@@ -1177,6 +1177,7 @@ function renderProducts() {
           <span class="price ${Number(p.price) === 0 ? 'free' : ''}">${money(p.price)}</span>
           <div class="product-actions">
             <button class="icon-btn ${wished ? 'active' : ''}" title="Wishlist" onclick="event.stopPropagation();toggleWishlist('${escapeHtml(p.id)}')">${wished ? '♥' : '♡'}</button>
+${(currentUser && String(p.creator_id) === String(currentUser.id)) ? `<button class="icon-btn" title="Edit this product" onclick="event.stopPropagation();openEditProduct('${escapeHtml(p.id)}')">✏️</button>` : ''}
             <span class="btn btn-sm">View →</span>
           </div>
         </div>
@@ -1320,7 +1321,28 @@ function openProductModal(productId) {
 }
 
 /* ---------------- Sell / Dashboard / Promotion ---------------- */
-function openSellModal() { uploadedFilePath = null; uploadedImageUrl = null; const _fs = document.getElementById('sellFileStatus'); if (_fs) _fs.textContent = ''; const _fi = document.getElementById('sellFile'); if (_fi) _fi.value = ''; const _is = document.getElementById('sellImageStatus'); if (_is) _is.textContent = ''; const _ii = document.getElementById('sellImage'); if (_ii) _ii.value = ''; refreshCurrentUser().then(() => { if (!requireLogin()) return; openModal('sellModal'); }); }
+function openEditProduct(id) {
+  const p = products.find(x => String(x.id) === String(id));
+  if (!p) return;
+  editingProductId = id;
+  uploadedImageUrl = p.image_url || null;
+  uploadedFilePath = p.file_path || null;
+  document.getElementById('sellTitle').value = p.title || '';
+  document.getElementById('sellCategory').value = p.category || 'AI Prompts';
+  document.getElementById('sellPrice').value = p.price != null ? p.price : '';
+  document.getElementById('sellDesc').value = p.description || '';
+  document.getElementById('sellLink').value = p.product_url || p.link || '';
+  const fi = document.getElementById('sellImage'); if (fi) fi.value = '';
+  const ff = document.getElementById('sellFile'); if (ff) ff.value = '';
+  const si = document.getElementById('sellImageStatus');
+  if (si) si.textContent = p.image_url ? '✅ Photo already set — choose a new one to replace it.' : '';
+  const sf = document.getElementById('sellFileStatus');
+  if (sf) sf.textContent = p.file_path ? '✅ File already uploaded — choose a new one to replace it.' : '';
+  const t = document.querySelector('#sellModal h2'); if (t) t.textContent = 'Edit Product';
+  openModal('sellModal');
+}
+
+function openSellModal() { editingProductId = null; const _t = document.querySelector('#sellModal h2'); if (_t) _t.textContent = 'List Your Digital Asset'; uploadedFilePath = null; uploadedImageUrl = null; const _fs = document.getElementById('sellFileStatus'); if (_fs) _fs.textContent = ''; const _fi = document.getElementById('sellFile'); if (_fi) _fi.value = ''; const _is = document.getElementById('sellImageStatus'); if (_is) _is.textContent = ''; const _ii = document.getElementById('sellImage'); if (_ii) _ii.value = ''; refreshCurrentUser().then(() => { if (!requireLogin()) return; openModal('sellModal'); }); }
 
 async function handleSellProduct(e) {
   e.preventDefault();
@@ -1332,16 +1354,30 @@ async function handleSellProduct(e) {
   if (!title || !category || isNaN(price) || !description) { toast('Please fill all required fields.'); return; }
   if (link && !/^https?:\/\//i.test(link)) { toast('Please enter a valid link starting with https://'); return; }
 
+  // Wait for any upload still in progress, otherwise image/file get saved as empty.
+  if (uploadingCount > 0) {
+    toast('⏳ Waiting for the upload to finish…');
+    let waited = 0;
+    while (uploadingCount > 0 && waited < 60000) { await new Promise(r => setTimeout(r, 250)); waited += 250; }
+  }
+
   await refreshCurrentUser();
   const newProduct = { id: 'custom-' + Date.now(), title, category, price, description, link, product_url: link, file_path: uploadedFilePath || null, image_url: uploadedImageUrl || null, creator: true, creator_name: currentUser?.email || 'Creator', created_at: new Date().toISOString() };
   let saved = false;
   if (isSupabaseConnected && supabaseClient && currentUser) {
     try {
-      const payload = { creator_id: currentUser.id, title, description, price, product_url: link || null, file_path: uploadedFilePath || null, image_url: uploadedImageUrl || null, is_published: true, created_at: newProduct.created_at };
-      const { data, error } = await supabaseClient.from('products').insert([payload]).select().single();
-      if (error) throw error;
-      if (data) { Object.assign(newProduct, data, { creator: true, creator_name: currentUser.email || 'Creator', link: data.product_url || link, category }); saved = true; }
-    } catch (err) { console.warn('Supabase product insert failed; using local fallback.', err); }
+      const base = { title, description, price, category, product_url: link || null, file_path: uploadedFilePath || null, image_url: uploadedImageUrl || null, is_published: true };
+      if (editingProductId) {
+        const { data, error } = await supabaseClient.from('products').update(base).eq('id', editingProductId).select().single();
+        if (error) throw error;
+        if (data) { const idx = products.findIndex(x => String(x.id) === String(editingProductId)); if (idx > -1) Object.assign(products[idx], data, { creator: true, creator_name: currentUser.email || 'Creator', link: data.product_url || link, category }); saved = true; }
+      } else {
+        const payload = Object.assign({ creator_id: currentUser.id, created_at: newProduct.created_at }, base);
+        const { data, error } = await supabaseClient.from('products').insert([payload]).select().single();
+        if (error) throw error;
+        if (data) { Object.assign(newProduct, data, { creator: true, creator_name: currentUser.email || 'Creator', link: data.product_url || link, category }); saved = true; }
+      }
+    } catch (err) { console.warn('Supabase product save failed; using local fallback.', err); }
   }
   products.unshift(newProduct);
   localStorage.setItem('cmProducts', JSON.stringify(products));
@@ -1607,6 +1643,7 @@ async function uploadSellImage() {
   if (!/^image\//.test(f.type)) { if (st) st.textContent = 'Please choose an image file (JPG/PNG/WebP).'; return; }
   if (f.size > 5 * 1024 * 1024) { if (st) st.textContent = 'Image too large — max 5 MB.'; return; }
   if (st) st.textContent = '⏳ Uploading…';
+  uploadingCount++;
   try {
     const safe = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
     const path = currentUser.id + '/' + Date.now() + '-' + safe;
@@ -1616,6 +1653,7 @@ async function uploadSellImage() {
     uploadedImageUrl = data.publicUrl;
     if (st) st.textContent = '✅ Photo added.';
   } catch (e) { uploadedImageUrl = null; if (st) st.textContent = '❌ Upload failed: ' + (e.message || e); }
+  finally { uploadingCount--; }
 }
 function starsOnly(p) {
   const n = (reviewStore[String(p.id)] || []).length;
@@ -1633,6 +1671,8 @@ function cardThumb(p) {
 
 /* ---------- Product file upload (Supabase Storage, private) ---------- */
 let uploadedFilePath = null;
+let uploadingCount = 0;        // in-flight uploads — we wait for these before saving
+let editingProductId = null;   // set when editing an existing product
 async function uploadSellFile() {
   const el = document.getElementById('sellFile');
   const st = document.getElementById('sellFileStatus');
@@ -1642,6 +1682,7 @@ async function uploadSellFile() {
   if (!isSupabaseConnected || !supabaseClient || !currentUser) { if (st) st.textContent = 'Please log in to upload a file.'; return; }
   if (f.size > 50 * 1024 * 1024) { if (st) st.textContent = 'File too large — max 50 MB.'; return; }
   if (st) st.textContent = '⏳ Uploading…';
+  uploadingCount++;
   try {
     const safe = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
     const path = currentUser.id + '/' + Date.now() + '-' + safe;
@@ -1650,6 +1691,7 @@ async function uploadSellFile() {
     uploadedFilePath = path;
     if (st) st.textContent = '✅ Uploaded: ' + f.name + ' (buyers only)';;
   } catch (e) { uploadedFilePath = null; if (st) st.textContent = '❌ Upload failed: ' + (e.message || e); }
+  finally { uploadingCount--; }
 }
 let myPaidProductIds = new Set();
 async function loadMyPaidOrders() {
