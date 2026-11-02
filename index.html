@@ -1558,15 +1558,24 @@ async function recordOrder(o) {
   localStorage.setItem('cmOrders', JSON.stringify(orders));
   // UPI is self-declared (no gateway verification). The order is stored as PENDING
   // so the file stays locked until the seller confirms the payment was received.
-  if (isUpi && isSupabaseConnected && supabaseClient && currentUser) {
+  if (isUpi) {
+    await refreshCurrentUser();
+    if (!currentUser || !isSupabaseConnected || !supabaseClient) {
+      toast('⚠️ Please log in again so we can save your order.');
+      return;
+    }
     try {
-      const { data: ins } = await supabaseClient.from('orders').insert([{
+      const { data: ins, error: insErr } = await supabaseClient.from('orders').insert([{
         buyer_id: currentUser.id, kind: o.kind, product_id: o.product_id || null,
         plan: o.plan || null, promo_days: o.promo_days || null, amount: Number(o.amount) || 0,
         status: 'pending', payment_id: 'UPI — awaiting confirmation'
       }]).select('id').single();
-      if (ins && ins.id) { try { await callFunction('notify-owner', { order_id: ins.id }); } catch (e) {} }
-    } catch (e) { console.warn('UPI order record failed:', e); }
+      if (insErr) { toast('⚠️ Order not saved: ' + insErr.message); return; }
+      if (ins && ins.id) {
+        const r = await callFunction('notify-owner', { order_id: ins.id });
+        if (!r || !r.ok) toast('⚠️ Order saved, but the email could not be sent.');
+      }
+    } catch (e) { toast('⚠️ Order not saved: ' + (e.message || e)); }
   }
 }
 async function confirmPayment(orderId) {
