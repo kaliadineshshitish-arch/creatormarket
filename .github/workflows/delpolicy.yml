@@ -1,0 +1,22 @@
+name: Delete Policy
+on:
+  workflow_dispatch:
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: eqwmsjsqrhgyfpyssfop
+    steps:
+      - name: Q
+        run: |
+          q() { curl -s -m 40 -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "{\"query\": \"$1\"}"; echo; }
+          echo "=== products (title, image, file) ==="
+          q "select left(title,30) as title, category, case when image_url is null then 'NO IMG' else 'img' end as img, case when file_path is null then 'NO FILE' else right(file_path,28) end as fil from public.products order by created_at;"
+          echo "=== duplicate titles? ==="
+          q "select title, count(*)::int as n from public.products group by title having count(*) > 1;"
+          echo "=== add delete policy ==="
+          q "drop policy if exists \\\"Creators can delete own products\\\" on public.products;"
+          q "create policy \\\"Creators can delete own products\\\" on public.products for delete using (auth.uid() = creator_id);"
+          echo "=== policies now ==="
+          q "select policyname, cmd from pg_policies where schemaname='public' and tablename='products';"

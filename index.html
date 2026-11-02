@@ -727,7 +727,8 @@ footer.site .flinks a:hover{color:var(--text)}
       <div class="form-group"><label>Product photo (optional — shown on your product card)</label><input type="file" accept="image/*" class="form-control" id="sellImage" onchange="uploadSellImage()"><small id="sellImageStatus" style="color:var(--muted);display:block;margin-top:6px"></small></div>
       <div class="form-group"><label>Upload product file (optional — delivered securely to buyers only)</label><input type="file" class="form-control" id="sellFile" onchange="uploadSellFile()"><small id="sellFileStatus" style="color:var(--muted);display:block;margin-top:6px"></small></div>
       <div class="form-group"><label>Product / Delivery Link (optional)</label><input type="url" class="form-control" id="sellLink" placeholder="https://drive.google.com/... or your product page"></div>
-      <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px">List Product</button>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px" id="sellSubmitBtn">List Product</button>
+      <button type="button" class="btn btn-block" id="deleteProductBtn" style="margin-top:8px;display:none;color:#ef4444;border-color:#ef4444" onclick="deleteProduct(editingProductId)">🗑 Delete this product</button>
     </form>
   </div>
 </div>
@@ -1322,6 +1323,28 @@ function openProductModal(productId) {
 }
 
 /* ---------------- Sell / Dashboard / Promotion ---------------- */
+async function deleteProduct(id) {
+  if (!id) return;
+  if (!confirm('Delete this product? This cannot be undone.')) return;
+  await refreshCurrentUser();
+  if (isSupabaseConnected && supabaseClient && currentUser) {
+    try {
+      const { error } = await supabaseClient.from('products').delete().eq('id', id);
+      if (error) throw error;
+    } catch (err) {
+      toast('❌ Delete failed: ' + (err.message || err));
+      return;
+    }
+  }
+  const idx = products.findIndex(x => String(x.id) === String(id));
+  if (idx > -1) products.splice(idx, 1);
+  localStorage.setItem('cmProducts', JSON.stringify(products));
+  renderProducts();
+  closeModal('sellModal');
+  editingProductId = null;
+  toast('🗑 Product deleted.');
+}
+
 function canEditProduct(p) {
   if (!currentUser) return false;
   const owner = 'kaliadineshshitish@gmail.com';
@@ -1347,10 +1370,12 @@ function openEditProduct(id) {
   const sf = document.getElementById('sellFileStatus');
   if (sf) sf.textContent = p.file_path ? '✅ File already uploaded — choose a new one to replace it.' : '';
   const t = document.querySelector('#sellModal h2'); if (t) t.textContent = 'Edit Product';
+  const sb = document.getElementById('sellSubmitBtn'); if (sb) sb.textContent = '💾 Save changes';
+  const db = document.getElementById('deleteProductBtn'); if (db) db.style.display = 'block';
   openModal('sellModal');
 }
 
-function openSellModal() { editingProductId = null; const _t = document.querySelector('#sellModal h2'); if (_t) _t.textContent = 'List Your Digital Asset'; uploadedFilePath = null; uploadedImageUrl = null; const _fs = document.getElementById('sellFileStatus'); if (_fs) _fs.textContent = ''; const _fi = document.getElementById('sellFile'); if (_fi) _fi.value = ''; const _is = document.getElementById('sellImageStatus'); if (_is) _is.textContent = ''; const _ii = document.getElementById('sellImage'); if (_ii) _ii.value = ''; refreshCurrentUser().then(() => { if (!requireLogin()) return; openModal('sellModal'); }); }
+function openSellModal() { editingProductId = null; const _t = document.querySelector('#sellModal h2'); if (_t) _t.textContent = 'List Your Digital Asset'; const _sb = document.getElementById('sellSubmitBtn'); if (_sb) _sb.textContent = 'List Product'; const _db = document.getElementById('deleteProductBtn'); if (_db) _db.style.display = 'none'; uploadedFilePath = null; uploadedImageUrl = null; const _fs = document.getElementById('sellFileStatus'); if (_fs) _fs.textContent = ''; const _fi = document.getElementById('sellFile'); if (_fi) _fi.value = ''; const _is = document.getElementById('sellImageStatus'); if (_is) _is.textContent = ''; const _ii = document.getElementById('sellImage'); if (_ii) _ii.value = ''; refreshCurrentUser().then(() => { if (!requireLogin()) return; openModal('sellModal'); }); }
 
 async function handleSellProduct(e) {
   e.preventDefault();
@@ -1387,7 +1412,12 @@ async function handleSellProduct(e) {
       }
     } catch (err) { console.warn('Supabase product save failed; using local fallback.', err); }
   }
-  products.unshift(newProduct);
+  if (editingProductId) {
+    const _idx = products.findIndex(x => String(x.id) === String(editingProductId));
+    if (_idx > -1) Object.assign(products[_idx], newProduct);
+  } else {
+    products.unshift(newProduct);
+  }
   localStorage.setItem('cmProducts', JSON.stringify(products));
   renderProducts(); closeModal('sellModal'); document.getElementById('sellForm').reset();
   toast(saved ? '✅ Product listed and linked to your account.' : '✅ Product saved in this browser.');
