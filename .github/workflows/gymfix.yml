@@ -1,0 +1,19 @@
+name: Gym Fix
+on:
+  workflow_dispatch:
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: eqwmsjsqrhgyfpyssfop
+    steps:
+      - name: Q
+        run: |
+          q() { curl -s -m 40 -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "{\"query\": \"$1\"}"; echo; }
+          echo "=== link the existing Gym PDF ==="
+          q "update public.products set file_path='c90765eb-fbc4-41b5-8b00-0cc70bf7041c/1793630583606-Gym-and-Diet-Plan.pdf' where title like 'Gym%';"
+          echo "=== products still holding a png as the file ==="
+          q "select left(title,32) as title, right(file_path,30) as fil from public.products where file_path like '%.png';"
+          echo "=== delete policy present? ==="
+          q "select policyname, cmd from pg_policies where schemaname='public' and tablename='products' and cmd='DELETE';"
