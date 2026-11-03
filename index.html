@@ -551,7 +551,7 @@ footer.site .flinks a:hover{color:var(--text)}
       </div>
       <div class="studioGrid">
         <div><div class="note" style="margin-top:0">Input</div><div class="out" id="packInput">Choose a platform and enter your topic.</div></div>
-        <div><div class="note" style="margin-top:0">CreatorMarket result</div><div class="out" id="packOutput">Your platform-ready content will appear here.</div></div>
+        <div><div class="note" style="margin-top:0">CreatorMarket result</div><div class="out" id="packOutput">Your platform-ready content will appear here.</div><button class="btn btn-sm" style="margin-top:8px" onclick="copyOut('packOutput')">📋 Copy result</button></div>
       </div>
       <p class="note">AI generation uses your configured Sarvam AI API key (stored server-side in Supabase). If it is not configured, you will see a setup message instead of a fake result.</p>
     </div>
@@ -577,6 +577,9 @@ footer.site .flinks a:hover{color:var(--text)}
       </div>
       <div class="limitbar"><strong>Free AI usage</strong><div class="progress"><i id="promptProgress"></i></div><span id="promptLimitText">10/10</span></div>
       <div class="out" id="promptOutput" style="margin-top:12px">Your ready-to-copy prompt will appear here.</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="copyOut('promptOutput')">📋 Copy prompt</button>
+      </div>
       <p class="note">The free limit is tracked per browser and resets monthly. It is a convenience limit, not a security boundary.</p>
     </div>
   </section>
@@ -2058,6 +2061,24 @@ function clearPrompt() {
   document.getElementById('promptOutput').textContent = 'Your ready-to-copy prompt will appear here.';
   updateUsageUI();
 }
+async function copyOut(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = (el.innerText || el.textContent || '').trim();
+  if (!text || /will appear here/i.test(text)) { toast('Nothing to copy yet — generate something first.'); return; }
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('📋 Copied to clipboard.');
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('📋 Copied.'); }
+    catch (_) { toast('Copy failed — select the text and copy it manually.'); }
+    document.body.removeChild(ta);
+  }
+}
+
 async function createPrompt() {
   const goal = document.getElementById('promptGoal').value.trim();
   const audience = document.getElementById('promptAudience').value.trim();
