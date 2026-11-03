@@ -327,7 +327,10 @@ footer.site .flinks a:hover{color:var(--text)}
   // In-page (hash) navigation — send a page_view when the section changes
   try {
     window.addEventListener('hashchange', function () {
-      try { gtag('event', 'page_view', { page_location: location.href, page_path: location.pathname + location.hash }); } catch (e) {}
+      try { gtag('event', 'page_view', { page_location: location.href, page_path: location.pathname + location.hash })
+  window.cmTrack = function (name, params) {
+    try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch (e) {}
+  };; } catch (e) {}
     });
   } catch (e) {}
 </script>
@@ -565,6 +568,8 @@ footer.site .flinks a:hover{color:var(--text)}
         <label>Platform<select class="field" id="promptPlatform"><option value="youtube">YouTube</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="general">Any AI tool</option></select></label>
         <label>Audience<input class="field" id="promptAudience" placeholder="Example: beginner creators in India"></label>
         <label>Tone<select class="field" id="promptTone"><option>Clear &amp; professional</option><option>Friendly &amp; conversational</option><option>Viral &amp; energetic</option><option>Premium &amp; persuasive</option><option>Simple Hinglish</option></select></label>
+        <label>Target AI model<select class="field" id="promptModel"><option value="any">Any / not sure</option><option value="ChatGPT">ChatGPT</option><option value="Claude">Claude</option><option value="Gemini">Gemini</option><option value="Midjourney">Midjourney (image)</option><option value="DALL-E">DALL&middot;E (image)</option><option value="Sora or Veo">Sora / Veo (video)</option></select></label>
+        <label>Length<select class="field" id="promptLength"><option value="short (1-2 paragraphs)">Short</option><option value="medium" selected>Medium</option><option value="long and detailed">Long / detailed</option></select></label>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
         <button class="btn btn-primary" id="promptBtn" onclick="createPrompt()">✨ Create Prompt</button>
@@ -1643,6 +1648,7 @@ function copyUpiId() {
   else toast('UPI ID: ' + v);
 }
 async function upiPaid() {
+  window.cmTrack && window.cmTrack('add_payment_info', { payment_type: 'upi' });
   const onPaid = window._payOnPaid;
   closeModal('payModal');
   if (onPaid) await onPaid('upi');
@@ -1664,6 +1670,7 @@ function showPaypalView(amount) {
     <div class="notice" style="margin-top:10px">PayPal payments are confirmed manually by the seller (usually within a few hours). You will be able to download your file once confirmed.</div>`;
 }
 async function paypalPaid() {
+  window.cmTrack && window.cmTrack('add_payment_info', { payment_type: 'paypal' });
   const onPaid = window._payOnPaid;
   closeModal('payModal');
   if (onPaid) await onPaid('paypal');
@@ -1886,6 +1893,7 @@ async function openEarnings() {
 }
 
 async function startCheckout(productId) {
+  try { const _p = products.find(x => String(x.id) === String(productId)); window.cmTrack && window.cmTrack('begin_checkout', { currency: 'INR', value: Number(_p && _p.price) || 0, item_name: (_p && _p.title) || '' }); } catch (e) {}
   const p = products.find(x => String(x.id) === String(productId));
   if (!p) return;
   await refreshCurrentUser();
@@ -2055,12 +2063,21 @@ async function createPrompt() {
   const audience = document.getElementById('promptAudience').value.trim();
   const p = document.getElementById('promptPlatform').value;
   const tone = document.getElementById('promptTone').value;
+  const modelEl = document.getElementById('promptModel');
+  const lengthEl = document.getElementById('promptLength');
+  const model = modelEl ? modelEl.value : 'any';
+  const length = lengthEl ? lengthEl.value : 'medium';
   if (!goal) { toast('Tell me what prompt you want to create first.'); return; }
+  // Pass the model + length through so the prompt is shaped for the right tool
+  // (Midjourney and DALL·E want different phrasing, and script length differs).
+  const goalWithExtras = goal
+    + (model && model !== 'any' ? '\nTarget AI model: ' + model : '')
+    + (length ? '\nDesired output length: ' + length : '');
   if (getUsage() >= planLimit()) { toast('Your monthly AI limit is used up. Choose a paid plan for more.'); return; }
   const b = document.getElementById('promptBtn'); b.disabled = true; b.textContent = 'Creating…';
   document.getElementById('promptOutput').textContent = 'CreatorMarket is building your reusable prompt…';
   try {
-    const r = await callFunction('ai-tools', { mode: 'prompt-creator', goal, audience, platform: p, tone });
+    const r = await callFunction('ai-tools', { mode: 'prompt-creator', goal: goalWithExtras, audience, platform: p, tone, model, length });
     if (!r.ok) { document.getElementById('promptOutput').textContent = r.data.message || 'Prompt creation failed.'; return; }
     document.getElementById('promptOutput').textContent = r.data.prompt || (r.data && r.data.message) || 'No prompt returned.';
     setUsage(getUsage() + 1);
