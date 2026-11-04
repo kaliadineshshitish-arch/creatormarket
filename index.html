@@ -683,6 +683,18 @@ footer.site .flinks a:hover{color:var(--text)}
         <div id="invOutput" style="margin-top:10px"></div>
       </div>
 
+      <div class="studio" style="grid-column:1/-1">
+        <h3 style="margin-top:0">🎬 Video Script Checker</h3>
+        <p class="note" style="margin-top:0">Paste your script before you upload. It scores the hook, the middle and the CTA, then tells you exactly what to fix.</p>
+        <div class="promptForm">
+          <label>Hook — pehli line / pehle 2 second<input class="field" id="vsHook" placeholder="Example: 3 cheezein jo aapki reels par log nahi dekhte"></label>
+          <label>Body — script ka beech ka hissa (optional)<textarea class="field" id="vsBody" rows="4" placeholder="Paste the middle of your script here"></textarea></label>
+          <label>CTA — last line<input class="field" id="vsCta" placeholder="Example: Save karo aur kal try karo"></label>
+        </div>
+        <div style="margin-top:10px"><button class="btn btn-primary" onclick="checkScript()">Check my script</button></div>
+        <div class="out" id="vsOutput" style="margin-top:10px">Your score and fixes will appear here.</div>
+      </div>
+
     </div>
   </section>
 
@@ -2296,6 +2308,92 @@ function printInvoice() {
     '</style></head><body>' + lastInvoice + '</body></html>');
   w.document.close();
   setTimeout(() => w.print(), 400);
+}
+
+
+/* Video script checker — rule based, so it is instant and never fails. */
+const HOOK_BAD_OPENERS = ['hi guys','hello guys','hey guys','namaste doston','hello doston','hi everyone','aaj main aapko','aaj hum baat karenge','welcome back','is video me'];
+const CURIOSITY = ['secret','nobody','no one','why','how','stop','mistake','truth','wrong','never','nobody tells','galti','sach','kabhi','koi nahi','kyun','kaise','band','chhup','asli','jhoot','mat karo','rok','hidden','real reason'];
+const CTA_VERBS = ['comment','save','share','follow','link','dm','message','try','click','subscribe','bio','download','join','order','buy','bookmark','send','tag','batao','likho','saved','share karo','comment karo','follow karo','link in bio'];
+const CTA_LAZY = ['like and subscribe','like, share and subscribe','plz subscribe','please subscribe','thik laga to like karo'];
+
+function checkScript() {
+  const hook = (document.getElementById('vsHook').value || '').trim();
+  const body = (document.getElementById('vsBody').value || '').trim();
+  const cta  = (document.getElementById('vsCta').value || '').trim();
+  if (!hook) { toast('Pehle hook likho — pehli line.'); return; }
+
+  const lines = [];
+  const good = [], bad = [];
+  let hookPts = 0, bodyPts = 0, ctaPts = 0;
+
+  /* ---------- HOOK (max 50) ---------- */
+  const hw = hook.split(/\s+/).filter(Boolean).length;
+  if (hw <= 12) { hookPts += 12; good.push('Hook chhota hai (' + hw + ' words) — achha, log rukte hain.'); }
+  else if (hw <= 18) { hookPts += 6; bad.push('Hook ' + hw + ' words ka hai — 12 words ke andar laao.'); }
+  else { bad.push('Hook bahut lamba hai (' + hw + ' words) — 12 words ke andar laao.'); }
+
+  const hl = hook.toLowerCase();
+  const badOpen = HOOK_BAD_OPENERS.find(x => hl.startsWith(x) || hl.includes(x));
+  if (badOpen) { bad.push('"' + badOpen + '" se shuru mat karo — yeh 2 second me log scroll karwa deta hai.'); }
+  else { hookPts += 10; good.push('Hook me koi boring opener nahi hai.'); }
+
+  if (/\d/.test(hook)) { hookPts += 10; good.push('Hook me number hai — curiosity badhta hai.'); }
+  else { bad.push('Hook me ek number daalo (3 tips, 7 din, 99% log...).'); }
+
+  if (CURIOSITY.some(w => hl.includes(w))) { hookPts += 10; good.push('Hook me curiosity trigger hai.'); }
+  else { bad.push('Hook me curiosity word daalo — "galti", "sach", "kyun", "koi nahi batata".'); }
+
+  if (hook.includes('?')) { hookPts += 4; good.push('Hook sawaal poochh raha hai — engagement badhta hai.'); }
+  if (/\b(aap|you|tum|your)\b/i.test(hook)) { hookPts += 4; good.push('Hook me "aap" hai — viewer ko seedha address karta hai.'); }
+  else { bad.push('Hook me "aap" add karo — viewer ko lage ki baat uski ho rahi hai.'); }
+
+  /* ---------- BODY (max 30) ---------- */
+  if (body) {
+    const bw = body.split(/\s+/).filter(Boolean).length;
+    if (bw >= 40) { bodyPts += 10; good.push('Body me ' + bw + ' words hain — enough substance.'); }
+    else { bodyPts += 4; bad.push('Body chhota hai (' + bw + ' words) — thoda detail daalo.'); }
+    if (/\b(1\.|2\.|3\.|first|second|third|pehla|doosra|teesra)\b/i.test(body)) { bodyPts += 10; good.push('Body me list/steps hain — samajhna aasan.'); }
+    else { bad.push('Body ko 3 steps ya points me todo.'); }
+    if (/\b(aap|you)\b/i.test(body)) { bodyPts += 10; good.push('Body me viewer ko address kiya hai.'); }
+    else { bad.push('Body me "aap" use karo, "log" nahi.'); }
+  } else {
+    bodyPts += 15;
+    good.push('Body skip kiya — sirf hook + CTA check hua.');
+  }
+
+  /* ---------- CTA (max 20) ---------- */
+  if (cta) {
+    const cl = cta.toLowerCase();
+    if (CTA_VERBS.some(v => cl.includes(v))) { ctaPts += 10; good.push('CTA me clear action hai.'); }
+    else { bad.push('CTA me action word daalo — "save karo", "comment me likho", "link in bio".'); }
+    if (CTA_LAZY.some(v => cl.includes(v)) && !CTA_VERBS.filter(v => v !== 'subscribe').some(v => cl.includes(v))) {
+      bad.push('"Like and subscribe" akela kaam nahi karta — ek specific action maango.');
+    } else { ctaPts += 5; }
+    if (/\b(aaj|abhi|kal|today|now|turant)\b/i.test(cta)) { ctaPts += 5; good.push('CTA me urgency hai.'); }
+    else { bad.push('CTA me time daalo — "aaj hi", "abhi", "kal try karo".'); }
+  } else {
+    bad.push('CTA hai hi nahi — last line me ek action maango.');
+  }
+
+  const total = Math.max(0, Math.min(100, hookPts + bodyPts + ctaPts));
+  const grade = total >= 80 ? 'Strong' : total >= 60 ? 'Decent' : total >= 40 ? 'Weak' : 'Rewrite';
+  const bar = '█'.repeat(Math.round(total / 5)) + '░'.repeat(20 - Math.round(total / 5));
+
+  let out = '';
+  out += 'SCORE: ' + total + ' / 100  —  ' + grade + '\n';
+  out += bar + '\n\n';
+  out += 'Hook: ' + hookPts + '/50   Body: ' + bodyPts + '/30   CTA: ' + ctaPts + '/20\n\n';
+  if (bad.length) {
+    out += 'FIX KARO:\n' + bad.map((b, i) => (i + 1) + '. ' + b).join('\n') + '\n\n';
+  } else {
+    out += 'FIX KARO:\nKuch bada nahi hai — upload kar do.\n\n';
+  }
+  if (good.length) out += 'SAHI HAI:\n' + good.map(g => '• ' + g).join('\n') + '\n\n';
+  out += 'NOTE: yeh script ka checklist score hai — views ki prediction nahi. Views niche, thumbnail, timing aur luck par depend karte hain.';
+
+  document.getElementById('vsOutput').textContent = out;
+  window.cmTrack && window.cmTrack('tool_used', { tool: 'script_checker', score: total });
 }
 
 async function copyOut(id) {
