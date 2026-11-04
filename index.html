@@ -316,6 +316,19 @@ footer.site .flinks a:hover{color:var(--text)}
   .navright{gap:6px}
   .navright .btn-sm{padding:8px 11px;font-size:12.5px}
 }
+
+/* ---------- Free tools grid ---------- */
+.toolGrid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+@media (max-width:820px){ .toolGrid { grid-template-columns:1fr; } }
+.inv-box { background:#fff; color:#111827; border:1px solid #e5e7eb; border-radius:10px;
+           padding:16px; font-size:10.5pt; }
+.inv-box h4 { margin:0 0 4px; font-size:13pt; color:#4f46e5; }
+.inv-box table { width:100%; border-collapse:collapse; margin:10px 0; }
+.inv-box th { background:#f3f4f6; color:#111827; border:1px solid #e5e7eb; }
+.inv-box td { border:1px solid #e5e7eb; }
+.inv-total { text-align:right; font-weight:800; font-size:12pt; }
+@media print { body > *:not(#printArea) { display:none !important; } #printArea { display:block !important; } }
+
 </style>
 <!-- Google Analytics 4 (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GYPZCFTVJ8"></script>
@@ -367,6 +380,7 @@ footer.site .flinks a:hover{color:var(--text)}
     <nav class="navlinks">
       <a href="#marketplace">Marketplace</a>
       <a href="#tools">Creator Tools</a>
+      <a href="#free-tools">Free Tools</a>
       <a href="#plans">Plans</a>
       <a href="#faq">FAQ</a>
     </nav>
@@ -581,6 +595,94 @@ footer.site .flinks a:hover{color:var(--text)}
         <button class="btn btn-sm" onclick="copyOut('promptOutput')">📋 Copy prompt</button>
       </div>
       <p class="note">The free limit is tracked per browser and resets monthly. It is a convenience limit, not a security boundary.</p>
+    </div>
+  </section>
+
+
+  <!-- Free Tools -->
+  <section class="wrap section" id="free-tools">
+    <div class="section-head">
+      <h2>🧰 Free Creator Tools</h2>
+      <p>Four small tools that solve everyday creator problems. Free, no signup, nothing to install.</p>
+    </div>
+
+    <div class="toolGrid">
+
+      <div class="studio">
+        <h3 style="margin-top:0">📣 Hashtag Finder</h3>
+        <p class="note" style="margin-top:0">Pick a niche and get a ready hashtag set — a mix of big, medium and small tags so you are not buried.</p>
+        <div class="promptForm">
+          <label>Niche<select class="field" id="htNiche">
+            <option value="general">General creator</option>
+            <option value="finance">Finance / money</option>
+            <option value="fitness">Fitness / health</option>
+            <option value="food">Food / recipes</option>
+            <option value="tech">Tech / gadgets</option>
+            <option value="beauty">Beauty / fashion</option>
+            <option value="study">Study / exams</option>
+            <option value="business">Business / startup</option>
+          </select></label>
+          <label>How many<input class="field" id="htCount" type="number" value="25" min="10" max="30"></label>
+        </div>
+        <div style="margin-top:10px"><button class="btn btn-primary" onclick="findHashtags()">Find hashtags</button></div>
+        <div class="out" id="htOutput" style="margin-top:10px">Your hashtag set will appear here.</div>
+        <div style="margin-top:8px"><button class="btn btn-sm" onclick="copyOut('htOutput')">📋 Copy hashtags</button></div>
+      </div>
+
+      <div class="studio">
+        <h3 style="margin-top:0">✍️ Caption Generator</h3>
+        <p class="note" style="margin-top:0">A caption in Hinglish that does not sound like a robot wrote it. Pick a tone and a topic.</p>
+        <div class="promptForm">
+          <label>What is the post about?<input class="field" id="capTopic" placeholder="Example: 3 tips to grow on Instagram"></label>
+          <label>Tone<select class="field" id="capTone">
+            <option value="simple">Simple Hinglish</option>
+            <option value="hype">Hype / viral</option>
+            <option value="professional">Professional</option>
+            <option value="story">Story style</option>
+            <option value="question">Question / engagement</option>
+          </select></label>
+        </div>
+        <div style="margin-top:10px"><button class="btn btn-primary" onclick="makeCaption()">Make caption</button></div>
+        <div class="out" id="capOutput" style="margin-top:10px">Your caption will appear here.</div>
+        <div style="margin-top:8px"><button class="btn btn-sm" onclick="copyOut('capOutput')">📋 Copy caption</button></div>
+      </div>
+
+      <div class="studio">
+        <h3 style="margin-top:0">💰 Brand Deal Rate Calculator</h3>
+        <p class="note" style="margin-top:0">What should you charge a brand? Enter your numbers — get an honest ₹ range for a post, reel and story.</p>
+        <div class="promptForm">
+          <label>Followers<input class="field" id="brFollowers" type="number" value="5000" min="0"></label>
+          <label>Avg engagement %<input class="field" id="brEr" type="number" value="3" step="0.1" min="0"></label>
+          <label>Niche<select class="field" id="brNiche">
+            <option value="80">General</option>
+            <option value="150">Finance / money</option>
+            <option value="120">Tech</option>
+            <option value="110">Beauty / fashion</option>
+            <option value="100">Fitness / health</option>
+            <option value="90">Food</option>
+            <option value="70">Entertainment</option>
+          </select></label>
+        </div>
+        <div style="margin-top:10px"><button class="btn btn-primary" onclick="calcRate()">Calculate my rate</button></div>
+        <div class="out" id="brOutput" style="margin-top:10px">Your rate range will appear here.</div>
+      </div>
+
+      <div class="studio">
+        <h3 style="margin-top:0">🧾 Invoice Generator</h3>
+        <p class="note" style="margin-top:0">For freelancers and creators. Fill it in, print it or save as PDF — no account, no watermark.</p>
+        <div class="promptForm">
+          <label>Your name / studio<input class="field" id="invFrom" placeholder="DK Digital Studio"></label>
+          <label>Client name<input class="field" id="invTo" placeholder="Client Pvt Ltd"></label>
+          <label>Work description<input class="field" id="invWork" placeholder="Instagram reel — 30 sec"></label>
+          <label>Amount (₹)<input class="field" id="invAmount" type="number" value="5000" min="0"></label>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="makeInvoice()">Create invoice</button>
+          <button class="btn" onclick="printInvoice()">🖨 Print / Save PDF</button>
+        </div>
+        <div id="invOutput" style="margin-top:10px"></div>
+      </div>
+
     </div>
   </section>
 
@@ -2061,6 +2163,141 @@ function clearPrompt() {
   document.getElementById('promptOutput').textContent = 'Your ready-to-copy prompt will appear here.';
   updateUsageUI();
 }
+
+/* ============================================================
+   FREE CREATOR TOOLS — hashtags, captions, rates, invoices
+   ============================================================ */
+const HASHTAGS = {
+  general: ['#creatorindia','#indiancreators','#contentcreator','#reelsindia','#instagramindia','#explorepage','#viralreels','#trendingreels','#creatoreconomy','#digitalcreator','#reelitfeelit','#instadaily','#indiancontentcreator','#reelskarofeel','#contentcreation','#socialmedia','#growth','#smallcreator','#newcreator','#creatorlife','#reelkarofeel','#trendingnow','#foryou','#foryoupage','#explore'],
+  finance: ['#personalfinanceindia','#moneytips','#investingindia','#stockmarketindia','#financialfreedom','#sip','#mutualfunds','#savemoney','#financeindia','#wealthbuilding','#moneymindset','#investsmart','#taxplanning','#nifty50','#sensex','#financialliteracy','#paisa','#budgeting','#sidehustleindia','#earnmoneyonline','#financialgoals','#investingforbeginners','#moneytalks','#reelsindia','#explorepage'],
+  fitness: ['#fitnessindia','#workoutathome','#healthylifestyle','#fitnessmotivation','#gymindia','#indianfitness','#weightlossjourney','#fitindia','#homeworkout','#bodybuildingindia','#nutritiontips','#fitfam','#healthyliving','#fitnessreels','#gymlife','#workoutmotivation','#calisthenics','#yogaindia','#dietplan','#fitnessgoals','#strengthtraining','#fitnessjourney','#reelsindia','#explorepage','#viralreels'],
+  food: ['#indianfood','#foodieindia','#homemade','#indianrecipes','#foodreels','#recipeoftheday','#quickrecipes','#streetfoodindia','#foodbloggerindia','#cookingathome','#healthyrecipes','#indiankitchen','#foodlover','#tastyindia','#easyrecipes','#foodstagram','#desifood','#homecooking','#foodphotography','#recipevideo','#foodiesofindia','#reelsindia','#explorepage','#viralreels','#trendingfood'],
+  tech: ['#techindia','#gadgetsindia','#smartphoneindia','#techtips','#techreviews','#aitools','#artificialintelligence','#technewstoday','#mobiletips','#androidindia','#iphoneindia','#techyoutuber','#gadgetlover','#techtok','#aitoolsindia','#productivityhacks','#techsavvy','#techtrends','#digitalindia','#techfacts','#reelsindia','#explorepage','#viralreels','#techlife','#innovation'],
+  beauty: ['#beautyindia','#skincareroutine','#makeuptutorial','#indianbeauty','#skincaretips','#beautytips','#makeupindia','#haircare','#glowingskin','#beautybloggerindia','#makeuplover','#skincareindia','#beautyreels','#makeupartistindia','#naturalbeauty','#selfcare','#beautytrends','#indianmakeup','#skincaresolutions','#beautyhacks','#reelsindia','#explorepage','#viralreels','#beautyjunkie','#trendingmakeup'],
+  study: ['#studytips','#examseason','#indianstudents','#studymotivation','#neetpreparation','#jee','#upsc','#boardexams','#studynotes','#topper','#studyroutine','#educationindia','#learnwithme','#studytok','#competitiveexams','#studentlife','#examtips','#studysmart','#ias','#sarkarinaukri','#reelsindia','#explorepage','#viralreels','#studying','#motivation'],
+  business: ['#startupindia','#smallbusinessindia','#entrepreneurindia','#businessideas','#indianstartups','#businessgrowth','#digitalindia','#marketingtips','#solopreneur','#sidehustle','#businessowner','#startuplife','#msmeindia','#onlinbusiness','#businessstrategy','#salesgrowth','#entrepreneurlife','#makeinindia','#businesscoach','#freelancerindia','#reelsindia','#explorepage','#viralreels','#businesstips','#growthhacking'],
+};
+
+function findHashtags() {
+  const niche = document.getElementById('htNiche').value;
+  const count = Math.max(10, Math.min(30, Number(document.getElementById('htCount').value) || 25));
+  const pool = HASHTAGS[niche] || HASHTAGS.general;
+  const picked = pool.slice(0, count);
+  document.getElementById('htOutput').textContent = picked.join(' ');
+  window.cmTrack && window.cmTrack('tool_used', { tool: 'hashtag_finder' });
+}
+
+const CAPTIONS = {
+  simple: [
+    'Ek line me: {t}.\n\nSimple cheez hai, par kaam karti hai. Save kar lo, baad me kaam aayega.',
+    '{t} — yeh maine khud try kiya hai. Aap bhi try karo aur batao kaisa laga.',
+    'Aaj ka chhota tip: {t}. 10 second me padh lo, poora din kaam aayega.',
+    '{t}\n\nKoi shortcut nahi hai — bas roz thoda thoda. Aaj se shuru karo.',
+  ],
+  hype: [
+    '🔥 {t} — yeh padh ke rakh lo.\n\n99% log yeh galti karte hain. Aap mat karo.',
+    'STOP scrolling. {t} — aur yeh sabko nahi batana chahiye tha 😅\n\nSave + share karo.',
+    '{t} 🚀\n\nYeh wala tarika mahine bhar me farak daal dega. Try karke dekho.',
+    'Ek cheez jo sabko pata honi chahiye: {t}. Tag karo usko jisko zarurat hai.',
+  ],
+  professional: [
+    '{t}\n\nA short, practical note for anyone working on this right now. Consistency beats intensity.',
+    'Sharing something that worked for me: {t}. No hacks, no shortcuts — just a repeatable process.',
+    '{t} — worth doing properly, once. Happy to answer questions in the comments.',
+    'A quick breakdown of {t}, based on what I have actually run, not what I have read.',
+  ],
+  story: [
+    'Pehle mujhe lagta tha {t} sirf bade creators ke liye hai.\n\nEk din maine try kiya. 3 mahine baad farak dikha. Aaj wahi cheez main aapko bata raha hoon.',
+    'Mera pehla mahina bahut kharab gaya. Phir maine {t} par focus kiya. Yeh cheez badli: roz thoda, bina rukey.',
+    '{t} — maine ise ignore kiya tha 6 mahine. Ab sochta hoon time waste kiya. Aap mat karo.',
+  ],
+  question: [
+    '{t} — aap is par kya sochte ho? Comment me batao, main sabko reply karunga.',
+    'Sach batao: {t} — aapne ab tak try kiya hai ya nahi?\n\nComment me "haan" ya "nahi" likho.',
+    'Ek sawaal: {t} — aapke liye sabse mushkil kya hai? Neeche batao.',
+  ],
+};
+
+function makeCaption() {
+  const topic = document.getElementById('capTopic').value.trim();
+  const tone = document.getElementById('capTone').value;
+  if (!topic) { toast('Pehle likho post kis baare me hai.'); return; }
+  const pool = CAPTIONS[tone] || CAPTIONS.simple;
+  const tpl = pool[Math.floor(Math.random() * pool.length)];
+  const extra = pool.length > 1 ? pool.filter(x => x !== tpl)[0] : '';
+  let out = tpl.replace(/\{t\}/g, topic);
+  if (extra) out += '\n\n———\n\n' + extra.replace(/\{t\}/g, topic);
+  document.getElementById('capOutput').textContent = out;
+  window.cmTrack && window.cmTrack('tool_used', { tool: 'caption_generator' });
+}
+
+function calcRate() {
+  const followers = Math.max(0, Number(document.getElementById('brFollowers').value) || 0);
+  const er = Math.max(0, Number(document.getElementById('brEr').value) || 0);
+  const cpm = Number(document.getElementById('brNiche').value) || 80;
+  if (!followers) { toast('Followers daalo.'); return; }
+  // Reach-based estimate: followers x realistic reach, priced at an India CPM,
+  // then adjusted by how engaged the audience actually is.
+  const reach = followers * 0.35;
+  const base = (reach / 1000) * cpm;
+  const erFactor = Math.min(2, Math.max(0.5, er / 3));
+  const post = base * erFactor;
+  const reel = post * 1.2;
+  const story = post * 0.3;
+  const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+  const range = n => fmt(n * 0.8) + ' – ' + fmt(n * 1.25);
+  document.getElementById('brOutput').textContent =
+    'Aapke ' + followers.toLocaleString('en-IN') + ' followers aur ' + er + '% engagement par:\n\n' +
+    '• Ek static post: ' + range(post) + '\n' +
+    '• Ek Reel / video: ' + range(reel) + '\n' +
+    '• Ek story (3-4 frames): ' + range(story) + '\n\n' +
+    'Yeh estimate reach aur India ke CPM par based hai. Brand deals me usage rights, exclusivity aur timeline se rate badhta hai — 20-40% extra maango.';
+  window.cmTrack && window.cmTrack('tool_used', { tool: 'rate_calculator' });
+}
+
+let lastInvoice = '';
+function makeInvoice() {
+  const from = document.getElementById('invFrom').value.trim() || 'Your name';
+  const to = document.getElementById('invTo').value.trim() || 'Client name';
+  const work = document.getElementById('invWork').value.trim() || 'Creative work';
+  const amount = Number(document.getElementById('invAmount').value) || 0;
+  const invNo = 'INV-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 9000) + 1000);
+  const today = new Date().toLocaleDateString('en-IN');
+  const fmt = '₹' + amount.toLocaleString('en-IN');
+  lastInvoice = `<div class="inv-box" id="printArea">
+    <h4>INVOICE</h4>
+    <div style="font-size:9.5pt;color:#6b7280">${invNo} · ${today}</div>
+    <table>
+      <tr><th style="width:50%">From</th><th>To</th></tr>
+      <tr><td><b>${escapeHtml(from)}</b></td><td><b>${escapeHtml(to)}</b></td></tr>
+    </table>
+    <table>
+      <tr><th>Description</th><th style="width:30%">Amount</th></tr>
+      <tr><td>${escapeHtml(work)}</td><td>${fmt}</td></tr>
+      <tr><td class="inv-total">Total</td><td class="inv-total">${fmt}</td></tr>
+    </table>
+    <div style="font-size:9pt;color:#6b7280">Payment by UPI or bank transfer. Thank you.</div>
+  </div>`;
+  document.getElementById('invOutput').innerHTML = lastInvoice;
+  window.cmTrack && window.cmTrack('tool_used', { tool: 'invoice_generator' });
+}
+
+function printInvoice() {
+  if (!lastInvoice) { makeInvoice(); }
+  const w = window.open('', '_blank');
+  if (!w) { toast('Popup blocked — allow popups to print.'); return; }
+  w.document.write('<html><head><title>Invoice</title>' +
+    '<style>body{font-family:Inter,Arial,sans-serif;padding:32px;color:#111827}' +
+    '.inv-box{border:1px solid #e5e7eb;border-radius:10px;padding:20px}' +
+    'h4{color:#4f46e5;margin:0 0 4px;font-size:16pt}' +
+    'table{width:100%;border-collapse:collapse;margin:12px 0}' +
+    'th{background:#f3f4f6;border:1px solid #e5e7eb;padding:8px;text-align:left}' +
+    'td{border:1px solid #e5e7eb;padding:8px}.inv-total{font-weight:800;text-align:right}' +
+    '</style></head><body>' + lastInvoice + '</body></html>');
+  w.document.close();
+  setTimeout(() => w.print(), 400);
+}
+
 async function copyOut(id) {
   const el = document.getElementById(id);
   if (!el) return;
