@@ -846,7 +846,7 @@ footer.site .flinks a:hover{color:var(--text)}
       </div>
       <div class="form-group"><label>Price (₹ — put 0 for Free)</label><input type="number" step="1" class="form-control" id="sellPrice" required placeholder="999"></div>
       <div class="form-group"><label>Description</label><textarea class="form-control" id="sellDesc" required placeholder="Describe what buyers get..."></textarea></div>
-      <div class="form-group"><label>Product photo (optional — shown on your product card)</label><input type="file" accept="image/*" class="form-control" id="sellImage" onchange="uploadSellImage()"><small id="sellImageStatus" style="color:var(--muted);display:block;margin-top:6px"></small></div>
+      <div class="form-group"><label>Product photo (optional — shown on your product card)</label><input type="file" accept="image/*" class="form-control" id="sellImage" onchange="uploadSellImage()"><div id="sellImagePreview" style="display:none;margin-top:10px"><img id="sellImageThumb" alt="Product photo preview" style="width:100%;max-width:260px;border-radius:10px;border:1px solid var(--line,#2a2d3d);display:block"><button type="button" class="btn btn-sm" style="margin-top:8px" onclick="clearSellImage()">✕ Remove photo</button></div><small id="sellImageStatus" style="color:var(--muted);display:block;margin-top:6px"></small></div>
       <div class="form-group"><label>Upload product file (optional — delivered securely to buyers only)</label><input type="file" class="form-control" id="sellFile" onchange="uploadSellFile()"><small id="sellFileStatus" style="color:var(--muted);display:block;margin-top:6px"></small></div>
       <div class="form-group"><label>Product / Delivery Link (optional)</label><input type="url" class="form-control" id="sellLink" placeholder="https://drive.google.com/... or your product page"></div>
       <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px" id="sellSubmitBtn">List Product</button>
@@ -1803,6 +1803,23 @@ async function payViaCashfree() {
 
 /* ---------- Product image upload (public bucket) ---------- */
 let uploadedImageUrl = null;
+
+function showSellImagePreview(url) {
+  const wrap = document.getElementById('sellImagePreview');
+  const img = document.getElementById('sellImageThumb');
+  if (!wrap || !img) return;
+  if (!url) { wrap.style.display = 'none'; img.removeAttribute('src'); return; }
+  img.src = url;
+  wrap.style.display = 'block';
+}
+function clearSellImage() {
+  uploadedImageUrl = null;
+  const el = document.getElementById('sellImage');
+  const st = document.getElementById('sellImageStatus');
+  if (el) el.value = '';
+  if (st) st.textContent = 'Photo removed — choose another one.';
+  showSellImagePreview(null);
+}
 async function uploadSellImage() {
   const el = document.getElementById('sellImage');
   const st = document.getElementById('sellImageStatus');
@@ -1821,6 +1838,7 @@ async function uploadSellImage() {
     if (error) throw error;
     const { data } = supabaseClient.storage.from('product-images').getPublicUrl(path);
     uploadedImageUrl = data.publicUrl;
+    showSellImagePreview(data.publicUrl);
     if (st) st.textContent = '✅ Photo added.';
   } catch (e) { uploadedImageUrl = null; if (st) st.textContent = '❌ Upload failed: ' + (e.message || e); }
   finally { uploadingCount--; }
