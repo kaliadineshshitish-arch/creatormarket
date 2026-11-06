@@ -1050,7 +1050,7 @@ function updateAuthButton() {
   if (hl) hl.style.display = currentUser ? 'inline-flex' : 'none';
   if (st) st.textContent = currentUser ? 'Logged in as ' + (currentUser.email || currentUser.id) : 'Sign in to sell products, purchase products and manage your orders.';
   if (up) up.classList.toggle('show', !!currentUser);
-  if (em) em.textContent = currentUser ? (currentUser.email || 'Creator') : '';
+  if (em) em.textContent = currentUser ? (profilesMap[String(currentUser.id)] || 'DK Digital Studio') : '';
 }
 function openAuthModal() { refreshCurrentUser().then(() => { openModal('authModal'); refreshPrivacyUI(); }); }
 function setAuthMsg(msg, kind) {
@@ -1517,7 +1517,7 @@ async function handleSellProduct(e) {
   }
 
   await refreshCurrentUser();
-  const newProduct = { id: 'custom-' + Date.now(), title, category, price, description, link, product_url: link, file_path: uploadedFilePath || null, image_url: uploadedImageUrl || null, creator: true, creator_name: currentUser?.email || 'Creator', created_at: new Date().toISOString() };
+  const newProduct = { id: 'custom-' + Date.now(), title, category, price, description, link, product_url: link, file_path: uploadedFilePath || null, image_url: uploadedImageUrl || null, creator: true, creator_name: profilesMap[String(currentUser?.id)] || 'DK Digital Studio', created_at: new Date().toISOString() };
   let saved = false;
   if (isSupabaseConnected && supabaseClient && currentUser) {
     try {
@@ -1525,12 +1525,12 @@ async function handleSellProduct(e) {
       if (editingProductId) {
         const { data, error } = await supabaseClient.from('products').update(base).eq('id', editingProductId).select().single();
         if (error) throw error;
-        if (data) { const idx = products.findIndex(x => String(x.id) === String(editingProductId)); if (idx > -1) Object.assign(products[idx], data, { creator: true, creator_name: currentUser.email || 'Creator', link: data.product_url || link, category }); saved = true; }
+        if (data) { const idx = products.findIndex(x => String(x.id) === String(editingProductId)); if (idx > -1) Object.assign(products[idx], data, { creator: true, creator_name: profilesMap[String(currentUser.id)] || 'DK Digital Studio', link: data.product_url || link, category }); saved = true; }
       } else {
         const payload = Object.assign({ creator_id: currentUser.id, created_at: newProduct.created_at }, base);
         const { data, error } = await supabaseClient.from('products').insert([payload]).select().single();
         if (error) throw error;
-        if (data) { Object.assign(newProduct, data, { creator: true, creator_name: currentUser.email || 'Creator', link: data.product_url || link, category }); saved = true; }
+        if (data) { Object.assign(newProduct, data, { creator: true, creator_name: profilesMap[String(currentUser.id)] || 'DK Digital Studio', link: data.product_url || link, category }); saved = true; }
       }
     } catch (err) { console.warn('Supabase product save failed; using local fallback.', err); }
   }
@@ -2489,7 +2489,7 @@ async function loadProductsFromSupabase() {
         category: p.category || 'Uncategorized',
         sales_count: (pStats[String(p.id)] || {}).sales_count || 0,
         gross: (pStats[String(p.id)] || {}).gross || 0,
-        creator_name: profilesMap[String(p.creator_id)] || ((currentUser && String(p.creator_id) === String(currentUser.id)) ? (currentUser.email || 'Creator') : 'Creator')
+        creator_name: profilesMap[String(p.creator_id)] || ((currentUser && String(p.creator_id) === String(currentUser.id)) ? (profilesMap[String(currentUser.id)] || 'DK Digital Studio') : 'Creator')
       }));
       const localCustom = JSON.parse(localStorage.getItem('cmProducts') || '[]').filter(p => String(p.id).startsWith('custom-'));
       products = [...live, ...localCustom, ...demoProducts.filter(d => !data.some(x => String(x.id) === String(d.id)))];
