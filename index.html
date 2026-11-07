@@ -695,6 +695,52 @@ footer.site .flinks a:hover{color:var(--text)}
         <div class="out" id="vsOutput" style="margin-top:10px">Your score and fixes will appear here.</div>
       </div>
 
+
+      <div class="studio" style="grid-column:1/-1">
+        <h3 style="margin-top:0">📄 AI Resume Builder</h3>
+        <p class="note" style="margin-top:0">Fill this in once. Get a one-page resume written for the job you are applying to, plus an honest ATS score and the keywords you are missing. English, Hindi or Hinglish.</p>
+
+        <div class="promptForm">
+          <label>Your name<input class="field" id="rsName" placeholder="Dinesh Kalia"></label>
+          <label>Job you are applying for<input class="field" id="rsRole" placeholder="Digital Marketing Executive"></label>
+          <label>Email<input class="field" id="rsEmail" type="email" placeholder="you@example.com"></label>
+          <label>Phone<input class="field" id="rsPhone" placeholder="+91 90000 00000"></label>
+          <label>City<input class="field" id="rsCity" placeholder="Ludhiana, Punjab"></label>
+          <label>Experience level<select class="field" id="rsLevel">
+            <option value="fresher">Fresher</option>
+            <option value="1-3 years">1-3 years</option>
+            <option value="3-6 years">3-6 years</option>
+            <option value="6+ years">6+ years</option>
+          </select></label>
+          <label>Resume language<select class="field" id="rsLang">
+            <option value="english">English</option>
+            <option value="hinglish">Hinglish</option>
+            <option value="hindi">हिंदी (Hindi)</option>
+          </select></label>
+          <label>Education<input class="field" id="rsEducation" placeholder="B.Com, Panjab University, 2021"></label>
+        </div>
+
+        <div class="promptForm" style="margin-top:10px">
+          <label>Work experience<input class="field" id="rsExperience" placeholder="Sales Executive at ABC Ltd (2021-2023): handled 40+ clients, ₹18L monthly target"></label>
+          <label>Skills<input class="field" id="rsSkills" placeholder="Excel, Tally, Hindi/English communication, Instagram marketing"></label>
+        </div>
+
+        <div class="promptForm" style="margin-top:10px">
+          <label>Paste the job description (optional — but it is what makes the ATS score real)<textarea class="field" id="rsJd" rows="4" placeholder="Paste the full job posting here"></textarea></label>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" id="rsBtn" onclick="buildResume()">✨ Build my resume</button>
+          <button class="btn" onclick="clearResume()">Clear</button>
+        </div>
+
+        <div class="out" id="rsOutput" style="margin-top:12px;white-space:pre-wrap">Your resume will appear here.</div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="copyOut('rsOutput')">📋 Copy resume</button>
+          <button class="btn btn-sm" onclick="printResume()">🖨 Print / Save PDF</button>
+        </div>
+        <p class="note">Never invent experience — the builder leaves [ADD: ...] placeholders instead of guessing. Check every line before you send it.</p>
+      </div>
     </div>
   </section>
 
@@ -2412,6 +2458,61 @@ function checkScript() {
 
   document.getElementById('vsOutput').textContent = out;
   window.cmTrack && window.cmTrack('tool_used', { tool: 'script_checker', score: total });
+}
+
+
+/* ---------------- AI Resume Builder ---------------- */
+let lastResume = '';
+function clearResume() {
+  ['rsName','rsRole','rsEmail','rsPhone','rsCity','rsEducation','rsExperience','rsSkills','rsJd'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  lastResume = '';
+  const out = document.getElementById('rsOutput');
+  if (out) out.textContent = 'Your resume will appear here.';
+}
+async function buildResume() {
+  const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const name = val('rsName'), role = val('rsRole');
+  if (!name || !role) { toast('Name aur job title dono chahiye.'); return; }
+  if (getUsage() >= planLimit()) { toast('Your monthly AI limit is used up. Choose a paid plan for more.'); return; }
+
+  const btn = document.getElementById('rsBtn');
+  const out = document.getElementById('rsOutput');
+  btn.disabled = true; btn.textContent = 'Building…';
+  out.textContent = 'CreatorMarket is writing your resume and scoring it…';
+  try {
+    const r = await callFunction('ai-tools', {
+      mode: 'resume',
+      lang: val('rsLang') || 'english',
+      name, role,
+      email: val('rsEmail'), phone: val('rsPhone'), city: val('rsCity'),
+      level: val('rsLevel'), education: val('rsEducation'),
+      experience: val('rsExperience'), skills: val('rsSkills'), jd: val('rsJd'),
+    });
+    if (!r.ok) { out.textContent = (r.data && r.data.message) || 'Could not build the resume.'; return; }
+    lastResume = r.data.content || '';
+    out.textContent = lastResume || 'No resume returned.';
+    setUsage(getUsage() + 1);
+    window.cmTrack && window.cmTrack('tool_used', { tool: 'resume_builder', lang: val('rsLang') });
+  } catch (e) {
+    out.textContent = 'Something went wrong. Please try again.';
+  } finally {
+    btn.disabled = false; btn.textContent = '✨ Build my resume';
+    updateUsageUI();
+  }
+}
+function printResume() {
+  if (!lastResume) { toast('Pehle resume banao.'); return; }
+  const w = window.open('', '_blank');
+  if (!w) { toast('Popup blocked — allow popups to print.'); return; }
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  w.document.write('<html><head><title>Resume</title><style>' +
+    'body{font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.5;color:#111;padding:28px 34px;max-width:820px;margin:0 auto}' +
+    'pre{white-space:pre-wrap;font-family:inherit;font-size:11pt;margin:0}' +
+    '@media print{body{padding:0}}</style></head><body><pre>' + esc(lastResume) + '</pre></body></html>');
+  w.document.close();
+  setTimeout(() => w.print(), 400);
 }
 
 async function copyOut(id) {

@@ -94,6 +94,63 @@ Deno.serve(async (req) => {
       return json({ content });
     }
 
+
+    if (mode === 'resume') {
+      const lang = String(body.lang || 'english');
+      const name = String(body.name || '').trim();
+      const role = String(body.role || '').trim();
+      if (!name || !role) return json({ message: 'Your name and the job you are applying for are required.' }, 400);
+
+      const LANG_LABEL: Record<string, string> = {
+        english: 'English',
+        hindi: 'Hindi (Devanagari script)',
+        hinglish: 'Hinglish (Hindi written in English letters, the way Indian professionals actually write)',
+      };
+      const label = LANG_LABEL[lang] || 'English';
+
+      const system = `You are an expert resume writer for the Indian job market, and a strict ATS reviewer.
+
+Write the resume in ${label}. If the language is Hinglish, keep job titles, tools and company names in English but write everything else in natural Hinglish — the way a real Indian professional writes, not a literal translation.
+
+Rules:
+- One page. Plain text only, no markdown tables, no emoji.
+- Start with the candidate's name, then one line of contact details.
+- Then: SUMMARY (2 lines), SKILLS (one line, comma separated), EXPERIENCE (most recent first, 2-4 bullets each starting with a strong verb and containing a number wherever possible), EDUCATION, then anything else relevant.
+- Never invent employers, degrees, certifications or numbers the candidate did not provide. If something is missing, leave a clear [ADD: ...] placeholder instead of guessing.
+- Do not use first person. No "I".
+- Keep bullets under 20 words.
+
+After the resume, output exactly this block:
+
+---
+ATS SCORE: <0-100>
+MATCHED KEYWORDS: <comma separated, max 12>
+MISSING KEYWORDS: <comma separated, max 12, drawn from the job description>
+TOP 3 FIXES:
+1. <one line>
+2. <one line>
+3. <one line>
+---
+
+Score honestly. A resume with no job description supplied cannot score above 70.`;
+
+      const user = [
+        `Name: ${name}`,
+        `Email: ${String(body.email || '').trim() || '[ADD: email]'}`,
+        `Phone: ${String(body.phone || '').trim() || '[ADD: phone]'}`,
+        `City: ${String(body.city || '').trim() || '[ADD: city]'}`,
+        `Target role: ${role}`,
+        `Experience level: ${String(body.level || 'fresher')}`,
+        `Education: ${String(body.education || '').trim() || '[ADD: education]'}`,
+        `Work experience: ${String(body.experience || '').trim() || '[ADD: work experience]'}`,
+        `Skills: ${String(body.skills || '').trim() || '[ADD: skills]'}`,
+        `Job description to match against: ${String(body.jd || '').trim() || 'not supplied'}`,
+      ].join('\n');
+
+      const content = await chat(system, user, 0.35);
+      return json({ content });
+    }
+
     return json({ message: 'Unknown mode.' }, 400);
   } catch (e) {
     console.error('ai-tools error:', e);
