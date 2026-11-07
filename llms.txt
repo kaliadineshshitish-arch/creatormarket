@@ -1,23 +1,49 @@
 # CreatorMarket
 
-> CreatorMarket is a marketplace and creator-tools workspace for digital products. Creators list templates, UI kits, AI prompt packs, presets and eBooks and keep 90% of every sale (10% platform commission, free to list, no monthly fee). It also includes free AI creator tools — an AI prompt generator, a YouTube video analyzer and a social content studio. Buyers pay by UPI or card through a secure Cashfree checkout.
+> CreatorMarket is an Indian digital-products store and a free AI toolkit for creators, freelancers and small businesses. Buyers purchase ready-made templates, AI prompt packs and eBooks with instant download, paying by UPI (India) or PayPal (international). The site also gives away free AI tools with no signup: an AI resume builder with an ATS score, an AI prompt generator with a target-model picker, a hashtag finder, a Hinglish caption generator, a brand-deal rate calculator, an invoice generator and a video script checker. Selling is free — CreatorMarket takes no commission.
 
 ## Key pages
-- [Marketplace (home)](https://creatormarket-nu.vercel.app/): Browse and buy digital products; list your own.
-- [Sell Digital Products & Templates](https://creatormarket-nu.vercel.app/sell-digital-products): How to sell digital products online on CreatorMarket.
-- [Pricing](https://creatormarket-nu.vercel.app/pricing): Free to list, 10% commission, creator-tool passes from free to ₹599 / 30 days.
+
+### Store
+- [Home / Store](https://creatormarket-nu.vercel.app/): Browse and buy digital products; open the free AI tools.
+- [Pricing](https://creatormarket-nu.vercel.app/pricing): Free for creators, no commission. Optional creator-tool passes from free to ₹599 / 30 days.
 - [Why CreatorMarket](https://creatormarket-nu.vercel.app/why-creator-market): What makes it different for creators.
-- [Free AI Prompt Generator](https://creatormarket-nu.vercel.app/ai-prompt-generator): Turn an idea into a reusable AI prompt.
-- [AI Prompts for YouTube](https://creatormarket-nu.vercel.app/ai-prompts-for-youtube): Scripts, hooks, titles, descriptions and Shorts ideas.
-- [AI Image Prompt Generator](https://creatormarket-nu.vercel.app/ai-image-prompt-generator): Image prompts for Midjourney, DALL·E and Stable Diffusion.
+- [Sell Digital Products & Templates](https://creatormarket-nu.vercel.app/sell-digital-products): How to sell digital products online in India.
+- [Sell eBooks Online](https://creatormarket-nu.vercel.app/sell-ebooks-online): Selling eBooks without a company or GST.
+- [Sell Notion Templates](https://creatormarket-nu.vercel.app/sell-notion-templates): Selling Notion templates in India.
 - [Digital Templates for Creators](https://creatormarket-nu.vercel.app/digital-templates-for-creators): Buy ready-made templates or sell your own.
+- [Digital Product Ideas](https://creatormarket-nu.vercel.app/digital-product-ideas): 40+ digital product ideas that sell.
+
+### Free AI tools (no signup)
+- [AI Resume Builder](https://creatormarket-nu.vercel.app/resume-builder): Fill one form and get a one-page resume written for the job you are applying to, plus an honest ATS score, matched and missing keywords, and the top three fixes. Works in English, Hinglish and Hindi. Free, no signup, PDF download.
+- [AI Prompt Generator](https://creatormarket-nu.vercel.app/ai-prompt-generator): Turn one line into a reusable AI prompt, with a target-model picker (ChatGPT, Claude, Gemini, Midjourney, DALL·E, Sora/Veo) and a length picker.
+- [AI Image Prompt Generator](https://creatormarket-nu.vercel.app/ai-image-prompt-generator): Image prompts for Midjourney, DALL·E and Stable Diffusion.
+- [AI Prompts for YouTube](https://creatormarket-nu.vercel.app/ai-prompts-for-youtube): Scripts, hooks, titles, descriptions and Shorts ideas.
+- [AI Prompts for Instagram](https://creatormarket-nu.vercel.app/ai-prompts-for-instagram): Captions, hooks and Reels prompts.
+- [Hashtag Generator](https://creatormarket-nu.vercel.app/hashtag-generator): A mixed hashtag set (big, medium, small) that does not bury a small account.
+- [AI Caption Generator](https://creatormarket-nu.vercel.app/ai-caption-generator): Instagram captions in English or Hinglish.
+- [YouTube Shorts Ideas](https://creatormarket-nu.vercel.app/youtube-shorts-ideas): Shorts ideas and hooks.
+- [Midjourney Prompt Generator](https://creatormarket-nu.vercel.app/midjourney-prompt-generator): Prompts shaped for Midjourney specifically.
+- On the home page under Free Tools: brand-deal rate calculator (₹), invoice generator, video script checker, hashtag finder and caption generator.
+
+### Guides
+- [Creator Guides (blog)](https://creatormarket-nu.vercel.app/blog): Practical writing on selling digital products, getting found, and making content without burning out.
+- [How to Sell Digital Products in India](https://creatormarket-nu.vercel.app/blog/how-to-sell-digital-products-in-india): Without a company or GST — what to make, how to take UPI and PayPal, how to deliver files safely.
+- [Instagram Hashtags That Actually Work](https://creatormarket-nu.vercel.app/blog/instagram-hashtags-that-actually-work): Why 30 mega-tags bury a small account, and the mixed-size set that works.
+- [Faceless Reels: 30-Day Plan](https://creatormarket-nu.vercel.app/blog/faceless-reels-30-day-plan): The five-step loop and a realistic month of posting.
 
 ## Key facts
-- Platform commission: 10% per sale — creators keep 90%. Listing is free; no monthly fee.
-- Payments: UPI and card, via a secure Cashfree checkout. CreatorMarket does not store card details.
-- Creator tools: free tier includes 10 AI generations / month and the YouTube analyzer; Creator Pass is ₹299 / 30 days; Pro Pass is ₹599 / 30 days (one-time passes, not auto-renewing).
-- Trust: verified sales counts and earnings come from real orders (not screenshots); buyers can leave reviews; creators can hide their earnings.
-- Privacy: accounts use Supabase Auth with email and password; passwords are never stored by the site.
+- Selling: free. CreatorMarket takes no commission — creators keep 100% of their sales. No monthly fee.
+- Payments: UPI for buyers in India and PayPal for international buyers. Card details are never stored on the site.
+- Free tier: 10 AI generations a month across the tools, tracked in the browser, not tied to identity.
+- Paid passes (optional): Creator Pass ₹299 / 30 days, Pro Pass ₹599 / 30 days. One-time passes, not auto-renewing.
+- Products on sale include: an AI lead-generation and client-outreach kit, a faceless-reels kit in Hindi, a creator prompt-chain guide in Hinglish, and a Diwali greeting pack in Hindi/English/Punjabi.
+- Trust: verified sales counts come from real orders, not screenshots. Buyers can leave reviews. Creators can hide their earnings.
+- Privacy: accounts use Supabase Auth. Passwords are never stored by the site. The resume builder does not save the details you type.
+- Legal: Grievance Officer Dinesh Kalia, kaliadineshshitish@gmail.com, +91 97798 82240. Acknowledgement within 48 hours, resolution within 15 days.
 
 ## Contact
 - Website: https://creatormarket-nu.vercel.app/
+- Support: creatormarket.support@gmail.com
+- Owner: kaliadineshshitish@gmail.com
+- Operated by Dinesh Kalia, Amritsar, Punjab, India.
