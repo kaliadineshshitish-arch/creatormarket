@@ -878,7 +878,7 @@ footer.site .flinks a:hover{color:var(--text)}
       <button class="btn" onclick="signUpUser()">Create Account</button>
       <button class="btn" id="logoutButton" style="display:none" onclick="signOutUser()">Logout</button>
     </div>
-    <div style="margin-top:10px"><button class="btn btn-sm" onclick="sendLoginLink('auth')">✉️ Email me a login link</button></div>
+    <div style="margin-top:10px;display:none"><button class="btn btn-sm" onclick="sendLoginLink('auth')">✉️ Email me a login link</button></div><small style="display:block;margin-top:10px;color:var(--muted);line-height:1.5">Naye ho? Email daalo, koi bhi password (6+ letters) likho, aur <b>Create Account</b> dabao. Koi link ka wait nahi karna.</small>
     <div id="privacySection" style="display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
       <div style="font-weight:600;margin-bottom:6px">🔒 Privacy</div>
       <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted)">
@@ -1132,7 +1132,7 @@ async function signInUser() {
   const password = document.getElementById('authPassword').value;
   if (!email || !password) { setAuthMsg('Enter email and password.', 'error'); return; }
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error) { setAuthMsg('Login failed: ' + error.message, 'error'); toast('Login failed: ' + error.message); return; }
+  if (error) { const fm = friendlyAuthError(error); setAuthMsg(fm, 'error'); toast(fm); return; }
   currentUser = data.user; updateAuthButton(); closeModal('authModal');
   await loadProductsFromSupabase(); setAuthMsg('✅ Logged in.', 'ok'); toast('✅ Login successful.');
 }
@@ -1462,6 +1462,14 @@ async function submitReview(id) {
   }
   await loadProductsFromSupabase();
   openProductModal(id);
+}
+function friendlyAuthError(e) {
+  const m = String((e && e.message) || e || '');
+  if (/invalid login credentials/i.test(m)) return 'Galat email ya password. Naye ho? Create Account dabao.';
+  if (/already registered|already exists/i.test(m)) return 'Yeh email pehle se registered hai. Login karo ya password bhool gaye?';
+  if (/email not confirmed/i.test(m)) return 'Email confirm nahi hua. Dobara signup karo ya support se baat karo.';
+  if (/password/i.test(m) && /6|short|least/i.test(m)) return 'Password kam se kam 6 letters ka hona chahiye.';
+  return 'Login failed: ' + m;
 }
 function applyCoupon() {
   const code = (document.getElementById('couponInput')?.value || '').trim().toUpperCase();
