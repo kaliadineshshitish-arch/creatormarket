@@ -1,0 +1,21 @@
+name: Reviews Check
+on:
+  workflow_dispatch:
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: eqwmsjsqrhgyfpyssfop
+    steps:
+      - name: Q
+        run: |
+          q() { curl -s -m 40 -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "{\"query\": \"$1\"}"; echo; }
+          echo "=== tables ==="
+          q "select table_name from information_schema.tables where table_schema='public' order by table_name;"
+          echo "=== reviews columns ==="
+          q "select column_name, data_type from information_schema.columns where table_name='reviews' order by ordinal_position;"
+          echo "=== reviews policies ==="
+          q "select policyname, cmd, qual, with_check from pg_policies where tablename='reviews';"
+          echo "=== review rows ==="
+          q "select * from public.reviews order by created_at desc limit 5;"
