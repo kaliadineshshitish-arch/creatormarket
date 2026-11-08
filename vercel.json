@@ -1,3 +1,56 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/creatormarket",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/creatormarket/(.*)",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/index",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/products",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/store",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/shop",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/resume",
+      "destination": "/resume-builder",
+      "permanent": true
+    },
+    {
+      "source": "/resumebuilder",
+      "destination": "/resume-builder",
+      "permanent": true
+    },
+    {
+      "source": "/ai-resume-builder",
+      "destination": "/resume-builder",
+      "permanent": true
+    }
+  ]
 }
