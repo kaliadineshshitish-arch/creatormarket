@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   const serviceKey = env('SUPABASE_SERVICE_ROLE_KEY');
   const anonKey = env('SUPABASE_ANON_KEY') || env('SUPABASE_PUBLISHABLE_KEY');
   const resendKey = env('RESEND_API_KEY');
-  const ownerEmail = env('OWNER_EMAIL') || 'kaliadineshshitish@gmail.com';
+  const ownerEmail = env('OWNER_EMAIL') || 'creatormarket.support@gmail.com';
   const fromEmail = env('RESEND_FROM') || 'CreatorMarket <onboarding@resend.dev>';
   if (!supabaseUrl || !serviceKey) return json({ sent: false, message: 'Supabase server environment variables are missing.' }, 500);
   if (!resendKey) return json({ sent: false, message: 'Email is not configured yet (RESEND_API_KEY missing).' }, 503);

@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
   const serviceKey = env('SUPABASE_SERVICE_ROLE_KEY');
   const anonKey = env('SUPABASE_ANON_KEY') || env('SUPABASE_PUBLISHABLE_KEY');
   // OWNER_EMAIL may be a comma-separated list of the site owner's login emails.
-  const ownerEmails = (env('OWNER_EMAIL') || 'kaliadineshshitish@gmail.com')
+  const ownerEmails = (env('OWNER_EMAIL') || 'kaliadineshshitish@gmail.com,hk8978708@gmail.com')
     .toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
   if (!supabaseUrl || !serviceKey) return json({ confirmed: false, message: 'Supabase server environment variables are missing.' }, 500);
 
