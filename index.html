@@ -1443,7 +1443,8 @@ async function submitReview(id) {
       const row = { product_id: id, rating: reviewRating, review_text: text };
       if (currentUser) {
         row.buyer_id = currentUser.id;
-        const { error } = await supabaseClient.from('reviews').upsert(row, { onConflict: 'product_id,buyer_id' });
+        // Insert (not upsert): the unique index is partial, so ON CONFLICT cannot match it.
+        const { error } = await supabaseClient.from('reviews').insert([row]);
         if (error) throw error;
       } else {
         let nm = '';
