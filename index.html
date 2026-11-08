@@ -357,6 +357,14 @@ footer.site .flinks a:hover{color:var(--text)}
 .rate-stars .star.on { color:#fbbf24; }
 .rate-avg { margin-top:6px; font-size:.78rem; color:#8b90a6; }
 .rate-status { margin-top:4px; font-size:.78rem; color:#22d3ee; }
+.rate-form { margin-top:9px; }
+.rate-comment { width:100%; padding:9px 11px; border-radius:9px; border:1px solid #2a2d3d;
+  background:#0d0f17; color:#e5e7eb; font-size:.85rem; font-family:inherit; }
+.rate-comment::placeholder { color:#5b6178; }
+.rate-actions { display:flex; gap:8px; margin-top:8px; }
+.rate-list { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+.rate-item { font-size:.78rem; color:#9aa0b5; line-height:1.4; }
+.rate-item-stars { color:#fbbf24; letter-spacing:1px; }
 </style>
 </head>
 <body>
@@ -2550,20 +2558,40 @@ async function loadToolRating(tool, box) {
   if (!avgEl) return;
   if (!isSupabaseConnected || !supabaseClient) { avgEl.textContent = ''; return; }
   try {
-    const { data } = await supabaseClient.from('tool_ratings').select('rating').eq('tool', tool);
+    const { data } = await supabaseClient.from('tool_ratings').select('rating,comment,created_at').eq('tool', tool).order('created_at', { ascending: false });
     if (!Array.isArray(data) || !data.length) { avgEl.textContent = 'Be the first to rate this'; return; }
     const avg = data.reduce((a, r) => a + Number(r.rating || 0), 0) / data.length;
     avgEl.textContent = avg.toFixed(1) + ' / 5 · ' + data.length + ' rating' + (data.length === 1 ? '' : 's');
+
+    const withText = data.filter(r => r.comment && String(r.comment).trim()).slice(0, 3);
+    let listEl = box.querySelector('.rate-list');
+    if (withText.length) {
+      if (!listEl) {
+        listEl = document.createElement('div');
+        listEl.className = 'rate-list';
+        avgEl.parentNode.insertBefore(listEl, avgEl.nextSibling);
+      }
+      listEl.innerHTML = withText.map(r =>
+        '<div class="rate-item"><span class="rate-item-stars">' + '★'.repeat(Number(r.rating) || 0) + '</span> '
+        + escapeHtml(String(r.comment).slice(0, 200)) + '</div>').join('');
+    } else if (listEl) {
+      listEl.innerHTML = '';
+    }
   } catch (e) { avgEl.textContent = ''; }
 }
 
-async function submitToolRating(tool, value, box) {
+async function submitToolRating(tool, value, box, comment) {
   const status = box.querySelector('.rate-status');
   if (!isSupabaseConnected || !supabaseClient) { if (status) status.textContent = 'Ratings are unavailable right now.'; return; }
+  const row = { tool, rating: value };
+  const c = String(comment || '').trim();
+  if (c) row.comment = c.slice(0, 240);
   try {
-    const { error } = await supabaseClient.from('tool_ratings').insert([{ tool, rating: value }]);
+    const { error } = await supabaseClient.from('tool_ratings').insert([row]);
     if (error) throw error;
-    if (status) status.textContent = 'Thanks — ' + value + ' star' + (value === 1 ? '' : 's') + ' recorded.';
+    if (status) status.textContent = 'Thanks — ' + value + ' star' + (value === 1 ? '' : 's') + (c ? ' and your feedback' : '') + ' recorded.';
+    const form = box.querySelector('.rate-form');
+    if (form) form.style.display = 'none';
     const stars = box.querySelectorAll('.star');
     stars.forEach(s => s.classList.toggle('on', Number(s.dataset.v) <= value));
     loadToolRating(tool, box);
@@ -2582,10 +2610,34 @@ function initToolRatings() {
     box.className = 'ratebar';
     box.innerHTML = '<div class="rate-q">Yeh tool kaisa laga?</div>'
       + '<div class="rate-stars">' + starsHtml(5, 0) + '</div>'
+      + '<div class="rate-form" style="display:none">'
+      + '  <input class="rate-comment" type="text" maxlength="240" placeholder="Kuch likhna chahoge? (optional)">'
+      + '  <div class="rate-actions">'
+      + '    <button type="button" class="btn btn-sm rate-send">Send feedback</button>'
+      + '    <button type="button" class="btn btn-sm rate-skip">Skip</button>'
+      + '  </div>'
+      + '</div>'
       + '<div class="rate-avg"></div>'
       + '<div class="rate-status"></div>';
     box.querySelectorAll('.star').forEach(s => {
-      s.addEventListener('click', () => submitToolRating(t.key, Number(s.dataset.v), box));
+      s.addEventListener('click', () => {
+        box.dataset.picked = s.dataset.v;
+        box.querySelectorAll('.star').forEach(x => x.classList.toggle('on', Number(x.dataset.v) <= Number(s.dataset.v)));
+        box.querySelector('.rate-form').style.display = 'block';
+        box.querySelector('.rate-status').textContent = '';
+      });
+    });
+    const sendBtn = box.querySelector('.rate-send');
+    const skipBtn = box.querySelector('.rate-skip');
+    if (sendBtn) sendBtn.addEventListener('click', () => {
+      const v = Number(box.dataset.picked || 0);
+      if (!v) return;
+      submitToolRating(t.key, v, box, (box.querySelector('.rate-comment') || {}).value || '');
+    });
+    if (skipBtn) skipBtn.addEventListener('click', () => {
+      const v = Number(box.dataset.picked || 0);
+      if (!v) return;
+      submitToolRating(t.key, v, box, '');
     });
     out.parentNode.insertBefore(box, out.nextSibling);
     loadToolRating(t.key, box);
