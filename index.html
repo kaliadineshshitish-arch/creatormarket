@@ -347,6 +347,17 @@ footer.site .flinks a:hover{color:var(--text)}
     });
   } catch (e) {}
 </script>
+
+<style>
+.ratebar { margin-top:14px; padding:12px 14px; border:1px solid #2a2d3d; border-radius:12px; background:#12141d; }
+.rate-q { font-size:.86rem; color:#c7cbe0; margin-bottom:6px; }
+.rate-stars { display:flex; gap:6px; }
+.rate-stars .star { font-size:1.55rem; line-height:1; color:#3a3f52; cursor:pointer; transition:color .12s, transform .12s; }
+.rate-stars .star:hover { transform:scale(1.12); }
+.rate-stars .star.on { color:#fbbf24; }
+.rate-avg { margin-top:6px; font-size:.78rem; color:#8b90a6; }
+.rate-status { margin-top:4px; font-size:.78rem; color:#22d3ee; }
+</style>
 </head>
 <body>
 
@@ -2513,6 +2524,78 @@ function printResume() {
     '@media print{body{padding:0}}</style></head><body><pre>' + esc(lastResume) + '</pre></body></html>');
   w.document.close();
   setTimeout(() => w.print(), 400);
+}
+
+
+/* ---------------- Tool ratings ---------------- */
+const RATING_TOOLS = [
+  { key: 'resume',   label: 'AI Resume Builder', after: 'rsOutput' },
+  { key: 'prompt',   label: 'AI Prompt Creator', after: 'promptOutput' },
+  { key: 'hashtag',  label: 'Hashtag Finder',    after: 'htOutput' },
+  { key: 'caption',  label: 'Caption Generator', after: 'capOutput' },
+  { key: 'script',   label: 'Script Checker',    after: 'vsOutput' },
+  { key: 'rate',     label: 'Rate Calculator',   after: 'brOutput' },
+  { key: 'invoice',  label: 'Invoice Generator', after: 'invOutput' },
+  { key: 'studio',   label: 'Content Studio',    after: 'packOutput' },
+];
+
+function starsHtml(n, active) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) s += '<span class="star' + (i <= active ? ' on' : '') + '" data-v="' + i + '">★</span>';
+  return s;
+}
+
+async function loadToolRating(tool, box) {
+  const avgEl = box.querySelector('.rate-avg');
+  if (!avgEl) return;
+  if (!isSupabaseConnected || !supabaseClient) { avgEl.textContent = ''; return; }
+  try {
+    const { data } = await supabaseClient.from('tool_ratings').select('rating').eq('tool', tool);
+    if (!Array.isArray(data) || !data.length) { avgEl.textContent = 'Be the first to rate this'; return; }
+    const avg = data.reduce((a, r) => a + Number(r.rating || 0), 0) / data.length;
+    avgEl.textContent = avg.toFixed(1) + ' / 5 · ' + data.length + ' rating' + (data.length === 1 ? '' : 's');
+  } catch (e) { avgEl.textContent = ''; }
+}
+
+async function submitToolRating(tool, value, box) {
+  const status = box.querySelector('.rate-status');
+  if (!isSupabaseConnected || !supabaseClient) { if (status) status.textContent = 'Ratings are unavailable right now.'; return; }
+  try {
+    const { error } = await supabaseClient.from('tool_ratings').insert([{ tool, rating: value }]);
+    if (error) throw error;
+    if (status) status.textContent = 'Thanks — ' + value + ' star' + (value === 1 ? '' : 's') + ' recorded.';
+    const stars = box.querySelectorAll('.star');
+    stars.forEach(s => s.classList.toggle('on', Number(s.dataset.v) <= value));
+    loadToolRating(tool, box);
+  } catch (e) {
+    if (status) status.textContent = 'Could not save your rating. Try again.';
+  }
+}
+
+function initToolRatings() {
+  RATING_TOOLS.forEach(t => {
+    const out = document.getElementById(t.after);
+    if (!out || !out.parentNode) return;
+    if (out.parentNode.querySelector('[data-rate-tool="' + t.key + '"]')) return;
+    const box = document.createElement('div');
+    box.setAttribute('data-rate-tool', t.key);
+    box.className = 'ratebar';
+    box.innerHTML = '<div class="rate-q">Yeh tool kaisa laga?</div>'
+      + '<div class="rate-stars">' + starsHtml(5, 0) + '</div>'
+      + '<div class="rate-avg"></div>'
+      + '<div class="rate-status"></div>';
+    box.querySelectorAll('.star').forEach(s => {
+      s.addEventListener('click', () => submitToolRating(t.key, Number(s.dataset.v), box));
+    });
+    out.parentNode.insertBefore(box, out.nextSibling);
+    loadToolRating(t.key, box);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(initToolRatings, 800));
+} else {
+  setTimeout(initToolRatings, 800);
 }
 
 async function copyOut(id) {
