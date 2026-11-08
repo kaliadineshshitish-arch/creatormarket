@@ -874,11 +874,10 @@ footer.site .flinks a:hover{color:var(--text)}
     <div class="form-group"><label>Email</label><input id="authEmail" type="email" class="form-control" placeholder="you@example.com"></div>
     <div class="form-group"><label>Password</label><input id="authPassword" type="password" class="form-control" placeholder="Minimum 6 characters"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="signInUser()">Login</button>
-      <button class="btn" onclick="signUpUser()">Create Account</button>
+      <button class="btn btn-primary" onclick="continueAuth()">Continue</button>
       <button class="btn" id="logoutButton" style="display:none" onclick="signOutUser()">Logout</button>
     </div>
-    <div style="margin-top:10px;display:none"><button class="btn btn-sm" onclick="sendLoginLink('auth')">✉️ Email me a login link</button></div><small style="display:block;margin-top:10px;color:var(--muted);line-height:1.5">Naye ho? Email daalo, koi bhi password (6+ letters) likho, aur <b>Create Account</b> dabao. Koi link ka wait nahi karna.</small>
+    <div style="margin-top:10px;display:none"><button class="btn btn-sm" onclick="sendLoginLink('auth')">✉️ Email me a login link</button></div><small style="display:block;margin-top:10px;color:var(--muted);line-height:1.5">Email daalo, koi bhi password (6+ letters) likho, aur <b>Continue</b> dabao. Naya account khud ban jayega — koi email link nahi.</small>
     <div id="privacySection" style="display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
       <div style="font-weight:600;margin-bottom:6px">🔒 Privacy</div>
       <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted)">
@@ -1135,6 +1134,45 @@ async function signInUser() {
   if (error) { const fm = friendlyAuthError(error); setAuthMsg(fm, 'error'); toast(fm); return; }
   currentUser = data.user; updateAuthButton(); closeModal('authModal');
   await loadProductsFromSupabase(); setAuthMsg('✅ Logged in.', 'ok'); toast('✅ Login successful.');
+}
+async function continueAuth() {
+  if (!isSupabaseConnected || !supabaseClient) { setAuthMsg('Supabase is not connected — check the internet and refresh.', 'error'); return; }
+  const email = (document.getElementById('authEmail').value || '').trim();
+  const password = document.getElementById('authPassword').value || '';
+  if (!email || password.length < 6) { setAuthMsg('Email daalo aur kam se kam 6 letters ka password likho.', 'error'); return; }
+
+  setAuthMsg('Checking…', '');
+  // 1) existing account? log in.
+  const { data: d1, error: e1 } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (!e1 && d1 && d1.session) {
+    currentUser = d1.user; updateAuthButton(); closeModal('authModal');
+    setAuthMsg('✅ Logged in.', 'ok'); toast('✅ Logged in.');
+    try { await loadProductsFromSupabase(); } catch (_) {}
+    return;
+  }
+
+  // 2) wrong password on an existing account — say so, do not create a duplicate.
+  const msg1 = String((e1 && e1.message) || '');
+  if (/invalid login credentials/i.test(msg1)) {
+    // 3) no account yet? create one.
+    const { data: d2, error: e2 } = await supabaseClient.auth.signUp({ email, password });
+    if (!e2 && d2 && d2.session) {
+      currentUser = d2.user; updateAuthButton(); closeModal('authModal');
+      setAuthMsg('✅ Account ban gaya — logged in.', 'ok'); toast('✅ Account ban gaya.');
+      try { await loadProductsFromSupabase(); } catch (_) {}
+      return;
+    }
+    if (!e2 && d2 && d2.user && !d2.session) {
+      setAuthMsg('✅ Account ban gaya. Email confirm karo, phir login karo.', 'ok'); return;
+    }
+    const msg2 = String((e2 && e2.message) || '');
+    if (/already registered|already exists/i.test(msg2)) {
+      setAuthMsg('Yeh email pehle se hai — password galat hai. Sahi password daalo.', 'error'); return;
+    }
+    setAuthMsg(friendlyAuthError(e2 || { message: msg1 }), 'error'); return;
+  }
+
+  setAuthMsg(friendlyAuthError(e1 || {}), 'error');
 }
 async function signUpUser() {
   setAuthMsg('Creating account…', '');
