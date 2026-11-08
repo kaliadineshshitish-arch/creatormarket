@@ -1,0 +1,18 @@
+name: Auth Config
+on:
+  workflow_dispatch:
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: eqwmsjsqrhgyfpyssfop
+    steps:
+      - name: Q
+        run: |
+          echo "=== current auth config ==="
+          curl -s -m 40 "https://api.supabase.com/v1/projects/$REF/config/auth" -H "Authorization: Bearer $TOKEN" | python3 -c "import sys,json; d=json.load(sys.stdin); print({k:d.get(k) for k in ['mailer_autoconfirm','disable_signup','external_email_enabled','mailer_secure_email_change_enabled']})"
+          echo "=== turning OFF email confirmation ==="
+          curl -s -m 40 -X PATCH "https://api.supabase.com/v1/projects/$REF/config/auth" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"mailer_autoconfirm": true}' | python3 -c "import sys,json; d=json.load(sys.stdin); print({k:d.get(k) for k in ['mailer_autoconfirm','disable_signup','external_email_enabled']})"
+          echo "=== verify ==="
+          curl -s -m 40 "https://api.supabase.com/v1/projects/$REF/config/auth" -H "Authorization: Bearer $TOKEN" | python3 -c "import sys,json; d=json.load(sys.stdin); print('mailer_autoconfirm =', d.get('mailer_autoconfirm'))"
