@@ -65,7 +65,19 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Account / activity counters for the owner.
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+    const dayISO = dayStart.toISOString();
+    const countOf = async (q: any) => {
+      try { const { count } = await q; return count || 0; } catch (_) { return 0; }
+    };
+    const totalUsers = await countOf(admin.from('profiles').select('*', { count: 'exact', head: true }));
+    const newToday = await countOf(admin.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', dayISO));
+    const activeToday = await countOf(admin.from('profiles').select('*', { count: 'exact', head: true }).gte('last_seen', dayISO));
+
     return json({
+      users: { total: totalUsers, new_today: newToday, active_today: activeToday },
       pending_orders: pendingOrders,
       paid_orders: paid.length,
       product_sales: productSales.length,

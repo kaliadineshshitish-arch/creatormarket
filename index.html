@@ -1102,6 +1102,16 @@ async function refreshCurrentUser() {
   updateAuthButton();
   return currentUser;
 }
+let _lastSeenStamped = null;
+async function stampLastSeen() {
+  if (!isSupabaseConnected || !supabaseClient || !currentUser) return;
+  const id = String(currentUser.id);
+  if (_lastSeenStamped === id) return;   // once per page load
+  _lastSeenStamped = id;
+  try {
+    await supabaseClient.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', id);
+  } catch (_) { /* analytics only — never block the user */ }
+}
 function updateAuthButton() {
   const b = document.getElementById('authButton');
   const l = document.getElementById('logoutButton');
@@ -1115,6 +1125,7 @@ function updateAuthButton() {
   if (st) st.textContent = currentUser ? 'Logged in as ' + (currentUser.email || currentUser.id) : 'Sign in to sell products, purchase products and manage your orders.';
   if (up) up.classList.toggle('show', !!currentUser);
   if (em) em.textContent = currentUser ? (profilesMap[String(currentUser.id)] || 'DK Digital Studio') : '';
+  try { stampLastSeen(); } catch (_) {}
 }
 function openAuthModal() { refreshCurrentUser().then(() => { openModal('authModal'); refreshPrivacyUI(); }); }
 function setAuthMsg(msg, kind) {
@@ -2139,6 +2150,12 @@ async function openEarnings() {
       <div class="dashboard-stat"><strong>${inr(d.creator_payouts)}</strong><span>Creator payouts</span></div>
     </div>
     <div class="notice">Paid orders: ${Number(d.paid_orders || 0)} · Product sales: ${Number(d.product_sales || 0)}. </div>
+    <h3 style="margin:1.2rem 0 .5rem">👥 Accounts</h3>
+    <div class="dashboard-stats">
+      <div class="dashboard-stat"><strong>${Number((d.users && d.users.total) || 0)}</strong><span>Total accounts</span></div>
+      <div class="dashboard-stat"><strong>${Number((d.users && d.users.new_today) || 0)}</strong><span>New today</span></div>
+      <div class="dashboard-stat"><strong>${Number((d.users && d.users.active_today) || 0)}</strong><span>Active today</span></div>
+    </div>
     <div class="notice" style="margin-top:10px">This is a tracking report of your sales. Payouts are sent to the UPI / PayPal details you save above.</div>`;
   const pend = Array.isArray(d.pending_orders) ? d.pending_orders : [];
   box.innerHTML += `
