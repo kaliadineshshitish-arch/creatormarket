@@ -51,6 +51,41 @@
       "source": "/ai-resume-builder",
       "destination": "/resume-builder",
       "permanent": true
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/privacypolicy",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/refund",
+      "destination": "/refund-policy",
+      "permanent": true
+    },
+    {
+      "source": "/terms-and-conditions",
+      "destination": "/terms",
+      "permanent": true
+    },
+    {
+      "source": "/about",
+      "destination": "/why-creator-market",
+      "permanent": true
+    },
+    {
+      "source": "/free-tools",
+      "destination": "/#free-tools",
+      "permanent": true
+    },
+    {
+      "source": "/tools",
+      "destination": "/#free-tools",
+      "permanent": true
     }
   ]
 }
