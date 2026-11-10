@@ -702,6 +702,58 @@ footer.site .flinks a:hover{color:var(--text)}
         <div id="invOutput" style="margin-top:10px"></div>
       </div>
 
+
+      <div class="studio">
+        <h3 style="margin-top:0">🏷️ Business Name Generator</h3>
+        <p class="note" style="margin-top:0">10 names for your business, each with a tagline — short and easy to say over the phone.</p>
+        <div class="promptForm">
+          <label>Business type<input class="field" id="bnIndustry" placeholder="Example: home bakery in Amritsar"></label>
+          <label>Style<select class="field" id="bnStyle">
+            <option value="modern">Modern</option>
+            <option value="indian">Indian-rooted</option>
+            <option value="descriptive">Descriptive</option>
+            <option value="premium">Premium</option>
+            <option value="fun">Fun / quirky</option>
+          </select></label>
+          <label>Keywords (optional)<input class="field" id="bnKeywords" placeholder="ghee, homemade, punjabi"></label>
+        </div>
+        <div style="margin-top:10px"><button class="btn btn-primary" onclick="makeBusinessName()">Get 10 names</button></div>
+        <div class="out" id="bnOutput" style="margin-top:10px">Names will appear here.</div>
+        <div style="margin-top:8px"><button class="btn btn-sm" onclick="copyOut('bnOutput')">📋 Copy</button></div>
+      </div>
+
+      <div class="studio">
+        <h3 style="margin-top:0">▶️ YouTube Title &amp; Description</h3>
+        <p class="note" style="margin-top:0">5 titles, a description and tags — written so the keyword is front-loaded.</p>
+        <div class="promptForm">
+          <label>Video topic<input class="field" id="ytTopic" placeholder="Example: how to make a resume with no experience"></label>
+          <label>Audience<input class="field" id="ytAudience" placeholder="Indian freshers"></label>
+          <label>Main keyword (optional)<input class="field" id="ytKeyword" placeholder="resume for freshers"></label>
+        </div>
+        <div style="margin-top:10px"><button class="btn btn-primary" onclick="makeYtPack()">Write title &amp; description</button></div>
+        <div class="out" id="ytOutput" style="margin-top:10px">Titles, description and tags will appear here.</div>
+        <div style="margin-top:8px"><button class="btn btn-sm" onclick="copyOut('ytOutput')">📋 Copy</button></div>
+      </div>
+
+      <div class="studio">
+        <h3 style="margin-top:0">📸 Instagram Bio Generator</h3>
+        <p class="note" style="margin-top:0">5 bios under 150 characters, each with a clear call to action.</p>
+        <div class="promptForm">
+          <label>What is the account about?<input class="field" id="igNiche" placeholder="Example: homemade cakes in Amritsar"></label>
+          <label>Vibe<select class="field" id="igVibe">
+            <option value="friendly">Friendly</option>
+            <option value="professional">Professional</option>
+            <option value="funny">Funny</option>
+            <option value="premium">Premium</option>
+            <option value="motivational">Motivational</option>
+          </select></label>
+          <label>Account name (optional)<input class="field" id="igName" placeholder="@yourhandle"></label>
+        </div>
+        <div style="margin-top:10px"><button class="btn btn-primary" onclick="makeIgBio()">Get 5 bios</button></div>
+        <div class="out" id="igOutput" style="margin-top:10px">Bios will appear here.</div>
+        <div style="margin-top:8px"><button class="btn btn-sm" onclick="copyOut('igOutput')">📋 Copy</button></div>
+      </div>
+
       <div class="studio" style="grid-column:1/-1">
         <h3 style="margin-top:0">🎬 Video Script Checker</h3>
         <p class="note" style="margin-top:0">Paste your script before you upload. It scores the hook, the middle and the CTA, then tells you exactly what to fix.</p>
@@ -2617,6 +2669,9 @@ const RATING_TOOLS = [
   { key: 'rate',     label: 'Rate Calculator',   after: 'brOutput' },
   { key: 'invoice',  label: 'Invoice Generator', after: 'invOutput' },
   { key: 'studio',   label: 'Content Studio',    after: 'packOutput' },
+  { key: 'bizname',  label: 'Business Name',     after: 'bnOutput' },
+  { key: 'yttitle',  label: 'YouTube Titles',    after: 'ytOutput' },
+  { key: 'igbio',    label: 'Instagram Bio',     after: 'igOutput' },
 ];
 
 function starsHtml(n, active) {
@@ -2720,6 +2775,57 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => setTimeout(initToolRatings, 800));
 } else {
   setTimeout(initToolRatings, 800);
+}
+
+
+/* ---------------- Business name / YouTube / Instagram bio ---------------- */
+async function runAiTool(opts) {
+  const { btnId, outId, mode, payload, required, label } = opts;
+  const out = document.getElementById(outId);
+  const btn = document.getElementById(btnId);
+  for (const [id, msg] of required) {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) { toast(msg); return; }
+  }
+  if (getUsage() >= planLimit()) { toast('Your monthly AI limit is used up. Choose a paid plan for more.'); return; }
+  const old = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Working…'; }
+  if (out) out.textContent = 'Writing…';
+  try {
+    const r = await callFunction('ai-tools', Object.assign({ mode }, payload()));
+    if (!r.ok) { if (out) out.textContent = (r.data && r.data.message) || 'Could not generate.'; return; }
+    if (out) out.textContent = r.data.content || 'Nothing returned.';
+    setUsage(getUsage() + 1);
+    window.cmTrack && window.cmTrack('tool_used', { tool: mode });
+  } catch (e) {
+    if (out) out.textContent = 'Something went wrong. Try again.';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = old; }
+    updateUsageUI();
+  }
+}
+function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+function makeBusinessName() {
+  runAiTool({
+    btnId: null, outId: 'bnOutput', mode: 'business-name',
+    required: [['bnIndustry', 'Business type likho.']],
+    payload: () => ({ industry: val('bnIndustry'), style: val('bnStyle'), keywords: val('bnKeywords') }),
+  });
+}
+function makeYtPack() {
+  runAiTool({
+    btnId: null, outId: 'ytOutput', mode: 'yt-title',
+    required: [['ytTopic', 'Video ka topic likho.']],
+    payload: () => ({ topic: val('ytTopic'), audience: val('ytAudience'), keyword: val('ytKeyword') }),
+  });
+}
+function makeIgBio() {
+  runAiTool({
+    btnId: null, outId: 'igOutput', mode: 'ig-bio',
+    required: [['igNiche', 'Account kis baare me hai, likho.']],
+    payload: () => ({ niche: val('igNiche'), vibe: val('igVibe'), name: val('igName') }),
+  });
 }
 
 async function copyOut(id) {

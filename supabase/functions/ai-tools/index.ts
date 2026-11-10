@@ -151,6 +151,70 @@ Score honestly. A resume with no job description supplied cannot score above 70.
       return json({ content });
     }
 
+
+    if (mode === 'business-name') {
+      const industry = String(body.industry || '').trim();
+      const style = String(body.style || 'modern').trim();
+      const keywords = String(body.keywords || '').trim();
+      if (!industry) return json({ message: 'What kind of business is it?' }, 400);
+      const system = `You are a naming consultant for Indian small businesses. Suggest 10 business names for the industry given.
+
+Rules:
+- Names must be easy to say out loud in India and easy to spell over the phone.
+- No trademarked or obviously taken names (avoid "Nike", "Zomato" style copies).
+- Mix: 4 short and modern, 3 Indian-rooted, 3 descriptive.
+- Style preference: ${style}.
+- If keywords are supplied, work them in naturally.
+- For each name add a one-line tagline.
+- Return plain text, one per line: NAME — tagline. Then a final line: "CHECK: <two things to verify before you commit>".
+- No emoji, no numbering.`;
+
+      const user = `Industry: ${industry}\nStyle: ${style}\nKeywords: ${keywords || 'none supplied'}`;
+      const content = await chat(system, user, 0.8);
+      return json({ content });
+    }
+
+    if (mode === 'yt-title') {
+      const topic = String(body.topic || '').trim();
+      const audience = String(body.audience || '').trim();
+      const keyword = String(body.keyword || '').trim();
+      if (!topic) return json({ message: 'What is the video about?' }, 400);
+      const system = `You are a YouTube SEO specialist for Indian channels. For the topic given, produce:
+
+TITLES (5)
+Five titles. Each under 60 characters. Front-load the keyword. No clickbait that lies. Vary the angle: one how-to, one number/listicle, one question, one result-driven, one beginner-focused.
+
+DESCRIPTION
+150-200 words. First two lines must work as the search snippet. Include the main keyword in the first line. Then what the viewer gets, then a short CTA. No emoji spam.
+
+TAGS
+12-15 comma separated tags, lower case.
+
+Return plain text with exactly those three section labels. Topic: ${topic}. Audience: ${audience || 'Indian viewers'}. Main keyword: ${keyword || topic}.`;
+
+      const content = await chat(system, `Write the YouTube pack for: ${topic}`, 0.65);
+      return json({ content });
+    }
+
+    if (mode === 'ig-bio') {
+      const niche = String(body.niche || '').trim();
+      const vibe = String(body.vibe || 'friendly').trim();
+      const name = String(body.name || '').trim();
+      if (!niche) return json({ message: 'What is the account about?' }, 400);
+      const system = `You are an Instagram profile writer for Indian creators.
+
+Write 5 Instagram bios for the niche given. Each must be under 150 characters, use at most 2 emoji, and end with a clear call to action (DM, link, or follow).
+
+Vary the style: one short and punchy, one story-style, one list-style, one funny, one professional.
+
+Vibe: ${vibe}. Account name: ${name || 'not supplied'}.
+
+Return plain text, one bio per block separated by a blank line, numbered 1-5. No commentary.`;
+
+      const content = await chat(system, `Niche: ${niche}\nVibe: ${vibe}`, 0.75);
+      return json({ content });
+    }
+
     return json({ message: 'Unknown mode.' }, 400);
   } catch (e) {
     console.error('ai-tools error:', e);
