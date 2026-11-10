@@ -51,7 +51,7 @@ h1,h2,h3,.brand-name{font-family:Sora,Inter,sans-serif;letter-spacing:-.02em}
 
 /* ---------- Header ---------- */
 header.site{
-  position:sticky;top:0;z-index:100;background:rgba(10,11,18,.82);backdrop-filter:blur(14px);
+  position:sticky;top:0;z-index:100;background:#0a0b12;
   border-bottom:1px solid var(--border);
 }
 .nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:14px}
@@ -329,6 +329,13 @@ footer.site .flinks a:hover{color:var(--text)}
 .inv-total { text-align:right; font-weight:800; font-size:12pt; }
 @media print { body > *:not(#printArea) { display:none !important; } #printArea { display:block !important; } }
 
+
+/* --- mobile scroll smoothness: stop image tearing while scrolling --- */
+.product-card, .studio, .card { transform: translateZ(0); backface-visibility: hidden; }
+img { -webkit-backface-visibility: hidden; }
+@media (max-width: 720px) {
+  .product-card img, .studio img { will-change: auto; }
+}
 </style>
 <!-- Google Analytics 4 (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GYPZCFTVJ8"></script>
