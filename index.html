@@ -336,6 +336,13 @@ img { -webkit-backface-visibility: hidden; }
 @media (max-width: 720px) {
   .product-card img, .studio img { will-change: auto; }
 }
+
+.toolChips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+.toolChip { display:inline-block; padding:10px 16px; border-radius:40px; border:1px solid var(--border);
+  background:var(--card); color:var(--text); font-size:.9rem; font-weight:600; text-decoration:none;
+  transition:border-color .15s, transform .12s; }
+.toolChip:hover { border-color:#6366f1; transform:translateY(-1px); }
+@media (max-width:640px){ .toolChip{ padding:9px 13px; font-size:.84rem; } }
 </style>
 <!-- Google Analytics 4 (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GYPZCFTVJ8"></script>
@@ -422,12 +429,12 @@ img { -webkit-backface-visibility: hidden; }
 <main id="top">
   <!-- Hero -->
   <section class="wrap hero">
-    <div class="eyebrow">✦ READY-MADE PRODUCTS + FREE AI TOOLS</div>
-    <h1>Stop searching 10 websites — <span class="grad">everything a creator needs</span> is here</h1>
-    <p>Buy ready-made templates, AI prompt packs and eBooks with instant download — or make your own with free AI tools: prompt generator, YouTube analyzer and content studio. Pay by UPI or PayPal.</p>
+    <div class="eyebrow">✦ 12 FREE AI TOOLS — NO SIGNUP, NO PAYMENT</div>
+    <h1>Free AI tools for Indian creators — <span class="grad">start in 30 seconds</span></h1>
+    <p>Resume builder, business names, YouTube titles, Instagram bios, hashtags, captions, rate calculator, invoices — all free, all in the browser. Ready-made templates and eBooks bhi hain, UPI ya PayPal se.</p>
     <div class="cta">
-      <a class="btn btn-primary" href="#marketplace">Explore Marketplace</a>
-      <a class="btn btn-ghost" href="#tools">Open Creator Tools</a>
+      <a class="btn btn-primary" href="#free-tools">Try 12 free tools — no signup</a>
+      <a class="btn btn-ghost" href="#marketplace">Browse products</a>
     </div>
     <div class="trust">
       <span>✓ Secure UPI checkout</span>
@@ -441,6 +448,28 @@ img { -webkit-backface-visibility: hidden; }
       <div class="feature-box"><b>❤️ Wishlist</b><span>Save products for later</span></div>
       <div class="feature-box"><b>🎁 Offers</b><span>Coupons &amp; deals</span></div>
     </div>
+  </section>
+
+
+  <!-- Free tools — first thing after the hero, because this is what people actually use -->
+  <section class="wrap section" id="toolsFirst" style="padding-top:8px">
+    <h2 class="section-title">Start with a free tool</h2>
+    <p class="lead">No signup, no payment. Ek tool chuno — 30 second me kaam ho jayega.</p>
+    <div class="toolChips">
+      <a class="toolChip" href="/resume-builder">📄 Resume Builder</a>
+      <a class="toolChip" href="/business-name-generator">🏷️ Business Name</a>
+      <a class="toolChip" href="/youtube-title-generator">▶️ YouTube Title</a>
+      <a class="toolChip" href="/instagram-bio-generator">📸 Instagram Bio</a>
+      <a class="toolChip" href="/ai-prompt-generator">✍️ Prompt Creator</a>
+      <a class="toolChip" href="/hashtag-generator">#️⃣ Hashtags</a>
+      <a class="toolChip" href="/ai-caption-generator">💬 Captions</a>
+      <a class="toolChip" href="#free-tools">🎬 Script Checker</a>
+      <a class="toolChip" href="#free-tools">💰 Rate Calculator</a>
+      <a class="toolChip" href="#free-tools">🧾 Invoice</a>
+      <a class="toolChip" href="#free-tools">📦 Content Studio</a>
+      <a class="toolChip" href="#free-tools">▶️ YouTube Analyzer</a>
+    </div>
+    <p class="note" style="margin-top:10px"><a href="#free-tools">Saare tools ek page par →</a></p>
   </section>
 
   <!-- Marketplace -->
