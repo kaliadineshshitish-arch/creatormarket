@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OneLink — ek page, apna rate card</title>
+<meta name="description" content="Apna rate card aur contact card ek single page par. Free banao, link share karo, enquiry lo.">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<style>
+  :root{
+    --ink:#16181d; --muted:#6b7280; --line:#e6e8ee; --bg:#f6f5f2;
+    --card:#ffffff; --accent:#1c5d4f; --accent-soft:#e8f2ee; --warn:#8a5a00;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:20px 16px 56px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .brand{font-weight:700;letter-spacing:-.02em;font-size:17px}
+  .brand span{color:var(--accent)}
+  .ghost{
+    background:none;border:1px solid var(--line);color:var(--ink);
+    padding:8px 12px;border-radius:999px;font-size:13px;cursor:pointer;font-weight:600
+  }
+  .ghost:hover{background:#fff}
+
+  /* ---------- card ---------- */
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:22px 20px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.05);
+  }
+  .avatar{
+    width:56px;height:56px;border-radius:50%;background:var(--accent-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;font-weight:700;color:var(--accent);margin-bottom:12px
+  }
+  .name{font-size:23px;font-weight:750;letter-spacing:-.02em;margin:0 0 2px}
+  .role{color:var(--accent);font-weight:650;font-size:14px;margin:0 0 2px}
+  .city{color:var(--muted);font-size:13px;margin:0}
+  .about{font-size:14.5px;color:#3b3f47;margin:14px 0 0;white-space:pre-wrap}
+
+  .sec-label{
+    font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--muted);margin:22px 0 10px
+  }
+  .svc{
+    display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+    padding:11px 0;border-bottom:1px dashed var(--line);font-size:14.5px
+  }
+  .svc:last-of-type{border-bottom:none}
+  .svc b{font-weight:650}
+  .svc .price{font-weight:750;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+  .actions{display:flex;flex-direction:column;gap:9px;margin-top:20px}
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:13px 16px;border-radius:13px;font-size:15px;font-weight:650;
+    text-decoration:none;border:1px solid transparent;cursor:pointer;text-align:center
+  }
+  .btn-primary{background:#25D366;color:#07301a}
+  .btn-secondary{background:var(--ink);color:#fff}
+  .btn-outline{background:#fff;border-color:var(--line);color:var(--ink)}
+  .upi{
+    margin-top:9px;font-size:13px;color:var(--muted);text-align:center;
+    display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap
+  }
+  .upi code{background:#f2f3f6;padding:3px 8px;border-radius:6px;color:var(--ink);font-size:12.5px}
+  .upi button{background:none;border:none;color:var(--accent);font-weight:700;font-size:12.5px;cursor:pointer;padding:2px}
+
+  .foot{
+    margin-top:20px;padding-top:14px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    font-size:11.5px;color:var(--muted)
+  }
+  .foot a{color:var(--accent);font-weight:700;text-decoration:none}
+
+  /* ---------- builder ---------- */
+  .intro{margin-bottom:16px}
+  .intro h1{font-size:22px;line-height:1.25;letter-spacing:-.02em;margin:0 0 6px}
+  .intro p{margin:0;color:var(--muted);font-size:14px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:#4b5563;margin-bottom:5px}
+  .field input,.field textarea{
+    width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;
+    font-size:15px;font-family:inherit;background:#fff;color:var(--ink)
+  }
+  .field input:focus,.field textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+  .field textarea{resize:vertical;min-height:64px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .svc-inputs{display:grid;grid-template-columns:1fr 104px;gap:8px;margin-bottom:8px}
+  .hint{font-size:12px;color:var(--muted);margin:4px 0 0}
+  .divider{height:1px;background:var(--line);margin:20px 0}
+  .sharebox{
+    background:#fff;border:1px dashed var(--accent);border-radius:13px;
+    padding:12px;font-size:12px;color:#3b3f47;word-break:break-all;margin-top:10px;display:none
+  }
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;
+    font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.22s;z-index:9
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .pro{background:var(--accent-soft);border:1px solid #cfe3db;border-radius:13px;padding:12px 14px;margin-top:16px}
+  .pro b{color:var(--accent)}
+  .pro p{margin:4px 0 0;font-size:12.5px;color:#3f5f55}
+
+  @media print{
+    body{background:#fff}
+    .wrap{padding:0;max-width:100%}
+    .topbar,.actions,.foot,.ghost{display:none!important}
+    .card{border:none;box-shadow:none;padding:0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var FIELDS = ["name","role","city","about","phone","upi","link","s1t","s1p","s2t","s2p","s3t","s3p"];
+
+  var state = {
+    name:"", role:"", city:"", about:"", phone:"", upi:"", link:"",
+    s1t:"", s1p:"", s2t:"", s2p:"", s3t:"", s3p:""
+  };
+
+  var app = document.getElementById("app");
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+
+  function safeUrl(u) {
+    var t = String(u == null ? "" : u).trim();
+    if (!t) return "";
+    if (/^https?:\/\//i.test(t)) return t;
+    if (/^www\./i.test(t)) return "https://" + t;
+    return "";
+  }
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2200);
+  }
+
+  /* ---------- encoding ---------- */
+  function encode(obj) {
+    var json = JSON.stringify(obj);
+    var b64 = btoa(unescape(encodeURIComponent(json)));
+    return b64.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  }
+  function decode(str) {
+    var b64 = str.replace(/-/g,"+").replace(/_/g,"/");
+    while (b64.length % 4) { b64 += "="; }
+    try {
+      return JSON.parse(decodeURIComponent(escape(atob(b64))));
+    } catch (e) { return null; }
+  }
+
+  function readHash() {
+    var h = window.location.hash || "";
+    var m = h.match(/[#&]d=([^&]+)/);
+    if (!m) return null;
+    return decode(m[1]);
+  }
+
+  /* ---------- helpers ---------- */
+  function initials(name) {
+    var parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return "•";
+    if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  }
+
+  function waNumber(phone) {
+    var d = String(phone || "").replace(/\D/g,"");
+    if (d.length === 10) d = "91" + d;
+    if (d.length === 11 && d.charAt(0) === "0") d = "91" + d.slice(1);
+    return d;
+  }
+
+  function services() {
+    var out = [];
+    if (state.s1t.trim()) out.push({ t: state.s1t.trim(), p: state.s1p.trim() });
+    if (state.s2t.trim()) out.push({ t: state.s2t.trim(), p: state.s2p.trim() });
+    if (state.s3t.trim()) out.push({ t: state.s3t.trim(), p: state.s3p.trim() });
+    return out;
+  }
+
+  function prettyPrice(p) {
+    if (!p) return "";
+    var t = p.trim();
+    if (/^[0-9]+$/.test(t)) return "₹" + Number(t).toLocaleString("en-IN");
+    return t;
+  }
+
+  /* ---------- public card ---------- */
+  function renderCard(data) {
+    var svcs = [];
+    if (data.s1t) svcs.push({ t:data.s1t, p:data.s1p });
+    if (data.s2t) svcs.push({ t:data.s2t, p:data.s2p });
+    if (data.s3t) svcs.push({ t:data.s3t, p:data.s3p });
+
+    var wa = waNumber(data.phone);
+    var msg = encodeURIComponent("Namaste " + (data.name || "") + ", maine aapka page dekha. Kaam ke baare mein baat karni hai.");
+
+    var svcHtml = svcs.map(function(s){
+      return '<div class="svc"><b>' + esc(s.t) + '</b><span class="price">' + esc(prettyPrice(s.p)) + '</span></div>';
+    }).join("");
+
+    var upiHtml = data.upi
+      ? '<div class="upi">UPI: <code id="upicode">' + esc(data.upi) + '</code>' +
+        '<button type="button" data-copy="' + esc(data.upi) + '">Copy</button></div>'
+      : "";
+
+    var safeLink = safeUrl(data.link);
+    var linkHtml = safeLink
+      ? '<a class="btn btn-outline" href="' + esc(safeLink) + '" target="_blank" rel="noopener noreferrer">Kaam dekhein</a>'
+      : "";
+
+    app.innerHTML =
+      '<div class="topbar"><div class="brand">One<span>Link</span></div>' +
+        '<button class="ghost" id="editBtn" type="button">Edit</button></div>' +
+      '<div class="card">' +
+        '<div class="avatar">' + esc(initials(data.name)) + '</div>' +
+        '<h1 class="name">' + esc(data.name || "Aapka naam") + '</h1>' +
+        (data.role ? '<p class="role">' + esc(data.role) + '</p>' : "") +
+        (data.city ? '<p class="city">' + esc(data.city) + '</p>' : "") +
+        (data.about ? '<p class="about">' + esc(data.about) + '</p>' : "") +
+        (svcHtml ? '<div class="sec-label">Kaam aur rate</div>' + svcHtml : "") +
+        '<div class="actions">' +
+          (wa ? '<a class="btn btn-primary" href="https://wa.me/' + esc(wa) + '?text=' + msg + '" target="_blank" rel="noopener">WhatsApp par baat karein</a>' : "") +
+          linkHtml +
+          '<button class="btn btn-secondary" id="printBtn" type="button">PDF / Print</button>' +
+        '</div>' +
+        upiHtml +
+        '<div class="foot"><span>OneLink par bana hua page</span>' +
+          '<a href="#" id="makeOwn">Apna banayein</a></div>' +
+      '</div>';
+
+    var editBtn = document.getElementById("editBtn");
+    if (editBtn) editBtn.addEventListener("click", function(){ window.location.hash = ""; renderBuilder(); });
+
+    var makeOwn = document.getElementById("makeOwn");
+    if (makeOwn) makeOwn.addEventListener("click", function(e){ e.preventDefault(); window.location.hash = ""; renderBuilder(); });
+
+    var printBtn = document.getElementById("printBtn");
+    if (printBtn) printBtn.addEventListener("click", function(){ window.print(); });
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function(btn){
+      btn.addEventListener("click", function(){
+        var v = btn.getAttribute("data-copy");
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(v).then(function(){ toast("Copy ho gaya"); });
+        } else { toast(v); }
+      });
+    });
+  }
+
+  /* ---------- builder ---------- */
+  function renderBuilder() {
+    app.innerHTML =
+      '<div class="topbar"><div class="brand">One<span>Link</span></div>' +
+        '<button class="ghost" id="sampleBtn" type="button">Sample dekhein</button></div>' +
+      '<div class="intro">' +
+        '<h1>Ek page. Apna rate card aur contact card.</h1>' +
+        '<p>Neeche detail bharein, apna link copy karein, aur client ko bhejein. Koi login nahi, koi fees nahi.</p>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="field"><label for="f_name">Aapka naam</label>' +
+          '<input id="f_name" data-k="name" placeholder="Jaise: Priya Sharma" value="' + esc(state.name) + '"></div>' +
+        '<div class="row2">' +
+          '<div class="field"><label for="f_role">Kaam / profession</label>' +
+            '<input id="f_role" data-k="role" placeholder="Bridal makeup artist" value="' + esc(state.role) + '"></div>' +
+          '<div class="field"><label for="f_city">Sheher</label>' +
+            '<input id="f_city" data-k="city" placeholder="Jaipur" value="' + esc(state.city) + '"></div>' +
+        '</div>' +
+        '<div class="field"><label for="f_about">Do line apne baare mein</label>' +
+          '<textarea id="f_about" data-k="about" placeholder="6 saal se bridal makeup karti hoon. Ghar par aur destination dono.">' + esc(state.about) + '</textarea></div>' +
+        '<div class="field"><label for="f_phone">WhatsApp number</label>' +
+          '<input id="f_phone" data-k="phone" inputmode="numeric" placeholder="98XXXXXXXX" value="' + esc(state.phone) + '">' +
+          '<p class="hint">Isi par enquiry aayegi. 10 digit likhein.</p></div>' +
+        '<div class="field"><label for="f_upi">UPI ID (optional)</label>' +
+          '<input id="f_upi" data-k="upi" placeholder="naam@upi" value="' + esc(state.upi) + '">' +
+          '<p class="hint">Isse customer seedha payment kar sakta hai. Yaad rakhein: yeh link kholne wala sab kuch dekh sakta hai — sirf wahi likhein jo public ho sakta hai.</p></div>' +
+        '<div class="field"><label for="f_link">Portfolio / Instagram link (optional)</label>' +
+          '<input id="f_link" data-k="link" placeholder="https://instagram.com/..." value="' + esc(state.link) + '"></div>' +
+        '<div class="divider"></div>' +
+        '<div class="sec-label" style="margin-top:0">Kaam aur rate (2-3 likhein)</div>' +
+        '<div class="svc-inputs">' +
+          '<input data-k="s1t" placeholder="Bridal makeup" value="' + esc(state.s1t) + '">' +
+          '<input data-k="s1p" placeholder="15000" value="' + esc(state.s1p) + '">' +
+        '</div>' +
+        '<div class="svc-inputs">' +
+          '<input data-k="s2t" placeholder="Party makeup" value="' + esc(state.s2t) + '">' +
+          '<input data-k="s2p" placeholder="3500" value="' + esc(state.s2p) + '">' +
+        '</div>' +
+        '<div class="svc-inputs">' +
+          '<input data-k="s3t" placeholder="Trial session" value="' + esc(state.s3t) + '">' +
+          '<input data-k="s3p" placeholder="1500" value="' + esc(state.s3p) + '">' +
+        '</div>' +
+        '<p class="hint">Rate ki jagah "On request" bhi likh sakte hain.</p>' +
+        '<div class="actions">' +
+          '<button class="btn btn-primary" id="buildBtn" type="button">Mera page banayein</button>' +
+        '</div>' +
+        '<div class="sharebox" id="sharebox"></div>' +
+        '<div class="pro"><b>Free:</b> poora page, WhatsApp button, PDF.' +
+          '<p>Watermark hatana ho aur apna naam wala link chahiye to ₹149 mein unlock — payment UPI se.</p></div>' +
+      '</div>';
+
+    Array.prototype.forEach.call(app.querySelectorAll("[data-k]"), function(el){
+      el.addEventListener("input", function(){
+        state[el.getAttribute("data-k")] = el.value;
+        hideShare();
+      });
+    });
+
+    document.getElementById("sampleBtn").addEventListener("click", fillSample);
+    document.getElementById("buildBtn").addEventListener("click", build);
+  }
+
+  function hideShare() {
+    var sb = document.getElementById("sharebox");
+    if (sb) { sb.style.display = "none"; }
+  }
+
+  function fillSample() {
+    state = {
+      name:"Priya Sharma", role:"Bridal makeup artist", city:"Jaipur",
+      about:"6 saal se bridal aur party makeup karti hoon. Ghar par aur destination dono. Trial available.",
+      phone:"9876543210", upi:"priya@upi", link:"https://instagram.com/",
+      s1t:"Bridal makeup", s1p:"15000",
+      s2t:"Party makeup", s2p:"3500",
+      s3t:"Trial session", s3p:"1500"
+    };
+    renderBuilder();
+    toast("Sample bhar diya — ab 'Mera page banayein' dabayein");
+  }
+
+  function build() {
+    if (!state.name.trim()) { toast("Pehle apna naam likhein"); return; }
+    if (!state.phone.trim() && !state.upi.trim() && !state.link.trim()) {
+      toast("Kam se kam WhatsApp number ya UPI daalein"); return;
+    }
+
+    var payload = {};
+    FIELDS.forEach(function(k){ payload[k] = (state[k] || "").trim(); });
+
+    var isLocal = window.location.protocol === "file:";
+    var url = isLocal ? "" : (window.location.origin + window.location.pathname) + "#d=" + encode(payload);
+
+    var sb = document.getElementById("sharebox");
+    sb.style.display = "block";
+
+    if (isLocal) {
+      sb.innerHTML =
+        '<div style="font-weight:700;margin-bottom:6px;color:#8a5a00">Yeh file seedha khuli hai</div>' +
+        '<p style="margin:0 0 10px;font-size:12.5px;color:#3b3f47">Is haalat mein link doosre phone par nahi khulega, kyunki woh aapke computer ka path hai. Abhi card dekhein aur PDF bana kar bhej dein:</p>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+          '<button class="btn btn-secondary" id="viewBtn" type="button" style="flex:1;padding:10px;font-size:13.5px">Card dekhein aur PDF banayein</button>' +
+        '</div>' +
+        '<p style="margin:10px 0 0;font-size:11.5px;color:#6b7280">Permanent link chahiye to is file ko free host karein (Cloudflare Pages ya Netlify Drop) — do minute ka kaam.</p>';
+    } else {
+      sb.innerHTML =
+        '<div style="font-weight:700;margin-bottom:6px;color:#16181d">Aapka link taiyar hai</div>' +
+        '<div id="linkText">' + esc(url) + '</div>' +
+        '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+          '<button class="btn btn-secondary" id="copyBtn" type="button" style="flex:1;padding:10px;font-size:13.5px">Link copy karein</button>' +
+          '<button class="btn btn-outline" id="viewBtn" type="button" style="flex:1;padding:10px;font-size:13.5px">Page dekhein</button>' +
+        '</div>' +
+        '<p style="margin:10px 0 0;font-size:11.5px;color:#6b7280">Yeh link aapke browser mein hi banta hai — koi data kahin save nahi hota.</p>';
+    }
+
+    var copyBtn = document.getElementById("copyBtn");
+    if (copyBtn) copyBtn.addEventListener("click", function(){
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function(){ toast("Link copy ho gaya"); });
+      } else {
+        var r = document.createRange();
+        r.selectNodeContents(document.getElementById("linkText"));
+        var sel = window.getSelection();
+        sel.removeAllRanges(); sel.addRange(r);
+        toast("Link select ho gaya — copy karein");
+      }
+    });
+
+    document.getElementById("viewBtn").addEventListener("click", function(){
+      window.location.hash = "d=" + encode(payload);
+      renderCard(payload);
+    });
+  }
+
+  /* ---------- boot ---------- */
+  var fromLink = readHash();
+  if (fromLink) {
+    FIELDS.forEach(function(k){ state[k] = fromLink[k] || ""; });
+    renderCard(state);
+  } else {
+    renderBuilder();
+  }
+})();
+</script>
+</body>
+</html>
