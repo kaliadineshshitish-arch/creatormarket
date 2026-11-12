@@ -1,0 +1,21 @@
+name: DNS Check 2
+on:
+  workflow_dispatch:
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Q
+        run: |
+          echo "=== A record ==="
+          dig +short creatormarket.in A @8.8.8.8
+          dig +short creatormarket.in A @1.1.1.1
+          echo "=== NS ==="
+          dig +short creatormarket.in NS @8.8.8.8
+          echo "=== www ==="
+          dig +short www.creatormarket.in @8.8.8.8
+          echo "=== HTTP ==="
+          for u in "http://creatormarket.in" "https://creatormarket.in"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -m 25 -L "$u" || echo ERR)
+            echo "$code  $u"
+          done
