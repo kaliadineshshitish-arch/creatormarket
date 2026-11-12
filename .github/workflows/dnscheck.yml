@@ -1,0 +1,27 @@
+name: DNS Check
+on:
+  workflow_dispatch:
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Q
+        run: |
+          echo "=== A record (authoritative-ish) ==="
+          for ns in 8.8.8.8 1.1.1.1; do
+            echo "--- via $ns ---"
+            dig +short creatormarket.in A @$ns
+          done
+          echo "=== nameservers ==="
+          dig +short creatormarket.in NS @8.8.8.8
+          echo "=== ask the authoritative NS directly ==="
+          NS=$(dig +short creatormarket.in NS @8.8.8.8 | head -1)
+          echo "NS = $NS"
+          dig +short creatormarket.in A @$NS
+          echo "=== www ==="
+          dig +short www.creatormarket.in @8.8.8.8
+          echo "=== HTTP test ==="
+          for u in "http://creatormarket.in" "https://creatormarket.in"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -m 25 -L "$u" || echo ERR)
+            echo "$code  $u"
+          done
