@@ -1,0 +1,20 @@
+name: DNS Check 3
+on:
+  workflow_dispatch:
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Q
+        run: |
+          echo "=== A ==="
+          dig +short creatormarket.in A @8.8.8.8
+          echo "=== NS ==="
+          dig +short creatormarket.in NS @8.8.8.8
+          echo "=== ask .IN TLD servers directly ==="
+          for tld in a.in-servers.net b.in-servers.net c.in-servers.net d.in-servers.net; do
+            echo "--- $tld ---"
+            dig +short creatormarket.in NS @$tld 2>/dev/null | head -3
+          done
+          echo "=== HTTP ==="
+          curl -s -o /dev/null -w "%{http_code}\n" -m 25 -L "http://creatormarket.in" || echo ERR
