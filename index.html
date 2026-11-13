@@ -555,7 +555,7 @@ img { -webkit-backface-visibility: hidden; }
       <div class="product-card" style="cursor:default"><div class="card-body">
         <div style="font-size:1.6rem">🛡️</div>
         <h3 class="card-title" style="margin:.4rem 0">Secure payments</h3>
-        <p class="card-desc">Safe checkout by Cashfree, with server-side validation and protected data.</p>
+        <p class="card-desc">Safe checkout by UPI or PayPal, with server-side validation and protected data.</p>
       </div></div>
     </div>
     <div style="text-align:center;margin-top:22px">
@@ -883,7 +883,7 @@ img { -webkit-backface-visibility: hidden; }
           <li>Priority feature access</li>
         </ul>
         <button class="btn btn-primary btn-block" onclick="startPlan('creator')">Pay ₹299 — 30-day pass</button>
-        <p class="note">One-time 30-day pass. Pay by UPI or Cashfree. Renew manually when it ends.</p>
+        <p class="note">One-time 30-day pass. Pay by UPI or PayPal. Renew manually when it ends.</p>
       </div>
       <div class="price-card">
         <span class="planbadge">PRO</span>
@@ -897,7 +897,7 @@ img { -webkit-backface-visibility: hidden; }
           <li>Priority support</li>
         </ul>
         <button class="btn btn-primary btn-block" onclick="startPlan('pro')">Pay ₹599 — 30-day pass</button>
-        <p class="note">One-time 30-day pass. Pay by UPI or Cashfree. Renew manually when it ends.</p>
+        <p class="note">One-time 30-day pass. Pay by UPI or PayPal. Renew manually when it ends.</p>
       </div>
     </div>
   </section>
@@ -924,8 +924,8 @@ img { -webkit-backface-visibility: hidden; }
   <section class="wrap section" id="faq">
     <div class="section-head"><h2>FAQ</h2></div>
     <div class="faq">
-      <details><summary>How do payments work?</summary><p>Two ways. <b>UPI</b> (default — no gateway needed): pay straight to the owner's UPI ID by QR or UPI app; the order is then marked “awaiting confirmation”. <b>Cashfree</b> (when enabled): the order is created on a secure Supabase Edge Function and verified server-side before it is marked paid. Secret keys never touch the browser.</p></details>
-      <details><summary>Do you store my card details?</summary><p>No. Card, UPI and netbanking details are entered on Cashfree's PCI-compliant checkout. CreatorMarket only ever sees an order ID and payment status.</p></details>
+      <details><summary>How do payments work?</summary><p>Two ways. <b>UPI</b> (default — no gateway needed): pay straight to the owner's UPI ID by QR or UPI app; the order is then marked “awaiting confirmation”. <b>PayPal</b> (international): pay through PayPal.Me, then the order is verified server-side before it is marked paid.</p></details>
+      <details><summary>Do you store my card details?</summary><p>No. Card, UPI and netbanking details are entered on your bank's UPI app or on PayPal's own checkout page. CreatorMarket only ever sees an order ID and payment status.</p></details>
       <details><summary>Is login real?</summary><p>Yes. Accounts use Supabase Auth with email and password. Your password is never stored in this page.</p></details>
       <details><summary>Can CreatorMarket publish to Instagram, Facebook or TikTok?</summary><p>The workspace generates platform-specific content. Direct publishing needs each platform's official API/OAuth setup; CreatorMarket will not fake a connection or ask for your social passwords.</p></details>
       <details><summary>How many free AI generations do I get?</summary><p>10 free AI generations per calendar month in the Prompt Creator. The browser counter resets monthly; it is a convenience limit, not a security boundary.</p></details>
@@ -946,7 +946,7 @@ img { -webkit-backface-visibility: hidden; }
     <a href="#marketplace">Marketplace</a><a href="#tools">Creator Tools</a><a href="#plans">Plans</a><a href="#faq">FAQ</a><a href="mailto:creatormarket.support@gmail.com">Support</a>
   </div>
   <p>© 2026 CreatorMarket. Marketplace &amp; Creator Tools for creators worldwide.</p>
-  <p style="margin-top:.5rem;font-size:.75rem">Payments by UPI (direct) &amp; Cashfree • Auth &amp; data by Supabase • Frontend is fully static.</p>
+  <p style="margin-top:.5rem;font-size:.75rem">Payments by UPI (direct) &amp; PayPal • Auth &amp; data by Supabase • Frontend is fully static.</p>
   <p style="margin-top:.6rem;font-size:.8rem;color:var(--faint)">Free tools: <a href="/ai-prompt-generator" style="color:var(--muted)">AI Prompt Generator</a> · <a href="/ai-prompts-for-youtube" style="color:var(--muted)">AI Prompts for YouTube</a> · <a href="/ai-image-prompt-generator" style="color:var(--muted)">AI Image Prompt Generator</a> · <a href="/digital-templates-for-creators" style="color:var(--muted)">Digital Templates for Creators</a> · <a href="/sell-digital-products" style="color:var(--muted)">Sell Digital Products</a></p>
   <p style="margin-top:.4rem;font-size:.8rem"><a href="/pricing" style="color:var(--muted)">Pricing</a> · <a href="/why-creator-market" style="color:var(--muted)">Why CreatorMarket</a></p>
   <p style="margin-top:.4rem;font-size:.75rem"><a href="/terms" style="color:var(--faint)">Terms</a> · <a href="/privacy" style="color:var(--faint)">Privacy</a> · <a href="/refund-policy" style="color:var(--faint)">Refund Policy</a> · <a href="/delivery-policy" style="color:var(--faint)">Delivery</a> · <a href="/contact" style="color:var(--faint)">Contact</a></p>
@@ -1030,7 +1030,7 @@ img { -webkit-backface-visibility: hidden; }
         <div class="promo-card-option" onclick="selectPromoPlan(this, 7, 499)"><div class="days">7 Days</div><div class="cost">₹499</div></div>
       </div>
     </div>
-    <div class="notice">Pay by UPI (QR / app) or Cashfree. Your product appears in Featured Promotions once payment is confirmed.</div>
+    <div class="notice">Pay by UPI (QR / app) or PayPal. Your product appears in Featured Promotions once payment is confirmed.</div>
     <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="confirmPromotion()">Pay &amp; Activate Promotion</button>
   </div>
 </div>
@@ -1065,11 +1065,11 @@ img { -webkit-backface-visibility: hidden; }
 <div class="modal-overlay" id="supportModal">
   <div class="modal"><button class="modal-close" onclick="closeModal('supportModal')">&times;</button>
     <h2 class="section-title">🛡️ Security &amp; Support</h2>
-    <div class="notice success"><b>Checkout safety:</b> UPI goes directly to the owner's UPI ID (no gateway). Cashfree secret keys live only on Supabase Edge Functions — never in this page.</div>
+    <div class="notice success"><b>Checkout safety:</b> UPI goes directly to the owner's UPI ID (no gateway). PayPal uses the owner's PayPal.Me link. No payment keys ever live in this page.</div>
     <ul style="padding-left:1.2rem;line-height:1.9;color:var(--muted);margin-top:1rem;font-size:.9rem">
       <li>Supabase Row Level Security protects products, orders, reviews and creator data.</li>
       <li>Authenticated users are required for selling and buying.</li>
-      <li>Cashfree order status is confirmed on the server before marking an order paid.</li>
+      <li>Payment status is confirmed on the server before marking an order paid.</li>
     </ul>
     <p style="margin-top:1rem;color:var(--muted);font-size:.9rem">Need help? Email us at <a href="mailto:creatormarket.support@gmail.com">creatormarket.support@gmail.com</a> — we usually reply within 24 hours.</p>
     <button class="btn btn-primary" style="margin-top:1rem" onclick="requestSupport()">Contact Support</button>
@@ -1084,7 +1084,7 @@ img { -webkit-backface-visibility: hidden; }
       <div class="notice">✅ Marketplace UI</div><div class="notice">✅ Sell asset form</div>
       <div class="notice">✅ Supabase auth &amp; data</div><div class="notice">✅ Creator dashboard</div>
       <div class="notice">✅ Promotions ₹99/₹199/₹499</div><div class="notice">✅ Buyer purchases library</div>
-      <div class="notice success">✅ Cashfree payment + server verification</div><div class="notice success">✅ Reviews, wishlist, coupons, notifications</div>
+      <div class="notice success">✅ UPI and PayPal + server verification</div><div class="notice success">✅ Reviews, wishlist, coupons, notifications</div>
       <div class="notice">✅ YouTube analyzer &amp; content studio</div><div class="notice">✅ AI prompt creator</div>
     </div>
     <div class="notice" style="margin-top:1rem">Live payments require the Supabase Edge Functions and environment variables described in the README.</div>
@@ -1124,7 +1124,7 @@ img { -webkit-backface-visibility: hidden; }
 <script>
 /* ============================================================
    CreatorMarket — frontend
-   Payments: Cashfree (server-side order + verification via Supabase Edge Functions)
+   Payments: UPI and PayPal (server-side order + verification via Supabase Edge Functions)
    ============================================================ */
 
 const CONFIG = {
@@ -1951,7 +1951,7 @@ function openPayModal(opts) {
     </div>
     ${opts.note ? '<div class="note" style="margin-top:10px">' + escapeHtml(opts.note) + '</div>' : ''}
     ${!upiReady ? '<div class="notice warn" style="margin-top:12px">UPI is not set up yet — add your UPI ID in the CONFIG block.</div>' : ''}
-    ${cfReady ? '<div class="notice" style="margin-top:8px">Card / Netbanking is enabled by Cashfree after account approval — until then UPI works through Cashfree.</div>' : ''}
+    ${cfReady ? '<div class="notice" style="margin-top:8px">Pay by UPI (India) or PayPal (international). Card and netbanking go through your own UPI app or PayPal page — CreatorMarket never sees them.</div>' : ''}
     <div id="upiView" style="margin-top:14px"></div>`;
   openModal('payModal');
 }
