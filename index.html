@@ -430,6 +430,13 @@ img { -webkit-backface-visibility: hidden; }
   <!-- Hero -->
   <section class="wrap hero">
     <div class="eyebrow">✦ 12 FREE AI TOOLS — NO SIGNUP, NO PAYMENT</div>
+    <div id="aiLangBar" style="display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin:14px 0 4px">
+  <span style="font-size:.78rem;color:var(--muted)">AI answer language:</span>
+  <button class="lang-chip" data-ailang="en" style="padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:#151827;color:var(--text);font-size:.8rem;cursor:pointer">English</button>
+  <button class="lang-chip" data-ailang="hinglish" style="padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:#151827;color:var(--text);font-size:.8rem;cursor:pointer">Hinglish</button>
+  <button class="lang-chip" data-ailang="hi" style="padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:#151827;color:var(--text);font-size:.8rem;cursor:pointer">हिंदी</button>
+</div>
+
     <h1>Free AI tools for Indian creators — <span class="grad">start in 30 seconds</span></h1>
     <p>Resume builder, business names, YouTube titles, Instagram bios, hashtags, captions, rate calculator, invoices — all free, all in the browser. Ready-made templates and eBooks bhi hain, UPI ya PayPal se.</p>
     <div class="cta">
@@ -2828,7 +2835,21 @@ async function runAiTool(opts) {
   if (btn) { btn.disabled = true; btn.textContent = 'Working…'; }
   if (out) out.textContent = 'Writing…';
   try {
-    const r = await callFunction('ai-tools', Object.assign({ mode }, payload()));
+    const _p = Object.assign({ mode }, payload());
+    // Language: 'en' (default) | 'hinglish' | 'hi'
+    const _lang = (function () {
+      try { return localStorage.getItem('cm_ai_lang') || 'en'; } catch (e) { return 'en'; }
+    })();
+    if (_lang !== 'en') {
+      const _instr = _lang === 'hi'
+        ? ' IMPORTANT: Write the entire answer in Hindi using Devanagari script.'
+        : ' IMPORTANT: Write the entire answer in Hinglish — Hindi words written in English (Roman) letters, casual and natural, the way Indian creators actually talk. Do not use Devanagari.';
+      Object.keys(_p).forEach(function (k) {
+        if (typeof _p[k] === 'string') _p[k] = _p[k] + _instr;
+      });
+      _p.lang = _lang;
+    }
+    const r = await callFunction('ai-tools', _p);
     if (!r.ok) { if (out) out.textContent = (r.data && r.data.message) || 'Could not generate.'; return; }
     if (out) out.textContent = r.data.content || 'Nothing returned.';
     setUsage(getUsage() + 1);
@@ -2840,6 +2861,29 @@ async function runAiTool(opts) {
     updateUsageUI();
   }
 }
+/* ---- AI answer language chips ---- */
+(function () {
+  function paint() {
+    let cur = 'en';
+    try { cur = localStorage.getItem('cm_ai_lang') || 'en'; } catch (e) {}
+    document.querySelectorAll('[data-ailang]').forEach(function (b) {
+      const on = b.dataset.ailang === cur;
+      b.style.background = on ? 'linear-gradient(120deg,#6366f1,#a855f7 52%,#22d3ee)' : '#151827';
+      b.style.color = on ? '#0a0b12' : 'var(--text)';
+      b.style.borderColor = on ? 'transparent' : 'var(--border)';
+      b.style.fontWeight = on ? '700' : '500';
+    });
+  }
+  document.addEventListener('click', function (e) {
+    const b = e.target.closest('[data-ailang]');
+    if (!b) return;
+    try { localStorage.setItem('cm_ai_lang', b.dataset.ailang); } catch (err) {}
+    paint();
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint);
+  else paint();
+})();
+
 function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
 function makeBusinessName() {
