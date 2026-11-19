@@ -1969,7 +1969,7 @@ async function payViaRazorpay() {
 
   let data;
   try {
-    const r = await callFunction('razorpay-order', {
+    const r = await callFunction('bright-task', {
       // 'pro' collides with CareerShield's Career Pro pack, so map it to cmpro
       plan: plan === 'pro' ? 'cmpro' : plan,
       site: 'creatormarket',
