@@ -1165,7 +1165,8 @@ const CONFIG = {
   INR_PER_USD: 88,                        // rough conversion used to show the USD amount
 
   // Cashfree stays ready — flip this to true once your Cashfree account + secrets are set.
-  CASHFREE_ENABLED: false,           // disabled: Cashfree rejected the marketplace model. Re-enable with a single-seller account.
+  RAZORPAY_ENABLED: true,            // Razorpay live — order created server-side, signature verified by webhook
+  CASHFREE_ENABLED: false,           // disabled: Cashfree rejected the marketplace model.
   CASHFREE_MODE: 'production',            // LIVE Cashfree keys are in use on the server
   CASHFREE_SPLIT_ENABLED: false,          // true once Easy Split is activated on your Cashfree account
   COMMISSION_PERCENT: 10,                 // platform commission taken from each creator sale
@@ -1954,9 +1955,64 @@ function activatePromotion(productId, days) {
   renderProducts();
 }
 
+
+/* ---------- RAZORPAY ---------- */
+async function payViaRazorpay() {
+  const amount = Number(window._payAmount || 0);
+  const payload = window._payPayload || {};
+  const plan = payload.plan || payload.type || 'creator';
+
+  if (typeof Razorpay === 'undefined') {
+    toast('Checkout could not load. Disable your ad blocker and try again.');
+    return;
+  }
+
+  let data;
+  try {
+    const r = await callFunction('razorpay-order', {
+      // 'pro' collides with CareerShield's Career Pro pack, so map it to cmpro
+      plan: plan === 'pro' ? 'cmpro' : plan,
+      site: 'creatormarket',
+      email: (currentUser && currentUser.email) || '',
+      phone: (document.getElementById('payPhone') || {}).value || ''
+    });
+    data = r.data || {};
+    if (!r.ok) {
+      toast(data.message || 'Could not start the payment. Please try again.');
+      return;
+    }
+  } catch (e) {
+    toast('Could not reach the payment server.');
+    return;
+  }
+
+  const rzp = new Razorpay({
+    key: data.key_id,
+    order_id: data.order_id,
+    amount: data.amount,
+    currency: data.currency || 'INR',
+    name: 'CreatorMarket',
+    description: plan === 'pro' ? 'Pro Pass — 30 days' : 'Creator Pass — 30 days',
+    prefill: { email: (currentUser && currentUser.email) || '', contact: (document.getElementById('payPhone') || {}).value || '' },
+    theme: { color: '#7c3aed' },
+    handler: async function (res) {
+      try {
+        await window._payOnPaid('razorpay');
+      } catch (e) {}
+      closeModal('payModal');
+      toast('Payment received. Reference ' + res.razorpay_payment_id);
+    },
+    modal: {
+      ondismiss: function () { toast('Checkout closed. Nothing was charged.'); }
+    }
+  });
+  rzp.open();
+}
+
 function openPayModal(opts) {
   window._payOnPaid = opts.onPaid;
   window._payPayload = opts.payload || {};
+  window._payAmount = Number(opts.amount) || 0;
   const cfReady = !!CONFIG.CASHFREE_ENABLED;
   const upiReady = upiConfigured();
   document.getElementById('payContent').innerHTML = `
@@ -1969,6 +2025,7 @@ function openPayModal(opts) {
     <div style="display:grid;gap:10px">
       <button class="btn btn-primary btn-block" ${upiReady ? '' : 'disabled'} onclick="showUpiView(${Number(opts.amount)})">📱 Pay by UPI (India)</button>
       ${CONFIG.PAYPAL_ME ? `<button class="btn btn-block" onclick="showPaypalView(${Number(opts.amount)})">🌍 Pay with PayPal (international)</button>` : ''}
+      ${CONFIG.RAZORPAY_ENABLED ? '<button class="btn btn-block" onclick="payViaRazorpay()">💳 Pay by UPI / Card / Netbanking — Razorpay</button>' : ''}
       ${cfReady ? '<button class="btn btn-block" onclick="payViaCashfree()">💳 Pay online — Cashfree (UPI / Card / Netbanking)</button>' : ''}
     </div>
     ${opts.note ? '<div class="note" style="margin-top:10px">' + escapeHtml(opts.note) + '</div>' : ''}
@@ -3060,5 +3117,6 @@ window.addEventListener('storage', () => {
 });
 window.addEventListener('load', () => { setTimeout(() => document.getElementById('splash')?.classList.add('hide'), 1500); });
 </script>
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 </body>
 </html>
