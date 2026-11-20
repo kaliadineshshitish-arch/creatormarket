@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Video Script Checker — Score Your Hook, Body &amp; CTA</title>
+<meta name="description" content="Paste your reel or YouTube script and get a score out of 100. It checks the hook, the body and the call to action, then tells you exactly what to fix. Free, no signup.">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#0a0b12">
+<meta property="og:title" content="Free Video Script Checker — Score Your Hook, Body &amp; CTA">
+<meta property="og:description" content="Paste your reel or YouTube script and get a score out of 100. It checks the hook, the body and the call to action, then tells you exactly what to fix. Free, no signup.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://creatormarket-nu.vercel.app/video-script-checker">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://creatormarket-nu.vercel.app/video-script-checker">
+<meta property="og:image" content="https://creatormarket-nu.vercel.app/og-image.png">
+<meta name="twitter:image" content="https://creatormarket-nu.vercel.app/og-image.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"CreatorMarket","url":"https://creatormarket-nu.vercel.app/"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"CreatorMarket","url":"https://creatormarket-nu.vercel.app/","logo":"https://creatormarket-nu.vercel.app/og-image.png"}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='.5' stop-color='%23a855f7'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='60' height='60' rx='18' fill='url(%23g)'/%3E%3Cpath d='M16 46 L24 20 L32 38 L40 20 L48 46' fill='none' stroke='%230a0b12' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0b12;--card:#12141f;--border:#232838;--line:#1c2130;--text:#f4f6ff;--muted:#98a2b8;--faint:#6c7891;--grad:linear-gradient(120deg,#6366f1,#a855f7 52%,#22d3ee);--good:#10b981;--radius:14px;--radius-lg:20px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+header{position:sticky;top:0;z-index:10;background:#0a0b12;border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;font-family:Sora,Inter,sans-serif}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--grad);display:grid;place-items:center;color:#0a0b12;font-weight:900}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:var(--radius);font-weight:600;border:1px solid var(--border);background:#151827;color:var(--text);cursor:pointer;font-size:.95rem}
+.btn-primary{background:var(--grad);color:#0a0b12;border:none}
+.hero{padding:60px 0 36px;text-align:center}
+h1{font-family:Sora,Inter,sans-serif;font-size:clamp(1.9rem,4.8vw,3.1rem);font-weight:800;line-height:1.1;margin-bottom:16px;letter-spacing:-1px}
+.hero p{color:var(--muted);font-size:clamp(1rem,2vw,1.15rem);max-width:640px;margin:0 auto 24px}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.chip{font-size:.82rem;color:var(--muted);border:1px solid var(--line);padding:5px 12px;border-radius:999px;background:#0e1018}
+section{padding:38px 0}
+h2{font-family:Sora,Inter,sans-serif;font-size:clamp(1.35rem,3vw,1.9rem);font-weight:800;margin-bottom:10px;letter-spacing:-.5px}
+h3{font-family:Sora,Inter,sans-serif;font-size:1.05rem;margin-bottom:.4rem}
+.lead{color:var(--muted);max-width:680px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.card p{color:var(--muted);font-size:.92rem}
+.card .ic{font-size:1.5rem}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.step{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.step .n{width:30px;height:30px;border-radius:50%;background:var(--grad);color:#0a0b12;display:grid;place-items:center;font-weight:800;margin-bottom:10px}
+.step p{color:var(--muted);font-size:.92rem}
+ul.list{list-style:none;display:grid;gap:8px}
+ul.list li{color:var(--muted);padding-left:22px;position:relative}
+ul.list li:before{content:"✓";position:absolute;left:0;color:var(--good);font-weight:700}
+.faq details{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
+.faq summary{cursor:pointer;font-weight:600}
+.faq p{color:var(--muted);margin-top:8px;font-size:.93rem}
+.cta{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px 24px;text-align:center;margin:18px 0}
+.cta p{color:var(--muted);max-width:540px;margin:0 auto 20px}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.links a{font-size:.88rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+footer{border-top:1px solid var(--line);padding:26px 0;color:var(--faint);font-size:.85rem;text-align:center;margin-top:30px}
+footer a{color:var(--muted)}
+
+.fld{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#0e1018;color:var(--text);font:inherit;font-size:.95rem;margin-bottom:12px}
+.fld:focus{outline:none;border-color:#6366f1}
+.lbl{display:block;font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:6px}
+.tool{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:18px}
+.scoreWrap{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.scoreNum{font-family:Sora,Inter,sans-serif;font-size:2.8rem;font-weight:900;line-height:1}
+.scoreLbl{color:var(--muted);font-size:.9rem}
+.pill{display:inline-block;font-size:.75rem;font-weight:800;padding:4px 11px;border-radius:999px}
+.pill-ok{background:rgba(16,185,129,.15);color:#10b981}
+.pill-no{background:rgba(239,68,68,.15);color:#ef4444}
+.res{list-style:none;margin:10px 0 0}
+.res li{margin:7px 0;font-size:.9rem;color:var(--muted);padding-left:24px;position:relative;line-height:1.5}
+.res li.ok:before{content:'\2713';position:absolute;left:0;color:#10b981;font-weight:900}
+.res li.no:before{content:'\2715';position:absolute;left:0;color:#ef4444;font-weight:900}
+.sub{font-size:.78rem;color:var(--faint);margin-top:14px}
+</style>
+<!-- Google Analytics 4 (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GYPZCFTVJ8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GYPZCFTVJ8');
+  // In-page (hash) navigation — send a page_view when the section changes
+  try {
+    window.addEventListener('hashchange', function () {
+      try { gtag('event', 'page_view', { page_location: location.href, page_path: location.pathname + location.hash }); } catch (e) {}
+    });
+  } catch (e) {}
+</script>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="logo">M</span> CreatorMarket</a>
+    <a class="btn" href="/blog" style="margin-right:8px">Guides</a>
+    <a class="btn" href="/#tools">Try it Free →</a>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <h1>Free <span class="grad">Video Script Checker</span></h1>
+      <p>Paste your script before you upload. It scores the hook, the middle and the call to action out of 100, then tells you exactly what to fix — in plain Hinglish.</p>
+      <div class="chips">
+        <span class="chip">Hook score</span>
+        <span class="chip">Body score</span>
+        <span class="chip">CTA score</span>
+        <span class="chip">No signup</span>
+        <span class="chip">Runs in your browser</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="tool">
+        <label class="lbl" for="vsHook">Hook — pehli line / pehle 2 second</label>
+        <input class="fld" id="vsHook" placeholder="Example: 3 cheezein jo aapki reels par log nahi dekhte">
+
+        <label class="lbl" for="vsBody">Body — script ka beech ka hissa (optional)</label>
+        <textarea class="fld" id="vsBody" rows="5" placeholder="Paste the middle of your script here"></textarea>
+
+        <label class="lbl" for="vsCta">CTA — last line</label>
+        <input class="fld" id="vsCta" placeholder="Example: Save karo aur kal try karo">
+
+        <button class="btn btn-primary" onclick="checkScript()">Check my script</button>
+        <div id="vsOut" style="margin-top:16px"></div>
+      </div>
+
+      <h2>Why the first two seconds decide everything</h2>
+      <p class="lead">Instagram and YouTube both measure how fast people swipe away. If the first line does not give a reason to stay, the rest of the script never gets watched. Most creators spend hours on editing and thirty seconds on the hook — it is the other way around.</p>
+
+      <h2>What this checker looks at</h2>
+      <p class="lead"><b>The hook.</b> Length, whether it opens with a line everyone has heard before, whether it has a number, a curiosity word, a question and whether it speaks to the viewer as "aap".</p>
+      <p class="lead"><b>The body.</b> Whether it is long enough to teach something, whether it is broken into steps, and whether it talks to the viewer rather than about people in general.</p>
+      <p class="lead"><b>The CTA.</b> Whether you ask for one specific action instead of "like and subscribe", and whether there is a reason to do it now.</p>
+
+      <h2>How to use the result</h2>
+      <p class="lead">Fix the red lines first — they cost the most points. A score under 60 usually means the hook is doing the damage. Rewrite the first line, run it again, and compare. Two or three passes is normally enough to get past 80.</p>
+
+      <h2>Frequently asked questions</h2>
+      <details><summary>Is this really free?</summary><p>Yes. The checker runs entirely in your browser and nothing is uploaded or stored.</p></details>
+      <details><summary>Does it work for YouTube long videos?</summary><p>Yes. The same rules apply: the first line has to earn the next ten seconds. It works for reels, shorts and long-form.</p></details>
+      <details><summary>Does it write the script for me?</summary><p>No. It scores what you wrote and tells you what to fix. If you want help writing, use the AI Prompt Creator.</p></details>
+      <details><summary>Is my script saved anywhere?</summary><p>No. It never leaves your browser.</p></details>
+    </div>
+  </section>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Is this video script checker free?","acceptedAnswer":{"@type":"Answer","text":"Yes. It runs entirely in your browser and nothing is uploaded or stored."}},
+    {"@type":"Question","name":"What does it check?","acceptedAnswer":{"@type":"Answer","text":"Three parts of your script: the hook (first line), the body (middle) and the call to action (last line). Each is scored and every problem is listed with the fix."}},
+    {"@type":"Question","name":"Does it work for YouTube long videos?","acceptedAnswer":{"@type":"Answer","text":"Yes. The same rules apply for reels, shorts and long-form videos: the first line has to earn the next ten seconds."}},
+    {"@type":"Question","name":"Does it write the script for me?","acceptedAnswer":{"@type":"Answer","text":"No. It scores what you wrote and tells you what to fix. For help writing, use the AI Prompt Creator."}}
+  ]}
+  </script>
+
+  <div class="cta">
+    <h2>Want help writing the script?</h2>
+    <p>The AI Prompt Creator writes hooks, captions and full scripts in English or Hinglish. Ten free generations a month.</p>
+    <a class="btn btn-primary" href="/ai-prompt-generator">Open the AI Prompt Creator &rarr;</a>
+  </div>
+  <div class="links"><a href="/">Marketplace</a><a href="/ai-prompt-generator">AI Prompt Generator</a><a href="/hashtag-generator">Hashtag Generator</a><a href="/ai-caption-generator">Caption Generator</a><a href="/youtube-title-generator">YouTube Title Generator</a><a href="/instagram-bio-generator">Instagram Bio Generator</a><a href="/youtube-shorts-ideas">YouTube Shorts Ideas</a><a href="/ai-prompts-for-youtube">AI Prompts for YouTube</a><a href="/resume-builder">Resume Builder</a></div>
+</main>
+<footer>
+  <div class="wrap">
+    <p>© 2026 CreatorMarket. Marketplace &amp; Creator Tools for creators worldwide.</p>
+    <p style="margin-top:.5rem"><a href="/">Marketplace</a> · <a href="/#tools">Creator Tools</a> · <a href="/sell-digital-products">Sell Digital Products</a> · <a href="/pricing">Pricing</a></p>
+    <p style="margin-top:.45rem;font-size:.78rem"><a href="/ai-prompts-for-instagram" style="color:var(--muted)">AI Prompts for Instagram</a> · <a href="/youtube-shorts-ideas" style="color:var(--muted)">YouTube Shorts Ideas</a> · <a href="/ai-caption-generator" style="color:var(--muted)">Caption Generator</a> · <a href="/hashtag-generator" style="color:var(--muted)">Hashtag Generator</a> · <a href="/video-script-checker" style="color:var(--muted)">Script Checker</a> · <a href="/midjourney-prompt-generator" style="color:var(--muted)">Midjourney Prompts</a> · <a href="/digital-product-ideas" style="color:var(--muted)">Digital Product Ideas</a> · <a href="/sell-ebooks-online" style="color:var(--muted)">Sell eBooks</a> · <a href="/sell-notion-templates" style="color:var(--muted)">Sell Notion Templates</a></p>
+    <p style="margin-top:.5rem;font-size:.75rem;color:var(--faint)">Operated by <b>Dinesh Kalia</b> · <a href="mailto:kaliadineshshitish@gmail.com" style="color:var(--faint)">kaliadineshshitish@gmail.com</a> · <a href="tel:+919779882240" style="color:var(--faint)">+91 97798 82240</a></p>
+    <p style="margin-top:.35rem;font-size:.75rem"><a href="/terms" style="color:var(--faint)">Terms</a> · <a href="/privacy" style="color:var(--faint)">Privacy</a> · <a href="/refund-policy" style="color:var(--faint)">Refund Policy</a> · <a href="/delivery-policy" style="color:var(--faint)">Delivery</a> · <a href="/contact" style="color:var(--faint)">Contact</a></p>
+  </div>
+</footer>
+<script>
+const HOOK_BAD = ['hi guys','hello guys','hey guys','namaste doston','hello doston','hi everyone','aaj main aapko','aaj hum baat karenge','welcome back','is video me'];
+const CURIOSITY = ['secret','nobody','no one','why','how','stop','mistake','truth','wrong','never','galti','sach','kabhi','koi nahi','kyun','kaise','band','chhup','asli','jhoot','mat karo','rok','hidden'];
+const CTA_VERBS = ['comment','save','share','follow','link','dm','message','try','click','subscribe','bio','download','join','order','buy','bookmark','send','tag','batao','likho','share karo','comment karo','follow karo','link in bio'];
+const CTA_LAZY = ['like and subscribe','like, share and subscribe','plz subscribe','please subscribe','thik laga to like karo'];
+
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+function checkScript(){
+  var hook = (document.getElementById('vsHook').value || '').trim();
+  var body = (document.getElementById('vsBody').value || '').trim();
+  var cta  = (document.getElementById('vsCta').value || '').trim();
+  var out  = document.getElementById('vsOut');
+
+  if (!hook){ out.innerHTML = '<p class="pill pill-no">Pehle hook likho — pehli line.</p>'; return; }
+
+  var good = [], bad = [], hp = 0, bp = 0, cp = 0;
+
+  var hw = hook.split(/\s+/).filter(Boolean).length;
+  if (hw <= 12){ hp += 12; good.push('Hook chhota hai (' + hw + ' words) — log rukte hain.'); }
+  else if (hw <= 18){ hp += 6; bad.push('Hook ' + hw + ' words ka hai — 12 words ke andar laao.'); }
+  else { bad.push('Hook bahut lamba hai (' + hw + ' words) — 12 words ke andar laao.'); }
+
+  var hl = hook.toLowerCase();
+  var badOpen = HOOK_BAD.find(function(x){ return hl.indexOf(x) === 0 || hl.indexOf(x) > -1; });
+  if (badOpen){ bad.push('"' + badOpen + '" se shuru mat karo — yeh 2 second me scroll karwa deta hai.'); }
+  else { hp += 10; good.push('Hook me koi boring opener nahi hai.'); }
+
+  if (/\d/.test(hook)){ hp += 10; good.push('Hook me number hai — curiosity badhta hai.'); }
+  else { bad.push('Hook me ek number daalo (3 tips, 7 din, 99% log...).'); }
+
+  if (CURIOSITY.some(function(w){ return hl.indexOf(w) > -1; })){ hp += 10; good.push('Hook me curiosity trigger hai.'); }
+  else { bad.push('Hook me curiosity word daalo — "galti", "sach", "kyun", "koi nahi batata".'); }
+
+  if (hook.indexOf('?') > -1){ hp += 4; good.push('Hook sawaal poochh raha hai — engagement badhta hai.'); }
+  if (/\b(aap|you|tum|your)\b/i.test(hook)){ hp += 4; good.push('Hook me "aap" hai — viewer ko seedha address karta hai.'); }
+  else { bad.push('Hook me "aap" add karo — viewer ko lage ki baat uski ho rahi hai.'); }
+
+  if (body){
+    var bw = body.split(/\s+/).filter(Boolean).length;
+    if (bw >= 40){ bp += 10; good.push('Body me ' + bw + ' words hain — enough substance.'); }
+    else { bp += 4; bad.push('Body chhota hai (' + bw + ' words) — thoda detail daalo.'); }
+    if (/\b(1\.|2\.|3\.|first|second|third|pehla|doosra|teesra)\b/i.test(body)){ bp += 10; good.push('Body me list ya steps hain — samajhna aasan.'); }
+    else { bad.push('Body ko 3 steps ya points me todo.'); }
+    if (/\b(aap|you)\b/i.test(body)){ bp += 10; good.push('Body me viewer ko address kiya hai.'); }
+    else { bad.push('Body me "aap" use karo, "log" nahi.'); }
+  } else {
+    bp += 15; good.push('Body skip kiya — sirf hook aur CTA check hua.');
+  }
+
+  if (cta){
+    var cl = cta.toLowerCase();
+    if (CTA_VERBS.some(function(v){ return cl.indexOf(v) > -1; })){ cp += 10; good.push('CTA me clear action hai.'); }
+    else { bad.push('CTA me action word daalo — "save karo", "comment me likho", "link in bio".'); }
+    if (CTA_LAZY.some(function(v){ return cl.indexOf(v) > -1; }) && !CTA_VERBS.filter(function(v){ return v !== 'subscribe'; }).some(function(v){ return cl.indexOf(v) > -1; })){
+      bad.push('"Like and subscribe" akela kaam nahi karta — ek specific action maango.');
+    } else { cp += 5; }
+    if (/\b(aaj|abhi|kal|today|now|turant)\b/i.test(cta)){ cp += 5; good.push('CTA me urgency hai.'); }
+    else { bad.push('CTA me time daalo — "aaj hi", "abhi", "kal try karo".'); }
+  } else {
+    bad.push('CTA hai hi nahi — last line me ek action maango.');
+  }
+
+  var total = Math.max(0, Math.min(100, hp + bp + cp));
+  var verdict = total >= 80 ? ['pill-ok','Ready to post'] : total >= 60 ? ['pill-ok','Almost — fix the red lines'] : ['pill-no','Needs work before you upload'];
+
+  var html = '<div class="scoreWrap"><span class="scoreNum">' + total + '</span>'
+    + '<span class="scoreLbl">/ 100 &nbsp;<span class="pill ' + verdict[0] + '">' + verdict[1] + '</span></span></div>';
+
+  if (bad.length){
+    html += '<p style="font-weight:700;font-size:.9rem;margin:10px 0 4px">Fix these</p><ul class="res">';
+    bad.forEach(function(b){ html += '<li class="no">' + esc(b) + '</li>'; });
+    html += '</ul>';
+  }
+  if (good.length){
+    html += '<p style="font-weight:700;font-size:.9rem;margin:14px 0 4px">Working</p><ul class="res">';
+    good.forEach(function(g){ html += '<li class="ok">' + esc(g) + '</li>'; });
+    html += '</ul>';
+  }
+  html += '<p class="sub">Score: hook ' + hp + '/50 · body ' + bp + '/30 · CTA ' + cp + '/20</p>';
+
+  out.innerHTML = html;
+}
+</script>
+</body>
+</html>
