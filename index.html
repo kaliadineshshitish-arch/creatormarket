@@ -1957,6 +1957,27 @@ function activatePromotion(productId, days) {
 
 
 /* ---------- RAZORPAY ---------- */
+
+/* Asks the server to turn a paid Razorpay payment into an active plan.
+   The server verifies the payment with Razorpay before answering, and the
+   plan it returns is taken from the order notes, not from the browser. */
+async function claimPlan(paymentId, plan) {
+  for (let i = 0; i < 4; i++) {
+    try {
+      const r = await callFunction('careershield-pay', {
+        action: 'claim',
+        payment_id: paymentId,
+        plan: plan
+      });
+      const d = r.data || {};
+      if (r.ok && d.plan) return d;
+      if (r.status === 400 || r.status === 404) return null;
+    } catch (e) {}
+    await new Promise(function (x) { setTimeout(x, 1500); });
+  }
+  return null;
+}
+
 async function payViaRazorpay() {
   const amount = Number(window._payAmount || 0);
   const payload = window._payPayload || {};
@@ -1996,11 +2017,23 @@ async function payViaRazorpay() {
     prefill: { email: (currentUser && currentUser.email) || '', contact: (document.getElementById('payPhone') || {}).value || '' },
     theme: { color: '#7c3aed' },
     handler: async function (res) {
-      try {
-        await window._payOnPaid('razorpay');
-      } catch (e) {}
-      closeModal('payModal');
-      toast('Payment received. Reference ' + res.razorpay_payment_id);
+      toast('Payment received. Activating your pass…');
+      const d = await claimPlan(res.razorpay_payment_id, plan);
+      if (d && (d.plan === 'creator' || d.plan === 'pro' || d.plan === 'cmpro')) {
+        const realPlan = d.plan === 'creator' ? 'creator' : 'pro';
+        localStorage.setItem('cmPlan', JSON.stringify({
+          plan: realPlan,
+          until: Date.now() + 30 * 24 * 60 * 60 * 1000,
+          payment_id: res.razorpay_payment_id
+        }));
+        try { applyPlanUI(); } catch (e) {}
+        try { await window._payOnPaid('razorpay'); } catch (e) {}
+        closeModal('payModal');
+        toast('Pass active for 30 days. Reference ' + res.razorpay_payment_id);
+      } else {
+        closeModal('payModal');
+        toast('Payment received but the pass could not be activated. Email creatormarket.support@gmail.com with reference ' + res.razorpay_payment_id);
+      }
     },
     modal: {
       ondismiss: function () { toast('Checkout closed. Nothing was charged.'); }
