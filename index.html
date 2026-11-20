@@ -344,6 +344,15 @@ img { -webkit-backface-visibility: hidden; }
   transition:border-color .15s, transform .12s; }
 .toolChip:hover { border-color:#6366f1; transform:translateY(-1px); }
 @media (max-width:640px){ .toolChip{ padding:9px 13px; font-size:.84rem; } }
+
+/* ---------- USAGE STRIP ---------- */
+.usageStrip{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.35);border-radius:12px;padding:11px 14px;margin:12px 0;font-size:.85rem}
+.usageStrip.ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35)}
+.usageStrip.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4)}
+.usageStrip b{color:#fff}
+.usageStrip button{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:0;border-radius:8px;padding:8px 15px;font-weight:800;font-size:.8rem;cursor:pointer;white-space:nowrap;box-shadow:0 3px 10px rgba(124,58,237,.35)}
+.usageStrip button:hover{filter:brightness(1.1)}
+.usageStrip.ok button{display:none}
 </style>
 <!-- Google Analytics 4 (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GYPZCFTVJ8"></script>
@@ -465,7 +474,8 @@ img { -webkit-backface-visibility: hidden; }
   <!-- Free tools — first thing after the hero, because this is what people actually use -->
   <section class="wrap section" id="toolsFirst" style="padding-top:8px">
     <h2 class="section-title">Start with a free tool</h2>
-    <p class="lead">No signup, no payment. Ek tool chuno — 30 second me kaam ho jayega.</p>
+    <p class="lead">No signup needed. Free plan me har mahine 10 AI uses — sabse zyada use hone wale tools unlimited.</p>
+    <div class="usageStrip" id="usageStrip"></div>
     <div class="toolChips">
       <a class="toolChip" href="/resume-builder">📄 Resume Builder</a>
       <a class="toolChip" href="/business-name-generator">🏷️ Business Name</a>
@@ -2432,6 +2442,32 @@ function applyPlanUI() {
   if (badge) badge.textContent = p === 'free' ? 'FREE — 10 AI generations / month' : (p.toUpperCase() + ' PASS ACTIVE');
   updateUsageUI();
 }
+
+function scrollToPricing(){
+  const el = document.getElementById('plans');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function paintUsageStrip(remaining){
+  const strip = document.getElementById('usageStrip');
+  if (!strip) return;
+  const p = currentPlan();
+  if (p !== 'free'){
+    strip.className = 'usageStrip ok';
+    strip.innerHTML = '<span>\u2705 <b>' + p.toUpperCase() + ' pass active</b> \u2014 all AI tools unlimited</span>';
+    return;
+  }
+  if (remaining > 0){
+    strip.className = 'usageStrip';
+    strip.innerHTML = '<span><b>' + remaining + '</b> free AI use' + (remaining === 1 ? '' : 's') + ' left this month</span>'
+      + '<button onclick="scrollToPricing()">Upgrade \u2192</button>';
+  } else {
+    strip.className = 'usageStrip warn';
+    strip.innerHTML = '<span><b>Free limit reached</b> \u2014 all 10 AI uses are used this month</span>'
+      + '<button onclick="scrollToPricing()">Upgrade now \u2192</button>';
+  }
+}
+
 function updateUsageUI() {
   const used = getUsage(), remaining = Math.max(0, planLimit() - used), pct = (remaining / planLimit()) * 100;
   const c = document.getElementById('promptCount'), t = document.getElementById('promptLimitText'),
@@ -2440,6 +2476,7 @@ function updateUsageUI() {
   if (t) t.textContent = remaining + '/' + planLimit();
   if (pr) pr.style.width = pct + '%';
   if (b) { b.disabled = remaining <= 0; b.textContent = remaining <= 0 ? '🔒 Monthly limit reached' : '✨ Create Prompt'; }
+  paintUsageStrip(remaining);
 }
 
 /* ---------------- Creator tools ---------------- */
