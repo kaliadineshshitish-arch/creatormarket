@@ -353,6 +353,41 @@ img { -webkit-backface-visibility: hidden; }
 .usageStrip button{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:0;border-radius:8px;padding:8px 15px;font-weight:800;font-size:.8rem;cursor:pointer;white-space:nowrap;box-shadow:0 3px 10px rgba(124,58,237,.35)}
 .usageStrip button:hover{filter:brightness(1.1)}
 .usageStrip.ok button{display:none}
+
+/* ---- tool card head: icon tile + title + tagline ---- */
+.toolHead{display:flex;gap:13px;align-items:flex-start;margin:0 0 16px}
+.toolIcon{flex:none;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;
+  background:linear-gradient(140deg,color-mix(in srgb,var(--accent,#818cf8) 22%,transparent),transparent 78%);
+  border:1px solid color-mix(in srgb,var(--accent,#818cf8) 38%,var(--border));
+  color:var(--accent,#818cf8);box-shadow:0 6px 18px -10px var(--accent,#818cf8)}
+.toolIcon svg{width:23px;height:23px;display:block}
+.toolMeta{min-width:0;flex:1}
+.toolTitle{margin:0;font-size:1.02rem;font-weight:800;letter-spacing:-.01em;color:var(--text);line-height:1.25}
+.toolTag{margin:4px 0 0;font-size:.82rem;line-height:1.5;color:var(--muted)}
+.studio{position:relative;overflow:hidden}
+.studio::before{content:"";position:absolute;inset:0 0 auto;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent,#818cf8),transparent);opacity:.55}
+@media(max-width:520px){.toolIcon{width:40px;height:40px;border-radius:11px}
+  .toolIcon svg{width:20px;height:20px}.toolTitle{font-size:.97rem}.toolTag{font-size:.79rem}}
+
+/* ---- mobile header: keep the nav inside the viewport ---- */
+@media(max-width:560px){
+  .nav{gap:8px;flex-wrap:nowrap}
+  .navright{gap:5px;flex:none}
+  .navright .userpill{display:none}
+  .navright .btn-sm{padding:7px 9px;font-size:11.5px;white-space:nowrap}
+  #sellButton{max-width:38px;overflow:hidden;padding:7px 0;text-align:center}
+  #authButton{max-width:96px;overflow:hidden;text-overflow:ellipsis}
+  .brand-name{font-size:1rem}
+  .brand .mark{width:30px;height:30px}
+  /* the category pills scroll on their own instead of widening the page */
+  .catbar,.catBar,.cat-row{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .catbar::-webkit-scrollbar,.catBar::-webkit-scrollbar{display:none}
+}
+@media(max-width:400px){
+  #authButton{max-width:74px;font-size:11px}
+  .brand-name{font-size:.92rem}
+}
 </style>
 <!-- Google Analytics 4 (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GYPZCFTVJ8"></script>
@@ -436,7 +471,7 @@ img { -webkit-backface-visibility: hidden; }
       <div id="userpill" class="userpill"><span class="userdot"></span><span id="useremail"></span></div>
       <button id="authButton" class="btn btn-sm" onclick="openAuthModal()">Log in / Sign up</button>
       <button id="headerLogout" class="btn btn-sm" style="display:none" onclick="signOutUser()">Logout</button>
-      <button id="sellButton" class="btn btn-primary btn-sm" onclick="openSellModal()">+ Add product</button>
+      <button id="sellButton" class="btn btn-primary btn-sm" onclick="openSellModal()" aria-label="Add product">+ Add product</button>
     </div>
   </div>
 </header>
@@ -687,8 +722,7 @@ img { -webkit-backface-visibility: hidden; }
     <div class="toolGrid">
 
       <div class="studio">
-        <h3 style="margin-top:0">📣 Hashtag Finder</h3>
-        <p class="note" style="margin-top:0">Pick a niche and get a ready hashtag set — a mix of big, medium and small tags so you are not buried.</p>
+        <div class="toolHead" style="--accent:#818cf8"><div class="toolIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></div><div class="toolMeta"><h3 class="toolTitle">Hashtag Finder</h3><p class="toolTag">A mix of big, medium and small tags — not 30 random ones.</p></div></div>
         <div class="promptForm">
           <label>Niche<select class="field" id="htNiche">
             <option value="general">General creator</option>
@@ -708,8 +742,7 @@ img { -webkit-backface-visibility: hidden; }
       </div>
 
       <div class="studio">
-        <h3 style="margin-top:0">✍️ Caption Generator</h3>
-        <p class="note" style="margin-top:0">A caption in Hinglish that does not sound like a robot wrote it. Pick a tone and a topic.</p>
+        <div class="toolHead" style="--accent:#c084fc"><div class="toolIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div><div class="toolMeta"><h3 class="toolTitle">Caption Generator</h3><p class="toolTag">Hinglish captions that do not sound like a robot wrote them.</p></div></div>
         <div class="promptForm">
           <label>What is the post about?<input class="field" id="capTopic" placeholder="Example: 3 tips to grow on Instagram"></label>
           <label>Tone<select class="field" id="capTone">
@@ -726,8 +759,7 @@ img { -webkit-backface-visibility: hidden; }
       </div>
 
       <div class="studio">
-        <h3 style="margin-top:0">💰 Brand Deal Rate Calculator</h3>
-        <p class="note" style="margin-top:0">What should you charge a brand? Enter your numbers — get an honest ₹ range for a post, reel and story.</p>
+        <div class="toolHead" style="--accent:#34d399"><div class="toolIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 8h6"/><path d="M12 8v8"/><path d="M9 12h6"/><path d="M9 16h6"/></svg></div><div class="toolMeta"><h3 class="toolTitle">Brand Deal Rate Calculator</h3><p class="toolTag">An honest rupee range for a post, a reel and a story.</p></div></div>
         <div class="promptForm">
           <label>Followers<input class="field" id="brFollowers" type="number" value="5000" min="0"></label>
           <label>Avg engagement %<input class="field" id="brEr" type="number" value="3" step="0.1" min="0"></label>
@@ -746,8 +778,7 @@ img { -webkit-backface-visibility: hidden; }
       </div>
 
       <div class="studio">
-        <h3 style="margin-top:0">🧾 Invoice Generator</h3>
-        <p class="note" style="margin-top:0">For freelancers and creators. Fill it in, print it or save as PDF — no account, no watermark.</p>
+        <div class="toolHead" style="--accent:#fbbf24"><div class="toolIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18l2.5-1.6L10 21l2-1.6L14 21l2.5-1.6L19 21V3H5Z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg></div><div class="toolMeta"><h3 class="toolTitle">Invoice Generator</h3><p class="toolTag">A clean invoice you can send a brand in thirty seconds.</p></div></div>
         <div class="promptForm">
           <label>Your name / studio<input class="field" id="invFrom" placeholder="DK Digital Studio"></label>
           <label>Client name<input class="field" id="invTo" placeholder="Client Pvt Ltd"></label>
@@ -763,8 +794,7 @@ img { -webkit-backface-visibility: hidden; }
 
 
       <div class="studio">
-        <h3 style="margin-top:0">🏷️ Business Name Generator</h3>
-        <p class="note" style="margin-top:0">10 names for your business, each with a tagline — short and easy to say over the phone.</p>
+        <div class="toolHead" style="--accent:#f472b6"><div class="toolIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0l-7.2-7.2a2 2 0 0 1-.6-1.4V4a1 1 0 0 1 1-1h8a2 2 0 0 1 1.4.6l7.4 7.4a2 2 0 0 1 0 2.4Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></div><div class="toolMeta"><h3 class="toolTitle">Business Name Generator</h3><p class="toolTag">Names that are short, sayable and still free as a domain.</p></div></div>
         <div class="promptForm">
           <label>Business type<input class="field" id="bnIndustry" placeholder="Example: home bakery in Amritsar"></label>
           <label>Style<select class="field" id="bnStyle">
@@ -782,8 +812,7 @@ img { -webkit-backface-visibility: hidden; }
       </div>
 
       <div class="studio">
-        <h3 style="margin-top:0">▶️ YouTube Title &amp; Description</h3>
-        <p class="note" style="margin-top:0">5 titles, a description and tags — written so the keyword is front-loaded.</p>
+        <div class="toolHead" style="--accent:#f87171"><div class="toolIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9.5v5l4.5-2.5Z"/></svg></div><div class="toolMeta"><h3 class="toolTitle">YouTube Title &amp; Description</h3><p class="toolTag">Titles under sixty characters that still get the click.</p></div></div>
         <div class="promptForm">
           <label>Video topic<input class="field" id="ytTopic" placeholder="Example: how to make a resume with no experience"></label>
           <label>Audience<input class="field" id="ytAudience" placeholder="Indian freshers"></label>
@@ -795,8 +824,7 @@ img { -webkit-backface-visibility: hidden; }
       </div>
 
       <div class="studio">
-        <h3 style="margin-top:0">📸 Instagram Bio Generator</h3>
-        <p class="note" style="margin-top:0">5 bios under 150 characters, each with a clear call to action.</p>
+        <div class="toolHead" style="--accent:#e879f9"><div class="toolIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div><div class="toolMeta"><h3 class="toolTitle">Instagram Bio Generator</h3><p class="toolTag">One hundred and fifty characters that say exactly what you do.</p></div></div>
         <div class="promptForm">
           <label>What is the account about?<input class="field" id="igNiche" placeholder="Example: homemade cakes in Amritsar"></label>
           <label>Vibe<select class="field" id="igVibe">
@@ -814,14 +842,12 @@ img { -webkit-backface-visibility: hidden; }
       </div>
 
       <div class="studio" style="grid-column:1/-1;border:1px solid rgba(99,102,241,.4)">
-        <h3 style="margin-top:0">💼 Job seeker? Try CareerShield</h3>
-        <p class="note" style="margin-top:0">Six free tools for Indian job seekers — check if a job offer is a scam, see how ATS reads your resume, match your resume to a job description, and fix weak bullet points. Free, no signup.</p>
+        <div class="toolHead" style="--accent:#22d3ee"><div class="toolIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></div><div class="toolMeta"><h3 class="toolTitle">Job Seeker? Try CareerShield</h3><p class="toolTag">Free job scam checker, ATS resume score and cover letters.</p></div></div>
         <a class="btn btn-primary" href="https://careershield.vercel.app" target="_blank" rel="noopener">Open CareerShield &rarr;</a>
       </div>
 
       <div class="studio" style="grid-column:1/-1">
-        <h3 style="margin-top:0">🎬 Video Script Checker</h3>
-        <p class="note" style="margin-top:0">Paste your script before you upload. It scores the hook, the middle and the CTA, then tells you exactly what to fix.</p>
+        <div class="toolHead" style="--accent:#60a5fa"><div class="toolIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M7 4v16"/><path d="M17 4v16"/><path d="M2 9h5"/><path d="M17 9h5"/><path d="M2 15h5"/><path d="M17 15h5"/></svg></div><div class="toolMeta"><h3 class="toolTitle">Video Script Checker</h3><p class="toolTag">Score the hook, the body and the CTA before you hit upload.</p></div></div>
         <div class="promptForm">
           <label>Hook — pehli line / pehle 2 second<input class="field" id="vsHook" placeholder="Example: 3 cheezein jo aapki reels par log nahi dekhte"></label>
           <label>Body — script ka beech ka hissa (optional)<textarea class="field" id="vsBody" rows="4" placeholder="Paste the middle of your script here"></textarea></label>
