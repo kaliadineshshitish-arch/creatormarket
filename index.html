@@ -24,8 +24,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<!-- Cashfree SDK removed: CASHFREE_ENABLED is false and Razorpay handles
+     payments. cashfreeCheckout() already guards on window.Cashfree. -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
 <style>
 :root{
   --bg:#0a0b12; --bg2:#0e1018; --card:#12141f; --card-hover:#171a28; --panel:#0d0f19;
@@ -271,7 +272,7 @@ footer.site .flinks a{color:var(--muted);text-decoration:none}
 footer.site .flinks a:hover{color:var(--text)}
 
 /* ---------- Splash ---------- */
-.splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(600px 420px at 50% 40%,#16204a 0%,#090c16 52%,#05060c 100%);transition:opacity .45s ease,visibility .45s ease}
+.splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(600px 420px at 50% 40%,#16204a 0%,#090c16 52%,#05060c 100%);transition:opacity .22s ease,visibility .22s ease}
 .splash.hide{opacity:0;visibility:hidden;pointer-events:none}
 .splash-inner{text-align:center;animation:splashIn .5s ease-out both}
 .splash-inner svg{width:82px;height:82px;margin-bottom:16px;filter:drop-shadow(0 16px 40px #6366f166)}
@@ -430,6 +431,7 @@ img { -webkit-backface-visibility: hidden; }
 </script>
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
 <link rel="apple-touch-icon" href="/icon-512.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://creatormarket-nu.vercel.app/"}]}</script>
 </head>
 <body>
 
@@ -3222,7 +3224,18 @@ document.getElementById('url').addEventListener('keydown', e => { if (e.key === 
 window.addEventListener('storage', () => {
   try { wishlist = JSON.parse(localStorage.getItem('cmWishlist') || '[]'); notifications = JSON.parse(localStorage.getItem('cmNotifications') || '[]'); renderProducts(); } catch (e) {}
 });
-window.addEventListener('load', () => { setTimeout(() => document.getElementById('splash')?.classList.add('hide'), 1500); });
+// Hide the splash as soon as the DOM is parsed, not after window.load.
+// window.load waits for every font, image and third-party script, which
+// kept the logo on screen for seconds on a slow connection.
+(function () {
+  const hideSplash = () => document.getElementById('splash')?.classList.add('hide');
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(hideSplash, 350));
+  } else {
+    setTimeout(hideSplash, 350);
+  }
+  setTimeout(hideSplash, 1200); // hard ceiling
+})();
 </script>
 <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 </body>
