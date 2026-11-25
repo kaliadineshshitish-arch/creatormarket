@@ -145,13 +145,74 @@ header .nav .btn:last-child{padding:7px 13px}
       <div class="card"><div class="ic">✍️</div><h3>Writing &amp; study</h3><p>Blog outlines, summaries and study plans.</p></div>
     </div>
   </section>
+  <section>
+    <h2>What separates a good prompt from a bad one</h2>
+    <p>Most people type a wish and get a guess back. "Write a YouTube script" is a wish. The model has no idea who is watching, how long the video should be, or what the channel sounds like, so it produces the most average version of a script it can find. That average output is why so much AI writing reads the same.</p>
+    <p>A prompt that works carries five things: a role, a task, the audience, the constraints, and the output shape. Miss any one and the model fills the gap with a default you did not choose.</p>
+    <ul class="list">
+      <li><b>Role</b> — who the model should be while answering. "You are a scriptwriter for a Hindi finance channel" is different from "You are a scriptwriter."</li>
+      <li><b>Task</b> — the single thing you want produced. One task per prompt. If you ask for a script and a thumbnail idea and a title, you usually get three shallow answers.</li>
+      <li><b>Audience</b> — who reads or watches it. Age, city, what they already know, what they are worried about.</li>
+      <li><b>Constraints</b> — length, tone, language, what to avoid. "No jargon, under 140 words, Hinglish, do not promise returns" is a constraint list that changes the output completely.</li>
+      <li><b>Output shape</b> — the exact structure you want back. "Give it as a table with three columns" or "give me five options, each under 60 characters."</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>The same request, written properly</h2>
+    <p>Here is the weak version:</p>
+<pre style="white-space:pre-wrap;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--muted);font-size:.85rem;line-height:1.6">Write a YouTube script about saving money.</pre>
+    <p>Here is the same request with all five parts:</p>
+<pre style="white-space:pre-wrap;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--muted);font-size:.85rem;line-height:1.6">You are a scriptwriter for a personal-finance channel aimed at salaried Indians aged 25-35.
+
+Write a 4-minute YouTube script on why a ₹5,000 monthly SIP beats a one-time ₹1 lakh investment.
+
+Rules:
+- Hinglish, conversational, no jargon
+- Open with a hook under 15 seconds that names a real worry
+- Use one concrete rupee example, not abstract percentages
+- Do not promise returns or give investment advice
+- End with one clear action
+
+Format: hook, then three sections with a one-line heading each, then the action.</pre>
+    <p>The second version tells the model what to be, what to write, who reads it, what to avoid and how to lay it out. The difference in output is not small — it is the difference between something you can post and something you have to rewrite from scratch.</p>
+  </section>
+
+  <section>
+    <h2>Prompts for AI images work differently</h2>
+    <p>Text models can work from a description. Image models need a picture in words, and they care about things a writer would never mention: the lens, the light, the framing, the background.</p>
+    <p>A usable image prompt names the subject, then the setting, then the light, then the style, then the technical detail. "A chai stall" is not a prompt. "A small roadside chai stall at dawn, steel kettle steaming, one customer on a stool, warm low side-light, 50mm lens, shallow depth of field, film grain" is a prompt — every clause removes a choice the model would otherwise make for you.</p>
+    <p>Two habits help. Put the things you care about most at the front, because earlier words carry more weight. And when a result is nearly right, change one clause at a time instead of rewriting the whole prompt, so you learn which words actually did the work.</p>
+  </section>
+
+  <section>
+    <h2>Four mistakes that waste your free generations</h2>
+    <ul class="list">
+      <li><b>Asking for everything at once.</b> One prompt, one output. If you need a title, a script and a caption, that is three prompts, and each one will be better than a combined request.</li>
+      <li><b>Never saying what to avoid.</b> Models default to filler — "in today's fast-paced world", "game-changer", "unlock your potential". Naming those as banned removes them.</li>
+      <li><b>Accepting the first answer.</b> Ask for five options and pick one. The first output is the most predictable one the model can produce.</li>
+      <li><b>Not saving what worked.</b> When a prompt produces something you actually used, keep it. A personal library of ten good prompts is worth more than a thousand generic ones.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Why the prompt is written for you here</h2>
+    <p>Writing a five-part prompt takes practice. The generator on this page takes your plain description and fills in the role, the constraints and the output shape for you, so the first draft you paste into ChatGPT or Claude is already specific.</p>
+    <p>You can still edit it afterwards — and you should. The generated prompt is a starting structure, not a final answer. Add the details only you know: your audience, your language, the thing your last video got wrong.</p>
+  </section>
+
   <section class="faq">
     <h2>Frequently asked questions</h2>
     <details><summary>Is the AI prompt generator really free?</summary><p>Yes — you get 10 free AI generations every month in the AI Prompt Creator, with no card required.</p></details>
     <details><summary>Do I need to sign up?</summary><p>You can start free. Creating an account lets you keep using the tools and sell your own digital products.</p></details>
     <details><summary>Which AI tools can I use the prompts with?</summary><p>Any — the prompts are plain text and work with ChatGPT, Claude, Gemini, Midjourney, DALL·E and more.</p></details>
+    <details><summary>What is a good prompt made of?</summary><p>Five parts: a role for the model, one clear task, the audience, the constraints (length, tone, language, what to avoid), and the output shape you want back. Missing any one lets the model fill the gap with a default you did not choose.</p></details>
+    <details><summary>Why does my prompt give generic answers?</summary><p>Usually because it names no audience and sets no constraint. "Write a YouTube script" has nothing for the model to aim at, so it returns the most average version. Add who it is for and what to avoid.</p></details>
+    <details><summary>Should I write prompts in English or Hinglish?</summary><p>Write in the language you want the output in. If you want a Hinglish script, ask for a Hinglish script. The model will follow the language of your instruction.</p></details>
+    <details><summary>Can I use these prompts for client work?</summary><p>The prompts are plain text you can edit and reuse freely. What you produce with them is yours, subject to the terms of whichever AI tool you use.</p></details>
+    <details><summary>How long should a prompt be?</summary><p>Long enough to carry the five parts, and no longer. A focused five-line prompt usually beats a page of instructions, because every extra line dilutes the ones that matter.</p></details>
   </section>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is the AI prompt generator really free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes \u2014 you get 10 free AI generations every month in the AI Prompt Creator, with no card required."}}, {"@type": "Question", "name": "Do I need to sign up?", "acceptedAnswer": {"@type": "Answer", "text": "You can start free. Creating an account lets you keep using the tools and sell your own digital products."}}, {"@type": "Question", "name": "Which AI tools can I use the prompts with?", "acceptedAnswer": {"@type": "Answer", "text": "Any \u2014 the prompts are plain text and work with ChatGPT, Claude, Gemini, Midjourney, DALL\u00b7E and more."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is the AI prompt generator really free?","acceptedAnswer":{"@type":"Answer","text":"Yes - you get 10 free AI generations every month in the AI Prompt Creator, with no card required."}},{"@type":"Question","name":"Do I need to sign up?","acceptedAnswer":{"@type":"Answer","text":"You can start free. Creating an account lets you keep using the tools and sell your own digital products."}},{"@type":"Question","name":"Which AI tools can I use the prompts with?","acceptedAnswer":{"@type":"Answer","text":"Any - the prompts are plain text and work with ChatGPT, Claude, Gemini, Midjourney, DALL-E and more."}},{"@type":"Question","name":"What is a good prompt made of?","acceptedAnswer":{"@type":"Answer","text":"Five parts: a role for the model, one clear task, the audience, the constraints (length, tone, language, what to avoid), and the output shape you want back. Missing any one lets the model fill the gap with a default you did not choose."}},{"@type":"Question","name":"Why does my prompt give generic answers?","acceptedAnswer":{"@type":"Answer","text":"Usually because it names no audience and sets no constraint. A request like write a YouTube script has nothing for the model to aim at, so it returns the most average version. Add who it is for and what to avoid."}},{"@type":"Question","name":"Should I write prompts in English or Hinglish?","acceptedAnswer":{"@type":"Answer","text":"Write in the language you want the output in. If you want a Hinglish script, ask for a Hinglish script. The model will follow the language of your instruction."}},{"@type":"Question","name":"Can I use these prompts for client work?","acceptedAnswer":{"@type":"Answer","text":"The prompts are plain text you can edit and reuse freely. What you produce with them is yours, subject to the terms of whichever AI tool you use."}},{"@type":"Question","name":"How long should a prompt be?","acceptedAnswer":{"@type":"Answer","text":"Long enough to carry the five parts, and no longer. A focused five-line prompt usually beats a page of instructions, because every extra line dilutes the ones that matter."}}]}</script>
   <div class="cta">
     <h2>Generate your first prompt free</h2>
     <p>Describe what you want to create and let CreatorMarket write the prompt for you.</p>
