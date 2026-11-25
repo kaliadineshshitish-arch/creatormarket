@@ -139,12 +139,74 @@ header .nav .btn:last-child{padding:7px 13px}
     <h2>A word on taste</h2>
     <p class="lead">Be specific about what you want — and respectful about what you depict.</p>
 <p style="color:var(--muted)">Religious, cultural and real-person imagery deserves care. Describe the scene respectfully and avoid anything misleading or defamatory.</p>  </section>
+  <section>
+    <h2>The five parts of a Midjourney prompt</h2>
+    <p>Midjourney reads a prompt left to right and weights the early words most heavily. That single fact decides how you should order everything.</p>
+    <ul class="list">
+      <li><b>Subject first.</b> What the image is of, said plainly. "A roadside chai stall", not "an evocative scene of Indian street life".</li>
+      <li><b>Then the setting.</b> Where it sits, what surrounds it, what time of day. This is where a generic image becomes a specific one.</li>
+      <li><b>Then the light.</b> Light is the single biggest lever on whether an image looks generated or photographed. "Warm low side-light at dawn" changes more than any style word.</li>
+      <li><b>Then the medium and style.</b> Photograph, oil painting, risograph print, 3D render, film still. Pick one and commit; mixing two produces mush.</li>
+      <li><b>Then the technical detail.</b> Lens, depth of field, film grain, resolution. Optional, but it is what separates a stock image from a still.</li>
+    </ul>
+    <p>A useful test: cover the last three parts and read only the first two. If you cannot picture the scene, the subject and setting are too vague to fix with style words.</p>
+  </section>
+
+  <section>
+    <h2>The parameters worth knowing</h2>
+    <p>Midjourney takes flags at the end of a prompt that change how the image is made rather than what it shows. Four of them do most of the work.</p>
+    <ul class="list">
+      <li><b>--ar</b> sets the aspect ratio. <code>--ar 16:9</code> for a video thumbnail, <code>--ar 9:16</code> for a reel cover, <code>--ar 1:1</code> for a feed post. Get this right first — cropping later loses the composition you asked for.</li>
+      <li><b>--stylize</b> (or <code>--s</code>) controls how artistic the model is allowed to be. Low values stay literal and photographic. High values interpret more freely. Start low when you need a specific look, raise it when you want options.</li>
+      <li><b>--chaos</b> controls how different the four grid results are from each other. Low gives you four close variations. High gives you four genuinely different interpretations, useful when you have not decided what you want yet.</li>
+      <li><b>--no</b> removes things. <code>--no text, watermark, people</code> is the most common fix for a prompt that keeps adding elements you did not ask for.</li>
+    </ul>
+    <p>There is also a version flag for the model generation. Leave it alone unless you have a reason — the default is the most capable one, and older versions are only worth choosing when you want their specific look.</p>
+  </section>
+
+  <section>
+    <h2>Style words that actually change the output</h2>
+    <p>Most style words do very little. A few do a great deal. These are the ones worth keeping.</p>
+    <ul class="list">
+      <li><b>Light words</b> — golden hour, blue hour, overcast, hard midday sun, practical light, rim light, softbox. These move the image more than any adjective about mood.</li>
+      <li><b>Camera words</b> — 35mm, 50mm, 85mm, macro, wide angle, shallow depth of field, long exposure, tilt-shift. They set the geometry of the frame.</li>
+      <li><b>Film and print words</b> — Kodak Portra, Cinestill, Ilford HP5, risograph, screenprint, halftone. They carry a whole colour and grain palette with them.</li>
+      <li><b>Render words</b> — octane render, unreal engine, clay render, isometric, low poly. Useful when you want an object rather than a photograph.</li>
+    </ul>
+    <p>What does not work: "beautiful", "stunning", "masterpiece", "award-winning", "highly detailed". They are the most common words in every prompt on the platform, so they carry almost no signal. Replacing three of them with one light word improves the result immediately.</p>
+  </section>
+
+  <section>
+    <h2>Common mistakes, and the fix for each</h2>
+    <ul class="list">
+      <li><b>Asking for text.</b> Image models render lettering badly and unpredictably. Generate the image without text and add the words in Canva or Figma afterwards. It will look better and take less time.</li>
+      <li><b>Stacking contradictory styles.</b> "Photorealistic oil painting" gives you neither. Choose the medium once.</li>
+      <li><b>Rewriting the whole prompt after a bad result.</b> Change one clause at a time. Otherwise you never learn which words did the work, and you cannot repeat a good result.</li>
+      <li><b>Ignoring the aspect ratio.</b> A prompt composed for 16:9 will lose its subject when cropped to 9:16. Set the ratio before you generate.</li>
+      <li><b>Too many subjects.</b> Two people, a dog and a bicycle in one frame means the model decides the composition. One clear subject per prompt.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>A worked example</h2>
+    <p>Here is a weak prompt:</p>
+<pre style="white-space:pre-wrap;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--muted);font-size:.85rem;line-height:1.6">beautiful indian street food, highly detailed, masterpiece</pre>
+    <p>And the same idea with all five parts:</p>
+<pre style="white-space:pre-wrap;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--muted);font-size:.85rem;line-height:1.6">A small roadside chai stall at dawn, steel kettle steaming, one customer on a wooden stool, wet pavement reflecting the stall light, warm low side-light, 50mm lens, shallow depth of field, film grain --ar 16:9 --stylize 150</pre>
+    <p>The second prompt names the subject, the setting, the light, the medium and the technical detail, then sets the frame. Every clause removed a decision the model would otherwise have made for you. That is the whole craft — not finding better adjectives, but removing choices.</p>
+  </section>
+
   <section class="faq">
     <h2>Frequently asked questions</h2>
-    <details><summary>Does it work with DALL·E and Stable Diffusion?</summary><p>Yes — the same structure works across models. Some want the aspect ratio as a flag (like Midjourney) and others as a sentence.</p></details>
+    <details><summary>Does it work with DALL·E and Stable Diffusion?</summary><p>Yes — the same structure works across models. Some want the aspect ratio as a flag (like Midjourney) and others as a sentence. Drop the flags and describe the frame in words instead.</p></details>
+    <details><summary>What order should a Midjourney prompt be in?</summary><p>Subject first, then setting, then light, then medium and style, then technical detail, with parameters at the end. Midjourney weights the early words most heavily, so the subject must come first.</p></details>
+    <details><summary>Why does my prompt keep adding text?</summary><p>Image models render lettering badly and drift towards it when the prompt is vague. Add --no text, watermark to the end, and add the words in Canva or Figma after generating.</p></details>
+    <details><summary>What do --ar, --stylize and --chaos do?</summary><p>--ar sets the aspect ratio. --stylize controls how freely the model interprets. --chaos controls how different the four grid results are from each other. All three go at the end of the prompt.</p></details>
+    <details><summary>Which style words are worth using?</summary><p>Light words, camera words, film and print words, and render words. Avoid "beautiful", "stunning", "masterpiece" and "highly detailed" — they appear in so many prompts that they carry almost no signal.</p></details>
+    <details><summary>Should I write the prompt in Hindi?</summary><p>Write in the language you are comfortable in, but keep style and camera terms in English, since that is what the models were trained on most heavily. A Hinglish prompt with English technical terms works well.</p></details>
     <details><summary>Is it free?</summary><p>Yes — 10 free AI generations a month, no signup needed to try.</p></details>
   </section>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does it work with DALL\u00b7E and Stable Diffusion?", "acceptedAnswer": {"@type": "Answer", "text": "Yes \u2014 the same structure works across models. Some want the aspect ratio as a flag (like Midjourney) and others as a sentence."}}, {"@type": "Question", "name": "Is it free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes \u2014 10 free AI generations a month, no signup needed to try."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does it work with DALL.E and Stable Diffusion?","acceptedAnswer":{"@type":"Answer","text":"Yes - the same structure works across models. Some want the aspect ratio as a flag (like Midjourney) and others as a sentence. Drop the flags and describe the frame in words instead."}},{"@type":"Question","name":"What order should a Midjourney prompt be in?","acceptedAnswer":{"@type":"Answer","text":"Subject first, then setting, then light, then medium and style, then technical detail, with parameters at the end. Midjourney weights the early words most heavily, so the subject must come first."}},{"@type":"Question","name":"Why does my prompt keep adding text?","acceptedAnswer":{"@type":"Answer","text":"Image models render lettering badly and drift towards it when the prompt is vague. Add --no text, watermark to the end, and add the words in Canva or Figma after generating."}},{"@type":"Question","name":"What do --ar, --stylize and --chaos do?","acceptedAnswer":{"@type":"Answer","text":"--ar sets the aspect ratio. --stylize controls how freely the model interprets. --chaos controls how different the four grid results are from each other. All three go at the end of the prompt."}},{"@type":"Question","name":"Which style words are worth using?","acceptedAnswer":{"@type":"Answer","text":"Light words, camera words, film and print words, and render words. Avoid \"beautiful\", \"stunning\", \"masterpiece\" and \"highly detailed\" - they appear in so many prompts that they carry almost no signal."}},{"@type":"Question","name":"Should I write the prompt in Hindi?","acceptedAnswer":{"@type":"Answer","text":"Write in the language you are comfortable in, but keep style and camera terms in English, since that is what the models were trained on most heavily. A Hinglish prompt with English technical terms works well."}},{"@type":"Question","name":"Is it free?","acceptedAnswer":{"@type":"Answer","text":"Yes - 10 free AI generations a month, no signup needed to try."}}]}</script>
   <div class="cta">
     <h2>Generate your image prompt</h2>
     <p>Free to try.</p>
