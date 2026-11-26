@@ -146,13 +146,80 @@ header .nav .btn:last-child{padding:7px 13px}
       <div class="step"><div class="n">3</div><h3>Paste into your AI tool</h3><p>Use it in Midjourney, DALL·E, Stable Diffusion or any image AI.</p></div>
     </div>
   </section>
+  <section>
+    <h2>The five parts of an image prompt</h2>
+    <p class="lead">An image model does not read a wish. It reads a description and builds the most average thing that fits it. Every vague word you leave in pushes the result towards the average, which is why so many AI images look like the same stock photo. Five parts fix that.</p>
+    <ul class="list">
+      <li><b>Subject.</b> Who or what is in the frame, described concretely. "A woman in her twenties" is a start; "a street-food vendor in her fifties, sleeves rolled up, steel plate in hand" gives the model something to draw.</li>
+      <li><b>Action or state.</b> What the subject is doing. Standing, pouring tea, mid-laugh, looking away from the camera. A subject doing nothing has no pose, and no pose is what makes faces look stiff.</li>
+      <li><b>Setting.</b> Where, and what is around them. "A Mumbai roadside stall at dusk, wet plastic chairs, a hand-painted sign in Marathi" places the image in a specific world instead of a studio void.</li>
+      <li><b>Light.</b> The single biggest lever on whether an image looks real. Name the direction and the quality: "warm light from a single bulb above, soft shadow under the chin, cool blue evening light behind".</li>
+      <li><b>Style and camera.</b> Finish, framing and lens feel: "documentary photography, 35mm, shallow depth of field, slight grain, muted colours". One coherent style beats five adjectives.</li>
+    </ul>
+    <p style="color:var(--muted)">Order matters more than people expect. Put the subject first, because the beginning of the prompt gets the most weight, and put the technical style at the end, where it adjusts the image rather than defining it. Add the aspect ratio as the final item — the next section explains why.</p>
+
+    <h2>Aspect ratio for each platform</h2>
+    <p class="lead">Generate at the shape you will post at. Cropping a 16:9 image to 9:16 later cuts off the sides you spent tokens describing.</p>
+    <ul class="list">
+      <li><b>Instagram feed (portrait)</b> — 4:5, 1080 × 1350 px. Tallest shape the feed allows, so it fills more of the phone screen than a square.</li>
+      <li><b>Reels, Stories, Shorts</b> — 9:16, 1080 × 1920 px. Keep the subject in the middle third; the top and bottom get covered by interface elements and captions.</li>
+      <li><b>YouTube thumbnail</b> — 16:9, 1280 × 720 px. Wide and small on screen, so one subject and three or four words of text at most.</li>
+      <li><b>Carousel slide</b> — 4:5 or 1:1, 1080 × 1350 or 1080 × 1080 px. Leave a calm margin on one side for the text you will add in a design tool.</li>
+      <li><b>Pinterest pin</b> — 2:3, 1000 × 1500 px. Tall, with the headline in the upper third.</li>
+      <li><b>Website hero or blog header</b> — 16:9 or 3:1. Wide, with the subject off-centre so text can sit on the empty side.</li>
+    </ul>
+    <p style="color:var(--muted)">In Midjourney add <code>--ar 4:5</code> or <code>--ar 9:16</code> at the end of the prompt. In DALL·E and most web tools, pick the shape from a menu before generating. In Stable Diffusion, set the width and height to the ratio, then keep the total pixel count near what the model was trained on to avoid duplicated faces and limbs.</p>
+
+    <h2>Style words that work, and words that do nothing</h2>
+    <p class="lead">Style words are not magic spells. Each one either changes a visible property — light, lens, surface, palette — or it does nothing but fill space.</p>
+    <ul class="list">
+      <li><b>Works:</b> "golden hour backlight", "soft window light from the left", "35mm", "85mm portrait", "shallow depth of field", "matte finish", "film grain", "flat lay from above", "low angle", "muted earth tones", "high-key white background".</li>
+      <li><b>Does nothing:</b> "beautiful", "high quality", "ultra HD", "masterpiece", "award-winning", "best quality", "8k realistic". These are the model's default anyway, so typing them changes nothing and eats attention you could spend on light.</li>
+      <li><b>Fights itself:</b> "cinematic and cartoon and photorealistic and watercolour". Contradictions get averaged into mush. Pick one style and let the other words support it.</li>
+      <li><b>Risky:</b> naming a living artist or a photographer to borrow their style. It is unreliable across tools and raises copyright questions if you plan to sell the image. Describe the look instead: "high-contrast black and white, hard flash, 1990s editorial".</li>
+    </ul>
+
+    <h2>Common mistakes, and the fix for each</h2>
+    <ul class="list">
+      <li><b>Too many subjects.</b> Three people, a dog and a bicycle in one frame. Fix: one subject, one action. If you need more, generate separate images.</li>
+      <li><b>No light direction.</b> The image comes out flat and plastic. Fix: always say where the light comes from and whether it is hard or soft.</li>
+      <li><b>Abstract mood words.</b> "A sad but hopeful vibe". Fix: translate mood into visible things — posture, weather, colour temperature, empty space around the subject.</li>
+      <li><b>Wrong shape for the platform.</b> Generating square and cropping to 9:16. Fix: set the ratio in the prompt or the tool before you generate.</li>
+      <li><b>Adding text and expecting it to render.</b> Most models still mangle words. Fix: generate the image with clean empty space, then add the text in Canva or Figma where you control the font.</li>
+      <li><b>Changing everything at once.</b> Fix: change one part per iteration — light first, then framing, then style — so you know what actually improved the image.</li>
+    </ul>
+
+    <h2>Weak versus strong: a worked example</h2>
+    <p class="lead">Same idea — a chai stall in the evening — written two ways.</p>
+<pre style="white-space:pre-wrap;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--muted);font-size:.85rem;line-height:1.6">WEAK
+"a beautiful chai stall, high quality, 4k, realistic,
+masterpiece, amazing lighting, instagram worthy"
+
+Result: a generic stall, flat light, no place, no person,
+nothing to look at twice.</pre>
+<pre style="white-space:pre-wrap;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--muted);font-size:.85rem;line-height:1.6">STRONG
+"An older chai vendor in a faded blue shirt pouring tea from
+a steel kettle into small glasses, steam rising, at a roadside
+stall in Pune at dusk. Stacked glasses, a battered stove, a
+hand-painted sign behind him. Warm light from one bulb above
+the stall, cool blue evening sky behind, soft shadow under
+his chin. Documentary photography, 35mm, shallow depth of
+field, slight grain, muted colours. 4:5"</pre>
+    <p style="color:var(--muted)">The strong version is longer, but every phrase does a job: subject, action, setting, light, style, shape. Nothing in it is a compliment to the image — there is no "beautiful", no "masterpiece". That is the test to apply to your own prompts: if a phrase could be deleted without changing the picture, delete it and spend the space on the light.</p>
+  </section>
+
   <section class="faq">
     <h2>Frequently asked questions</h2>
     <details><summary>Is this AI image prompt generator free?</summary><p>Yes — you get 10 free AI generations a month, no card required.</p></details>
     <details><summary>Which image AI tools does it work with?</summary><p>The prompts are plain text, so they work with Midjourney, DALL·E, Stable Diffusion and others.</p></details>
     <details><summary>Can I sell AI prompt packs here?</summary><p>Yes. CreatorMarket is built for creators to sell digital products like prompt packs — and keep 100% of their sales.</p></details>
+    <details><summary>What is the best structure for an image prompt?</summary><p>Subject, action, setting, light, then style and aspect ratio — in that order. Subject first because the opening of a prompt carries the most weight, technical style last because it adjusts the image rather than defining it.</p></details>
+    <details><summary>Do aspect ratios really matter?</summary><p>Yes. Each platform shows a different shape, and cropping later removes the parts of the frame you described. Set 4:5 for an Instagram post, 9:16 for a Reel or Short, 16:9 for a YouTube thumbnail, and generate at that shape from the start.</p></details>
+    <details><summary>Why do my AI images look plastic or fake?</summary><p>Usually missing light direction and too many generic quality words. Say where the light comes from, whether it is hard or soft, and what it falls on. Replace "high quality, 4k, masterpiece" with a lens, a surface and a colour palette.</p></details>
+    <details><summary>Can I sell images made with these prompts?</summary><p>The prompt is yours; the licence for the image comes from the tool that generated it. Check that tool's current commercial terms before you put an image on a product, a cover or a paid template.</p></details>
+    <details><summary>Can the prompt add text inside the image?</summary><p>It can try, but most models still misspell or garble words. Generate the picture with deliberate empty space and add the text afterwards in Canva, Figma or your thumbnail editor, where you control the font and the spelling.</p></details>
   </section>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is this AI image prompt generator free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes \u2014 you get 10 free AI generations a month, no card required."}}, {"@type": "Question", "name": "Which image AI tools does it work with?", "acceptedAnswer": {"@type": "Answer", "text": "The prompts are plain text, so they work with Midjourney, DALL\u00b7E, Stable Diffusion and others."}}, {"@type": "Question", "name": "Can I sell AI prompt packs here?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. CreatorMarket is built for creators to sell digital products like prompt packs \u2014 and keep 100% of their sales."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is this AI image prompt generator free?","acceptedAnswer":{"@type":"Answer","text":"Yes — you get 10 free AI generations a month, no card required."}},{"@type":"Question","name":"Which image AI tools does it work with?","acceptedAnswer":{"@type":"Answer","text":"The prompts are plain text, so they work with Midjourney, DALL·E, Stable Diffusion and others."}},{"@type":"Question","name":"Can I sell AI prompt packs here?","acceptedAnswer":{"@type":"Answer","text":"Yes. CreatorMarket is built for creators to sell digital products like prompt packs — and keep 100% of their sales."}},{"@type":"Question","name":"What is the best structure for an image prompt?","acceptedAnswer":{"@type":"Answer","text":"Subject, action, setting, light, then style and aspect ratio — in that order. Subject first because the opening of a prompt carries the most weight, technical style last because it adjusts the image rather than defining it."}},{"@type":"Question","name":"Do aspect ratios really matter?","acceptedAnswer":{"@type":"Answer","text":"Yes. Each platform shows a different shape, and cropping later removes the parts of the frame you described. Set 4:5 for an Instagram post, 9:16 for a Reel or Short, 16:9 for a YouTube thumbnail, and generate at that shape from the start."}},{"@type":"Question","name":"Why do my AI images look plastic or fake?","acceptedAnswer":{"@type":"Answer","text":"Usually missing light direction and too many generic quality words. Say where the light comes from, whether it is hard or soft, and what it falls on. Replace \"high quality, 4k, masterpiece\" with a lens, a surface and a colour palette."}},{"@type":"Question","name":"Can I sell images made with these prompts?","acceptedAnswer":{"@type":"Answer","text":"The prompt is yours; the licence for the image comes from the tool that generated it. Check that tool's current commercial terms before you put an image on a product, a cover or a paid template."}},{"@type":"Question","name":"Can the prompt add text inside the image?","acceptedAnswer":{"@type":"Answer","text":"It can try, but most models still misspell or garble words. Generate the picture with deliberate empty space and add the text afterwards in Canva, Figma or your thumbnail editor, where you control the font and the spelling."}}]}</script>
   <div class="cta">
     <h2>Generate your first image prompt free</h2>
     <p>Describe the image, get the prompt. No design or prompt-writing skills needed.</p>
